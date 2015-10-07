@@ -71,7 +71,7 @@ namespace stdpmodule
 	// connections are templates of target identifier type (used for pointer / target index addressing)
 	// derived from generic connection template
 	template < typename targetidentifierT >
-	class STDPConnectionWeightIndependent : public Connection< targetidentifierT >
+	class STDPTripletConnection : public Connection< targetidentifierT >
 	{
 		
 	public:
@@ -82,13 +82,13 @@ namespace stdpmodule
    * Default Constructor.
    * Sets default values for all parameters. Needed by GenericConnectorModel.
    */
-  STDPConnectionWeightIndependent();
+  STDPTripletConnection();
 		
   /**
    * Copy constructor.
    * Needs to be defined properly in order for GenericConnector to work.
    */
-  STDPConnectionWeightIndependent( const STDPConnectionWeightIndependent& );
+  STDPTripletConnection( const STDPTripletConnection& );
 		
   // Explicitly declare all methods inherited from the dependent base ConnectionBase.
   // This avoids explicit name prefixes in all places these functions are used.
@@ -184,7 +184,7 @@ namespace stdpmodule
 
 
 template < typename targetidentifierT >
-stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::STDPConnectionWeightIndependent()
+stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection()
 : ConnectionBase()
 , weight_( 1.0 )
 , tau_plus_( 20.0 )
@@ -198,8 +198,8 @@ stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::STDPConnection
 }
 
 template < typename targetidentifierT >
-stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::STDPConnectionWeightIndependent(
-																								  const STDPConnectionWeightIndependent< targetidentifierT >& rhs )
+stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection(
+																								  const STDPTripletConnection< targetidentifierT >& rhs )
 : ConnectionBase( rhs )
 , weight_( rhs.weight_ )
 , tau_plus_( rhs.tau_plus_ )
@@ -222,7 +222,7 @@ stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::STDPConnection
  */
 template < typename targetidentifierT >
 inline void
-stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::send( Event& e,
+stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 																	   thread t,
 																	   double_t t_lastspike,
 																	   const CommonSynapseProperties& )
@@ -230,6 +230,7 @@ stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::send( Event& e
 	// synapse STDP depressing/facilitation dynamics
 	//   if(t_lastspike >0) {std::cout << "last spike " << t_lastspike << std::endl ;}
 	double_t t_spike = e.get_stamp().get_ms();
+	std::cout << "last spike " << t_lastspike << std::endl ;
 	// t_lastspike_ = 0 initially
 	
 	// use accessor functions (inherited from Connection< >) to obtain delay and target
@@ -273,7 +274,7 @@ stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::send( Event& e
 
 template < typename targetidentifierT >
 void
-stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::get_status( DictionaryDatum& d ) const
+stdpmodule::STDPTripletConnection< targetidentifierT >::get_status( DictionaryDatum& d ) const
 {
 	ConnectionBase::get_status( d );
 	def< double_t >( d, names::weight, weight_ );
@@ -290,7 +291,7 @@ stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::get_status( Di
 
 template < typename targetidentifierT >
 void
-stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::set_status( const DictionaryDatum& d, ConnectorModel& cm )
+stdpmodule::STDPTripletConnection< targetidentifierT >::set_status( const DictionaryDatum& d, ConnectorModel& cm )
 {
 	ConnectionBase::set_status( d, cm );
 	updateValue< double_t >( d, names::weight, weight_ );

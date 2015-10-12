@@ -228,25 +228,10 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 	assert(delta_with_lastspike >= 0);
 	
 	// save before spike value
+	double_t r1_before_ = r1_;
 	double_t r2_before_ = r2_;
-	double_t o2_before_ = o2_;
+	// TODO check delta step == gobal step
 	
-	// model variables
-	// r1_ += - r1_ / tau_plus_ * delta_with_lastspike;
-	// r2_ += - r2_ / tau_x_ * delta_with_lastspike;
-	// o1_ += - o1_ / tau_minus_ * delta_with_lastspike;
-	// o2_ += - o2_ / tau_y_ * delta_with_lastspike;
-	r1_ = r1_ * std::exp( - delta_with_lastspike / tau_plus_);
-	r2_ = r2_ * std::exp( - delta_with_lastspike / tau_x_);
-	o1_ = o1_ * std::exp( - delta_with_lastspike / tau_minus_);
-	o2_ = o2_ * std::exp( - delta_with_lastspike / tau_y_);
-	// TODO : maybe more like -> Kplus_ = Kplus_ * std::exp( ( t_lastspike - t_spike ) / tau_plus_ ) + 1.0;
-	
-	// t = t^pre
-	r1_ = r1_ + 1;
-	r2_ = r2_ + 1;
-	weight_ = weight_ - o1_ * ( a2_minus_ + a3_minus_ * r2_before_);
-
 	Node* target = get_target( t );
 	double_t dendritic_delay = get_delay();
 	
@@ -261,7 +246,6 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 	// dendritic_delay] have been
 	// incremented by Archiving_Node::register_stdp_connection(). See bug #218 for details.
 	target->get_history( t_lastspike - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
-	// TODO : why - dendritic delay ?
 	
 	std::cout << "# Spike event at " << t_spike << std::endl;
 	std::cout << "- dendritic delay " << dendritic_delay << std::endl;
@@ -272,36 +256,51 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 	
 	// facilitation due to post-synaptic spikes since last pre-synaptic spike
 	// go through also post-synaptic-received spikes since the last one from this connection
+	double_t t_last_postspike = t_lastspike;
 	while ( start != finish )
 	{
 
-		double_t dt = ( start->t_ + dendritic_delay ) - t_lastspike;
-		assert(dt >= 0);
+		double_t delta = ( start->t_ + dendritic_delay ) - t_last_postspike;
+		t_last_postspike = start->t_ + dendritic_delay;
+		assert(delta >= 0);
 		
 		std::cout << " " << start->t_ << std::endl;
 		++start;
-		if ( dt == 0 )
+		if ( delta == 0 )
 		{
 			continue;
 		}
 		
-		//weight_ = facilitate_( weight_, Kplus_ * std::exp( minus_dt / tau_plus_ ) );
+		// model variables
+		r1_ = r1_ * std::exp( - delta / tau_plus_);
+		r2_ = r2_ * std::exp( - delta / tau_x_);
+		o1_ = o1_ * std::exp( - delta / tau_minus_);
+		o2_ = o2_ * std::exp( - delta / tau_y_);
+
+		// t = t^post
+		weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_);
+		o1_ = o1_ + 1;
+		o2_ = o2_ + 1;
 	}
-	// depression due to new pre-synaptic spike
-	//weight_ = depress_( weight_, target->get_K_value( t_spike - dendritic_delay ) );
+	
+	// handeling the remaing delta between the last postspike and current spike time
+	double_t remaing_delta_ = t_spike - t_last_postspike;
+	assert(remaing_delta_ >= 0);
+	r1_ = r1_ * std::exp( - remaing_delta_ / tau_plus_);
+	r2_ = r2_ * std::exp( - remaing_delta_ / tau_x_);
+	o1_ = o1_ * std::exp( - remaing_delta_ / tau_minus_);
+	o2_ = o2_ * std::exp( - remaing_delta_ / tau_y_);
+	
+	// t = t^pre
+	weight_ = weight_ - o1_ * ( a2_minus_ + a3_minus_ * r2_before_);
+	r1_ = r1_ + 1;
+	r2_ = r2_ + 1;
 	
 	e.set_receiver( *target );
 	e.set_weight( weight_ );
 	e.set_delay( get_delay_steps() );
 	e.set_rport( get_rport() );
 	e();
-	
-	// TODO : not valid if the dendritic delay is longer than the fire delta
-	// t = t^post
-	o1_ = o1_ + 1;
-	o2_ = o2_ + 1;
-	weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_before_);
-
 
 }
 

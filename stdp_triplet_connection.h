@@ -138,8 +138,6 @@ namespace stdpmodule
 		}
 		
 	private:
-		
-  // data members of each connection
 		double_t weight_;
 		double_t tau_plus_;
 		double_t tau_x_;
@@ -149,6 +147,11 @@ namespace stdpmodule
 		double_t a2_minus_;
 		double_t a3_plus_;
 		double_t a3_minus_;
+		
+		double_t r1_;
+		double_t r2_;
+		double_t o1_;
+		double_t o2_;
 	};
 	
 }
@@ -160,7 +163,7 @@ namespace stdpmodule
 template < typename targetidentifierT >
 stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection()
 : ConnectionBase()
-, weight_( 1.0 )
+, weight_( 5.0 )
 , tau_plus_( 16.8 )
 , tau_x_( 20.0 )
 , tau_minus_( 33.7 )
@@ -169,9 +172,18 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection()
 , a2_minus_( 1.0 )
 , a3_plus_( 1.0 )
 , a3_minus_( 1.0 )
+, r1_( 1.0 )
+, r2_( 1.0 )
+, o1_( 1.0 )
+, o2_( 1.0 )
 {
+	// TODO : better error handling (no assert)
 	assert(tau_x_ > tau_plus_); // 9674 - J. Neurosci, September 20, 2006
 	assert(tau_y_ > tau_minus_); // 9674 - J. Neurosci, September 20, 2006
+	assert(r1_ > 0);
+	assert(r2_ > 0);
+	assert(o1_ > 0);
+	assert(o2_ > 0);
 }
 
 // Copy constructor.
@@ -187,9 +199,18 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection( c
 , a2_minus_( rhs.a2_minus_ )
 , a3_plus_( rhs.a3_plus_ )
 , a3_minus_( rhs.a3_minus_ )
+, r1_( rhs.r1_ )
+, r2_( rhs.r2_ )
+, o1_( rhs.o1_ )
+, o2_( rhs.o2_ )
 {
+	// TODO : better error handling (no assert)
 	assert(tau_x_ > tau_plus_); // 9674 - J. Neurosci, September 20, 2006
 	assert(tau_y_ > tau_minus_); // 9674 - J. Neurosci, September 20, 2006
+	assert(r1_ > 0);
+	assert(r2_ > 0);
+	assert(o1_ > 0);
+	assert(o2_ > 0);
 }
 
 // Send an event to the receiver of this connection.
@@ -197,17 +218,35 @@ template < typename targetidentifierT >
 inline void
 stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 															 thread t,
-															 double_t t_lastspike, // last spik emitted
+															 double_t t_lastspike, // last spike emitted
 															 const CommonSynapseProperties& ) // params
 {
-	/*
-	// synapse STDP depressing/facilitation dynamics
-	//   if(t_lastspike >0) {std::cout << "last spike " << t_lastspike << std::endl ;}
-	double_t t_spike = e.get_stamp().get_ms();
-	//std::cout << "last spike " << t_lastspike << std::endl ;
-	// t_lastspike_ = 0 initially
 	
-	// use accessor functions (inherited from Connection< >) to obtain delay and target
+	// timing
+	double_t t_spike = e.get_stamp().get_ms();
+	double_t delta_with_lastspike = t_spike - t_lastspike;
+	assert(delta_with_lastspike >= 0);
+	
+	// save before spike value
+	double_t r2_before_ = r2_;
+	double_t o2_before_ = o2_;
+	
+	// model variables
+	// r1_ += - r1_ / tau_plus_ * delta_with_lastspike;
+	// r2_ += - r2_ / tau_x_ * delta_with_lastspike;
+	// o1_ += - o1_ / tau_minus_ * delta_with_lastspike;
+	// o2_ += - o2_ / tau_y_ * delta_with_lastspike;
+	r1_ = r1_ * std::exp( - delta_with_lastspike / tau_plus_);
+	r2_ = r2_ * std::exp( - delta_with_lastspike / tau_x_);
+	o1_ = o1_ * std::exp( - delta_with_lastspike / tau_minus_);
+	o2_ = o2_ * std::exp( - delta_with_lastspike / tau_y_);
+	// TODO : maybe more like -> Kplus_ = Kplus_ * std::exp( ( t_lastspike - t_spike ) / tau_plus_ ) + 1.0;
+	
+	// t = t^pre
+	r1_ = r1_ + 1;
+	r2_ = r2_ + 1;
+	weight_ = weight_ - o1_ * ( a2_minus_ + a3_minus_ * r2_before_);
+
 	Node* target = get_target( t );
 	double_t dendritic_delay = get_delay();
 	
@@ -222,29 +261,48 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 	// dendritic_delay] have been
 	// incremented by Archiving_Node::register_stdp_connection(). See bug #218 for details.
 	target->get_history( t_lastspike - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
+	// TODO : why - dendritic delay ?
+	
+	std::cout << "# Spike event at " << t_spike << std::endl;
+	std::cout << "- dendritic delay " << dendritic_delay << std::endl;
+	std::cout << "- r1 " << r1_ << std::endl;
+	std::cout << "- r2 " << r2_ << std::endl;
+	std::cout << "- o1 " << o1_ << std::endl;
+	std::cout << "- o2 " << o2_ << std::endl;
+	
 	// facilitation due to post-synaptic spikes since last pre-synaptic spike
-	double_t minus_dt;
+	// go through also post-synaptic-received spikes since the last one from this connection
 	while ( start != finish )
 	{
-		minus_dt = t_lastspike - ( start->t_ + dendritic_delay );
+
+		double_t dt = ( start->t_ + dendritic_delay ) - t_lastspike;
+		assert(dt >= 0);
+		
+		std::cout << " " << start->t_ << std::endl;
 		++start;
-		if ( minus_dt == 0 )
-		continue;
-		weight_ = facilitate_( weight_, Kplus_ * std::exp( minus_dt / tau_plus_ ) );
+		if ( dt == 0 )
+		{
+			continue;
+		}
+		
+		//weight_ = facilitate_( weight_, Kplus_ * std::exp( minus_dt / tau_plus_ ) );
 	}
-	
 	// depression due to new pre-synaptic spike
-	weight_ = depress_( weight_, target->get_K_value( t_spike - dendritic_delay ) );
+	//weight_ = depress_( weight_, target->get_K_value( t_spike - dendritic_delay ) );
 	
 	e.set_receiver( *target );
 	e.set_weight( weight_ );
-	// use accessor functions (inherited from Connection< >) to obtain delay in steps and rport
 	e.set_delay( get_delay_steps() );
 	e.set_rport( get_rport() );
 	e();
 	
-	Kplus_ = Kplus_ * std::exp( ( t_lastspike - t_spike ) / tau_plus_ ) + 1.0;
-	 */
+	// TODO : not valid if the dendritic delay is longer than the fire delta
+	// t = t^post
+	o1_ = o1_ + 1;
+	o2_ = o2_ + 1;
+	weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_before_);
+
+
 }
 
 // Get parameters

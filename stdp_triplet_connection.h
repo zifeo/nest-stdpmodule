@@ -12,21 +12,24 @@
 	stdp_triplet_connection.h is a connector to create synapses with spike time
 	dependent plasticity (as defined in the references).
 	
-	Examples:
-	pair-based STDP	a3_plus = a3_minus = 0
-	triplet STDP       otherwise
+	STDP Examples:
+	pair-based		a3_plus = a3_minus = 0
+	triplet			otherwise
 	
 	Parameters:
-	- tau_plus		double: time constant of STDP window, potentiation in ms
-	- tau_x			double:
-	- tau_minus		double: time constant of STDP window, depression in ms
- (normally defined in post-synaptic neuron)
-	- tau_y			double:
-	- a2_plus		double:
-	- a2_minus		double:
-	- a3_plus		double:
-	- a3_minus		double:
-	
+	- tau_plus		double: pair-based potentiation time constant (ms)
+	- tau_x			double: triplet potentiation time constant (ms)
+	- tau_minus		double: pair-based depression time constant (ms)							TODO : normally defined in post-synaptic neuron
+	- tau_y			double:	triplet depression time constant (ms)
+	- a2_plus		double: weight change amplitude for pre-post spikes
+	- a2_minus		double: weight change amplitude for post-pre spikes
+	- a3_plus		double: weight change amplitude for pre-post-pre spikes
+	- a3_minus		double: weight change amplitude for post-pre-post spikes
+	- r1			double: variable r1 (e.g. amount of glutamate bound...)
+	- r2			double: variable r2 (e.g. number of NMDA receptors...)
+	- o1			double: variable r3 (e.g. influx of calcium concentration...)
+	- o2			double: variable r4 (e.g. number of secondary messengers...)
+ 
 	Reference:
 	- Triplets of Spikes in a Model of Spike Timing-Dependent Plasticity, Pfister/Gerstner, 2006.
  */
@@ -105,7 +108,6 @@ namespace stdpmodule
 		 */
 		void send( Event& e, thread t, double_t t_lastspike, const CommonSynapseProperties& cp );
 		
-		
 		class ConnTestDummyNode : public ConnTestDummyNodeBase
 		{
 		public:
@@ -177,13 +179,6 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection()
 , o1_( 1.0 )
 , o2_( 1.0 )
 {
-	// TODO : better error handling (no assert)
-	assert(tau_x_ > tau_plus_); // 9674 - J. Neurosci, September 20, 2006
-	assert(tau_y_ > tau_minus_); // 9674 - J. Neurosci, September 20, 2006
-	assert(r1_ > 0);
-	assert(r2_ > 0);
-	assert(o1_ > 0);
-	assert(o2_ > 0);
 }
 
 // Copy constructor.
@@ -204,13 +199,6 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection( c
 , o1_( rhs.o1_ )
 , o2_( rhs.o2_ )
 {
-	// TODO : better error handling (no assert)
-	assert(tau_x_ > tau_plus_); // 9674 - J. Neurosci, September 20, 2006
-	assert(tau_y_ > tau_minus_); // 9674 - J. Neurosci, September 20, 2006
-	assert(r1_ > 0);
-	assert(r2_ > 0);
-	assert(o1_ > 0);
-	assert(o2_ > 0);
 }
 
 // Send an event to the receiver of this connection.
@@ -259,7 +247,7 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 	double_t t_last_postspike = t_lastspike;
 	while ( start != finish )
 	{
-
+		
 		double_t delta = ( start->t_ + dendritic_delay ) - t_last_postspike;
 		t_last_postspike = start->t_ + dendritic_delay;
 		assert(delta >= 0);
@@ -276,9 +264,9 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 		r2_ = r2_ * std::exp( - delta / tau_x_);
 		o1_ = o1_ * std::exp( - delta / tau_minus_);
 		o2_ = o2_ * std::exp( - delta / tau_y_);
-
+		
 		// t = t^post
-		weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_);
+		weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_ );
 		o1_ = o1_ + 1;
 		o2_ = o2_ + 1;
 	}
@@ -301,7 +289,7 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 	e.set_delay( get_delay_steps() );
 	e.set_rport( get_rport() );
 	e();
-
+	
 }
 
 // Get parameters
@@ -337,6 +325,32 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::set_status( const Dictio
 	updateValue< double_t >( d, stdpnames::a2_minus, a2_minus_ );
 	updateValue< double_t >( d, stdpnames::a3_plus, a3_plus_ );
 	updateValue< double_t >( d, stdpnames::a3_minus, a3_minus_ );
+	
+	
+	if ( ! ( tau_x_ > tau_plus_ ) ) {
+		throw BadProperty( "Potentiation time-constant for triplet (tau_x) must be bigger than pair-based one (tau_plus)." );
+	}
+	
+	if ( ! ( tau_y_ > tau_minus_ ) ) {
+		throw BadProperty( "Depression time-constant for triplet (tau_y) must be bigger than pair-based one (tau_minus)." );
+	}
+	
+	if ( ! ( r1_ > 0 ) ) {
+		throw BadProperty( "Variable r1 must be positive and non-null." );
+	}
+	
+	if ( ! ( r2_ > 0 ) ) {
+		throw BadProperty( "Variable r2 must be positive and non-null." );
+	}
+	
+	if ( ! ( o1_ > 0 ) ) {
+		throw BadProperty( "TVariable o1 must be positive and non-null." );
+	}
+	
+	if ( ! ( o2_ > 0 ) ) {
+		throw BadProperty( "Variable o2 must be positive and non-null." );
+	}
+	
 }
 
 #endif /* stdp_triplet_connection_h */

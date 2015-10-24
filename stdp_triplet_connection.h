@@ -19,16 +19,16 @@
 	Parameters:
 	- tau_plus		double: pair-based potentiation time constant (ms)
 	- tau_x			double: triplet potentiation time constant (ms)
-	- tau_minus		double: pair-based depression time constant (ms)							TODO : normally defined in post-synaptic neuron
+	- tau_minus		double: pair-based depression time constant (ms) (normally defined in post-synaptic neuron)
 	- tau_y			double:	triplet depression time constant (ms)
 	- a2_plus		double: weight change amplitude for pre-post spikes
 	- a2_minus		double: weight change amplitude for post-pre spikes
 	- a3_plus		double: weight change amplitude for pre-post-pre spikes
 	- a3_minus		double: weight change amplitude for post-pre-post spikes
-	- r1			double: variable r1 (e.g. amount of glutamate bound...)
-	- r2			double: variable r2 (e.g. number of NMDA receptors...)
-	- o1			double: variable r3 (e.g. influx of calcium concentration...)
-	- o2			double: variable r4 (e.g. number of secondary messengers...)
+	- r1			double: pre variable r1 (e.g. amount of glutamate bound...)
+	- r2			double: pre variable r2 (e.g. number of NMDA receptors...)
+	- o1			double: post variable r3 (e.g. influx of calcium concentration...)
+	- o2			double: post variable r4 (e.g. number of secondary messengers...)
  
 	Reference:
 	- Triplets of Spikes in a Model of Spike Timing-Dependent Plasticity, Pfister/Gerstner, 2006.
@@ -53,6 +53,10 @@ namespace stdpnames
 	const Name a2_minus( "a2_minus" );
 	const Name a3_plus( "a3_plus" );
 	const Name a3_minus( "a3_minus" );
+	const Name r1( "r1" );
+	const Name r2( "r2" );
+	const Name o1( "o1" );
+	const Name o2( "o2" );
 }
 
 namespace stdpmodule
@@ -158,26 +162,23 @@ namespace stdpmodule
 	
 }
 
-
-
-
 // Default constructor
 template < typename targetidentifierT >
 stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection()
 : ConnectionBase()
 , weight_( 5.0 )
-, tau_plus_( 16.8 )
-, tau_x_( 20.0 )
-, tau_minus_( 33.7 )
-, tau_y_( 40.0 )
+, tau_plus_( 16.8 ) // visual cortex data set
+, tau_x_( 101 )
+, tau_minus_( 33.7 ) // visual cortex data set
+, tau_y_( 125 )
 , a2_plus_( 1.0 )
 , a2_minus_( 1.0 )
 , a3_plus_( 1.0 )
 , a3_minus_( 1.0 )
-, r1_( 1.0 )
-, r2_( 1.0 )
-, o1_( 1.0 )
-, o2_( 1.0 )
+, r1_( 0.0 )
+, r2_( 0.0 )
+, o1_( 0.0 )
+, o2_( 0.0 )
 {
 }
 
@@ -206,65 +207,55 @@ template < typename targetidentifierT >
 inline void
 stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 															 thread t,
-															 double_t t_lastspike, // last spike emitted
-															 const CommonSynapseProperties& ) // params
+															 double_t t_lastspike,
+															 const CommonSynapseProperties& )
 {
+	
+	// save before spike value
+	double_t r2_before_last_prespike = r2_;
 	
 	// timing
 	double_t t_spike = e.get_stamp().get_ms();
 	double_t delta_with_lastspike = t_spike - t_lastspike;
 	assert(delta_with_lastspike >= 0);
 	
-	// save before spike value
-	double_t r1_before_ = r1_;
-	double_t r2_before_ = r2_;
-	// TODO check delta step == gobal step
-	
+	// get post-synaptic neuron
 	Node* target = get_target( t );
 	double_t dendritic_delay = get_delay();
 	
-	// get spike history in relevant range (t1, t2] from post-synaptic neuron
+	// get spike history in relevant range (t1, t2] from post-synaptic neuron (without the added dentritic delay
 	std::deque< histentry >::iterator start;
 	std::deque< histentry >::iterator finish;
-	
-	// For a new synapse, t_lastspike contains the point in time of the last spike.
-	// So we initially read the history(t_last_spike - dendritic_delay, ...,  T_spike-dendritic_delay]
-	// which increases the access counter for these entries.
-	// At registration, all entries' access counters of history[0, ..., t_last_spike -
-	// dendritic_delay] have been
-	// incremented by Archiving_Node::register_stdp_connection(). See bug #218 for details.
 	target->get_history( t_lastspike - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
 	
-	std::cout << "# Spike event at " << t_spike << std::endl;
-	std::cout << "- dendritic delay " << dendritic_delay << std::endl;
-	std::cout << "- r1 " << r1_ << std::endl;
-	std::cout << "- r2 " << r2_ << std::endl;
-	std::cout << "- o1 " << o1_ << std::endl;
-	std::cout << "- o2 " << o2_ << std::endl;
-	
-	// facilitation due to post-synaptic spikes since last pre-synaptic spike
-	// go through also post-synaptic-received spikes since the last one from this connection
+	// go through all post-synaptic spikes since the last pre-synaptic spike from this connection
 	double_t t_last_postspike = t_lastspike;
 	while ( start != finish )
 	{
+		// deal with dendritic delay
+		double_t t_adjusted = start->t_ + dendritic_delay;
+		assert(t_adjusted > t_last_postspike);
 		
-		double_t delta = ( start->t_ + dendritic_delay ) - t_last_postspike;
-		t_last_postspike = start->t_ + dendritic_delay;
+		// get elapsed time
+		double_t delta = t_adjusted - t_last_postspike;
 		assert(delta >= 0);
 		
-		std::cout << " " << start->t_ << std::endl;
+		// prepare next iteration
+		t_last_postspike = t_adjusted;
 		++start;
+		
 		if ( delta == 0 )
 		{
 			continue;
 		}
 		
-		// model variables
+		// model variables each delta update
 		r1_ = r1_ * std::exp( - delta / tau_plus_);
 		r2_ = r2_ * std::exp( - delta / tau_x_);
 		o1_ = o1_ * std::exp( - delta / tau_minus_);
 		o2_ = o2_ * std::exp( - delta / tau_y_);
 		
+		// potentiate
 		// t = t^post
 		weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_ );
 		o1_ = o1_ + 1;
@@ -274,16 +265,20 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 	// handeling the remaing delta between the last postspike and current spike time
 	double_t remaing_delta_ = t_spike - t_last_postspike;
 	assert(remaing_delta_ >= 0);
+	
+	// model variables remaining delta update
 	r1_ = r1_ * std::exp( - remaing_delta_ / tau_plus_);
 	r2_ = r2_ * std::exp( - remaing_delta_ / tau_x_);
 	o1_ = o1_ * std::exp( - remaing_delta_ / tau_minus_);
 	o2_ = o2_ * std::exp( - remaing_delta_ / tau_y_);
 	
+	// depress
 	// t = t^pre
-	weight_ = weight_ - o1_ * ( a2_minus_ + a3_minus_ * r2_before_);
+	weight_ = weight_ - o1_ * ( a2_minus_ + a3_minus_ * r2_before_last_prespike);
 	r1_ = r1_ + 1;
 	r2_ = r2_ + 1;
 	
+	// send event
 	e.set_receiver( *target );
 	e.set_weight( weight_ );
 	e.set_delay( get_delay_steps() );
@@ -307,6 +302,10 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::get_status( DictionaryDa
 	def< double_t >( d, stdpnames::a2_minus, a2_minus_ );
 	def< double_t >( d, stdpnames::a3_plus, a3_plus_ );
 	def< double_t >( d, stdpnames::a3_minus, a3_minus_ );
+	def< double_t >( d, stdpnames::r1, r1_ );
+	def< double_t >( d, stdpnames::r2, r2_ );
+	def< double_t >( d, stdpnames::o1, o1_ );
+	def< double_t >( d, stdpnames::o2, o2_ );
 	def< long_t >( d, names::size_of, sizeof( *this ) );
 }
 
@@ -325,7 +324,10 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::set_status( const Dictio
 	updateValue< double_t >( d, stdpnames::a2_minus, a2_minus_ );
 	updateValue< double_t >( d, stdpnames::a3_plus, a3_plus_ );
 	updateValue< double_t >( d, stdpnames::a3_minus, a3_minus_ );
-	
+	updateValue< double_t >( d, stdpnames::r1, r1_ );
+	updateValue< double_t >( d, stdpnames::r2, r2_ );
+	updateValue< double_t >( d, stdpnames::o1, o1_ );
+	updateValue< double_t >( d, stdpnames::o2, o2_ );
 	
 	if ( ! ( tau_x_ > tau_plus_ ) ) {
 		throw BadProperty( "Potentiation time-constant for triplet (tau_x) must be bigger than pair-based one (tau_plus)." );
@@ -335,20 +337,20 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::set_status( const Dictio
 		throw BadProperty( "Depression time-constant for triplet (tau_y) must be bigger than pair-based one (tau_minus)." );
 	}
 	
-	if ( ! ( r1_ > 0 ) ) {
-		throw BadProperty( "Variable r1 must be positive and non-null." );
+	if ( ! ( r1_ >= 0 ) ) {
+		throw BadProperty( "Variable r1 must be positive." );
 	}
 	
-	if ( ! ( r2_ > 0 ) ) {
-		throw BadProperty( "Variable r2 must be positive and non-null." );
+	if ( ! ( r2_ >= 0 ) ) {
+		throw BadProperty( "Variable r2 must be positive." );
 	}
 	
-	if ( ! ( o1_ > 0 ) ) {
-		throw BadProperty( "TVariable o1 must be positive and non-null." );
+	if ( ! ( o1_ >= 0 ) ) {
+		throw BadProperty( "TVariable o1 must be positive." );
 	}
 	
-	if ( ! ( o2_ > 0 ) ) {
-		throw BadProperty( "Variable o2 must be positive and non-null." );
+	if ( ! ( o2_ >= 0 ) ) {
+		throw BadProperty( "Variable o2 must be positive." );
 	}
 	
 }

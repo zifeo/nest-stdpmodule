@@ -4,65 +4,60 @@
 //
 //
 
+/*	BeginDocumentation
+	Name: stdp_triplet_connection - Synapse type for spike-timing dependent plasticity
+	with a pair-based/triplet-based learning rule (not depending on weight).
+	
+	Description:
+	stdp_triplet_connection.h is a connector to create synapses with spike time
+	dependent plasticity (as defined in the references).
+	
+	STDP Examples:
+	pair-based		a3_plus = a3_minus = 0
+	triplet			otherwise
+	
+	Parameters:
+	- tau_plus		double: pair-based potentiation time constant (ms)
+	- tau_x			double: triplet potentiation time constant (ms)
+	- tau_minus		double: pair-based depression time constant (ms) (normally defined in post-synaptic neuron)
+	- tau_y			double:	triplet depression time constant (ms)
+	- a2_plus		double: weight change amplitude for pre-post spikes
+	- a2_minus		double: weight change amplitude for post-pre spikes
+	- a3_plus		double: weight change amplitude for pre-post-pre spikes
+	- a3_minus		double: weight change amplitude for post-pre-post spikes
+	- r1			double: pre variable r1 (e.g. amount of glutamate bound...)
+	- r2			double: pre variable r2 (e.g. number of NMDA receptors...)
+	- o1			double: post variable r3 (e.g. influx of calcium concentration...)
+	- o2			double: post variable r4 (e.g. number of secondary messengers...)
+ 
+	Reference:
+	- Triplets of Spikes in a Model of Spike Timing-Dependent Plasticity, Pfister/Gerstner, 2006.
+ */
+
 #ifndef stdp_triplet_connection_h
 #define stdp_triplet_connection_h
 
-/* BeginDocumentation
- Name: stdp_synapse_weight_independent - Synapse type for spike-timing dependent
- plasticity independent of the actual weight.
- 
- Description:
- stdp_synapse is a connector to create synapses with spike time
- dependent plasticity (as defined in [1]). Here the weight dependence
- exponent can be set separately for potentiation and depression.
- 
- Examples:
- multiplicative STDP [2]  mu_plus = mu_minus = 1.0
- additive STDP       [3]  mu_plus = mu_minus = 0.0
- Guetig STDP         [1]  mu_plus = mu_minus = [0.0,1.0]
- van Rossum STDP     [4]  mu_plus = 0.0 mu_minus = 1.0
- 
- Parameters:
- tau_plus   double - Time constant of STDP window, potentiation in ms
- (tau_minus defined in post-synaptic neuron)
- lambda     double - Step size
- alpha      double - Asymmetry parameter (scales depressing increments as alpha*lambda)
- mu_plus    double - Weight dependence exponent, potentiation
- mu_minus   double - Weight dependence exponent, depression
- Wmax       double - Maximum allowed weight
- 
- Transmits: SpikeEvent
- 
- References:
- [1] Guetig et al. (2003) Learning Input Correlations through Nonlinear
- Temporally Asymmetric Hebbian Plasticity. Journal of Neuroscience
- 
- [2] Rubin, J., Lee, D. and Sompolinsky, H. (2001). Equilibrium
- properties of temporally asymmetric Hebbian plasticity, PRL
- 86,364-367
- 
- [3] Song, S., Miller, K. D. and Abbott, L. F. (2000). Competitive
- Hebbian learning through spike-timing-dependent synaptic
- plasticity,Nature Neuroscience 3:9,919--926
- 
- [4] van Rossum, M. C. W., Bi, G-Q and Turrigiano, G. G. (2000).
- Stable Hebbian learning from spike timing-dependent
- plasticity, Journal of Neuroscience, 20:23,8812--8821
- 
- FirstVersion: March 2006
- Author: Moritz Helias, Abigail Morrison
- SeeAlso: synapsedict, tsodyks_synapse, static_synapse
- */
-
+#include <cassert>
 #include <cmath>
 
 #include "connection.h"
+#include "name.h"
 
-//#include "network.h"
-//#include "dictdatum.h"
-//#include "connector_model.h"
-//#include "common_synapse_properties.h"
-//#include "event.h"
+namespace stdpnames
+{
+	const Name tau_plus( "tau_plus" );
+	const Name tau_x( "tau_x" );
+	const Name tau_minus( "tau_minus" );
+	const Name tau_y( "tau_y" );
+	const Name a2_plus( "a2_plus" );
+	const Name a2_minus( "a2_minus" );
+	const Name a3_plus( "a3_plus" );
+	const Name a3_minus( "a3_minus" );
+	const Name r1( "r1" );
+	const Name r2( "r2" );
+	const Name o1( "o1" );
+	const Name o2( "o2" );
+}
 
 namespace stdpmodule
 {
@@ -71,236 +66,293 @@ namespace stdpmodule
 	// connections are templates of target identifier type (used for pointer / target index addressing)
 	// derived from generic connection template
 	template < typename targetidentifierT >
-	class STDPConnectionWeightIndependent : public Connection< targetidentifierT >
+	class STDPTripletConnection : public Connection< targetidentifierT >
 	{
 		
 	public:
-  typedef CommonSynapseProperties CommonPropertiesType;
-  typedef Connection< targetidentifierT > ConnectionBase;
+		typedef CommonSynapseProperties CommonPropertiesType;
+		typedef Connection< targetidentifierT > ConnectionBase;
 		
-  /**
-   * Default Constructor.
-   * Sets default values for all parameters. Needed by GenericConnectorModel.
-   */
-  STDPConnectionWeightIndependent();
+		/**
+		 * Default Constructor.
+		 * Sets default values for all parameters. Needed by GenericConnectorModel.
+		 */
+		STDPTripletConnection();
 		
-  /**
-   * Copy constructor.
-   * Needs to be defined properly in order for GenericConnector to work.
-   */
-  STDPConnectionWeightIndependent( const STDPConnectionWeightIndependent& );
+		/**
+		 * Copy constructor.
+		 * Needs to be defined properly in order for GenericConnector to work.
+		 */
+		STDPTripletConnection( const STDPTripletConnection& );
 		
-  // Explicitly declare all methods inherited from the dependent base ConnectionBase.
-  // This avoids explicit name prefixes in all places these functions are used.
-  // Since ConnectionBase depends on the template parameter, they are not automatically
-  // found in the base class.
-  using ConnectionBase::get_delay_steps;
-  using ConnectionBase::get_delay;
-  using ConnectionBase::get_rport;
-  using ConnectionBase::get_target;
+		// Explicitly declare all methods inherited from the dependent base ConnectionBase.
+		// This avoids explicit name prefixes in all places these functions are used.
+		// Since ConnectionBase depends on the template parameter, they are not automatically
+		// found in the base class.
+		using ConnectionBase::get_delay_steps;
+		using ConnectionBase::get_delay;
+		using ConnectionBase::get_rport;
+		using ConnectionBase::get_target;
 		
-  /**
-   * Get all properties of this connection and put them into a dictionary.
-   */
-  void get_status( DictionaryDatum& d ) const;
+		/**
+		 * Get all properties of this connection and put them into a dictionary.
+		 */
+		void get_status( DictionaryDatum& d ) const;
 		
-  /**
-   * Set properties of this connection from the values given in dictionary.
-   */
-  void set_status( const DictionaryDatum& d, ConnectorModel& cm );
+		/**
+		 * Set properties of this connection from the values given in dictionary.
+		 */
+		void set_status( const DictionaryDatum& d, ConnectorModel& cm );
 		
-  /**
-   * Send an event to the receiver of this connection.
-   * \param e The event to send
-   * \param t_lastspike Point in time of last spike sent.
-   * \param cp common properties of all synapses (empty).
-   */
-  void send( Event& e, thread t, double_t t_lastspike, const CommonSynapseProperties& cp );
+		/**
+		 * Send an event to the receiver of this connection.
+		 * \param e The event to send
+		 * \param t_lastspike Point in time of last spike sent.
+		 * \param cp common properties of all synapses (empty).
+		 */
+		void send( Event& e, thread t, double_t t_lastspike, const CommonSynapseProperties& cp );
 		
+		class ConnTestDummyNode : public ConnTestDummyNodeBase
+		{
+		public:
+			// Ensure proper overriding of overloaded virtual functions.
+			// Return values from functions are ignored.
+			using ConnTestDummyNodeBase::handles_test_event;
+			port
+			handles_test_event( SpikeEvent&, rport )
+			{
+				return invalid_port_;
+			}
+		};
 		
-  class ConnTestDummyNode : public ConnTestDummyNodeBase
-  {
-  public:
-	  // Ensure proper overriding of overloaded virtual functions.
-	  // Return values from functions are ignored.
-	  using ConnTestDummyNodeBase::handles_test_event;
-	  port
-	  handles_test_event( SpikeEvent&, rport )
-	  {
-		  return invalid_port_;
-	  }
-  };
-		
-  void
-  check_connection( Node& s,
-				   Node& t,
+		void
+		check_connection( Node& s,
+						 Node& t,
 				   rport receptor_type,
 				   double_t t_lastspike,
 				   const CommonPropertiesType& )
-  {
-	  ConnTestDummyNode dummy_target;
-	  
-	  ConnectionBase::check_connection_( dummy_target, s, t, receptor_type );
-	  
-	  t.register_stdp_connection( t_lastspike - get_delay() );
-  }
+		{
+			ConnTestDummyNode dummy_target;
+			ConnectionBase::check_connection_( dummy_target, s, t, receptor_type );
+			t.register_stdp_connection( t_lastspike - get_delay() );
+		}
 		
-  void
-  set_weight( double_t w )
-  {
-	  weight_ = w;
-  }
+		void
+		set_weight( double_t w )
+		{
+			weight_ = w;
+		}
 		
 	private:
-  double_t
-  facilitate_( double_t w, double_t kplus )
-  {
-	  double_t norm_w =
-	  ( w / Wmax_ ) + ( lambda_ * std::pow( 1.0 - ( w / Wmax_ ), mu_plus_ ) * kplus );
-	  return norm_w < 1.0 ? norm_w * Wmax_ : Wmax_;
-  }
+		double_t weight_;
+		double_t tau_plus_;
+		double_t tau_x_;
+		double_t tau_minus_;
+		double_t tau_y_;
+		double_t a2_plus_;
+		double_t a2_minus_;
+		double_t a3_plus_;
+		double_t a3_minus_;
 		
-  double_t
-  depress_( double_t w, double_t kminus )
-  {
-	  double_t norm_w =
-	  ( w / Wmax_ ) - ( alpha_ * lambda_ * std::pow( w / Wmax_, mu_minus_ ) * kminus );
-	  return norm_w > 0.0 ? norm_w * Wmax_ : 0.0;
-  }
-		
-  // data members of each connection
-  double_t weight_;
-  double_t tau_plus_;
-  double_t lambda_;
-  double_t alpha_;
-  double_t mu_plus_;
-  double_t mu_minus_;
-  double_t Wmax_;
-  double_t Kplus_;
+		double_t r1_;
+		double_t r2_;
+		double_t o1_;
+		double_t o2_;
 	};
 	
 }
 
-
-
+// Default constructor
 template < typename targetidentifierT >
-stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::STDPConnectionWeightIndependent()
+stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection()
 : ConnectionBase()
-, weight_( 1.0 )
-, tau_plus_( 20.0 )
-, lambda_( 0.01 )
-, alpha_( 1.0 )
-, mu_plus_( 1.0 )
-, mu_minus_( 1.0 )
-, Wmax_( 100.0 )
-, Kplus_( 0.0 )
+, weight_( 5.0 )
+, tau_plus_( 16.8 ) // visual cortex data set
+, tau_x_( 101 )
+, tau_minus_( 33.7 ) // visual cortex data set
+, tau_y_( 125 )
+, a2_plus_( 1.0 )
+, a2_minus_( 1.0 )
+, a3_plus_( 1.0 )
+, a3_minus_( 1.0 )
+, r1_( 0.0 )
+, r2_( 0.0 )
+, o1_( 0.0 )
+, o2_( 0.0 )
 {
 }
 
+// Copy constructor.
 template < typename targetidentifierT >
-stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::STDPConnectionWeightIndependent(
-																								  const STDPConnectionWeightIndependent< targetidentifierT >& rhs )
+stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection( const STDPTripletConnection< targetidentifierT >& rhs )
 : ConnectionBase( rhs )
 , weight_( rhs.weight_ )
 , tau_plus_( rhs.tau_plus_ )
-, lambda_( rhs.lambda_ )
-, alpha_( rhs.alpha_ )
-, mu_plus_( rhs.mu_plus_ )
-, mu_minus_( rhs.mu_minus_ )
-, Wmax_( rhs.Wmax_ )
-, Kplus_( rhs.Kplus_ )
+, tau_x_( rhs.tau_x_ )
+, tau_minus_( rhs.tau_minus_ )
+, tau_y_( rhs.tau_y_ )
+, a2_plus_( rhs.a2_plus_ )
+, a2_minus_( rhs.a2_minus_ )
+, a3_plus_( rhs.a3_plus_ )
+, a3_minus_( rhs.a3_minus_ )
+, r1_( rhs.r1_ )
+, r2_( rhs.r2_ )
+, o1_( rhs.o1_ )
+, o2_( rhs.o2_ )
 {
 }
 
-
-/**
- * Send an event to the receiver of this connection.
- * \param e The event to send
- * \param t The thread on which this connection is stored.
- * \param t_lastspike Time point of last spike emitted
- * \param cp Common properties object, containing the stdp parameters.
- */
+// Send an event to the receiver of this connection.
 template < typename targetidentifierT >
 inline void
-stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::send( Event& e,
-																	   thread t,
-																	   double_t t_lastspike,
-																	   const CommonSynapseProperties& )
+stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
+															 thread t,
+															 double_t t_lastspike,
+															 const CommonSynapseProperties& )
 {
-	// synapse STDP depressing/facilitation dynamics
-	//   if(t_lastspike >0) {std::cout << "last spike " << t_lastspike << std::endl ;}
-	double_t t_spike = e.get_stamp().get_ms();
-	// t_lastspike_ = 0 initially
 	
-	// use accessor functions (inherited from Connection< >) to obtain delay and target
+	// save before spike value
+	double_t r2_before_last_prespike = r2_;
+	
+	// timing
+	double_t t_spike = e.get_stamp().get_ms();
+	double_t delta_with_lastspike = t_spike - t_lastspike;
+	assert(delta_with_lastspike >= 0);
+	
+	// get post-synaptic neuron
 	Node* target = get_target( t );
 	double_t dendritic_delay = get_delay();
 	
-	// get spike history in relevant range (t1, t2] from post-synaptic neuron
+	// get spike history in relevant range (t1, t2] from post-synaptic neuron (without the added dentritic delay
 	std::deque< histentry >::iterator start;
 	std::deque< histentry >::iterator finish;
-	
-	// For a new synapse, t_lastspike contains the point in time of the last spike.
-	// So we initially read the history(t_last_spike - dendritic_delay, ...,  T_spike-dendritic_delay]
-	// which increases the access counter for these entries.
-	// At registration, all entries' access counters of history[0, ..., t_last_spike -
-	// dendritic_delay] have been
-	// incremented by Archiving_Node::register_stdp_connection(). See bug #218 for details.
 	target->get_history( t_lastspike - dendritic_delay, t_spike - dendritic_delay, &start, &finish );
-	// facilitation due to post-synaptic spikes since last pre-synaptic spike
-	double_t minus_dt;
+	
+	// go through all post-synaptic spikes since the last pre-synaptic spike from this connection
+	double_t t_last_postspike = t_lastspike;
 	while ( start != finish )
 	{
-		minus_dt = t_lastspike - ( start->t_ + dendritic_delay );
+		// deal with dendritic delay
+		double_t t_adjusted = start->t_ + dendritic_delay;
+		assert(t_adjusted > t_last_postspike);
+		
+		// get elapsed time
+		double_t delta = t_adjusted - t_last_postspike;
+		assert(delta >= 0);
+		
+		// prepare next iteration
+		t_last_postspike = t_adjusted;
 		++start;
-		if ( minus_dt == 0 )
+		
+		if ( delta == 0 )
+		{
 			continue;
-		weight_ = facilitate_( weight_, Kplus_ * std::exp( minus_dt / tau_plus_ ) );
+		}
+		
+		// model variables each delta update
+		r1_ = r1_ * std::exp( - delta / tau_plus_);
+		r2_ = r2_ * std::exp( - delta / tau_x_);
+		o1_ = o1_ * std::exp( - delta / tau_minus_);
+		o2_ = o2_ * std::exp( - delta / tau_y_);
+		
+		// potentiate
+		// t = t^post
+		weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_ );
+		o1_ = o1_ + 1;
+		o2_ = o2_ + 1;
 	}
 	
-	// depression due to new pre-synaptic spike
-	weight_ = depress_( weight_, target->get_K_value( t_spike - dendritic_delay ) );
+	// handeling the remaing delta between the last postspike and current spike time
+	double_t remaing_delta_ = t_spike - t_last_postspike;
+	assert(remaing_delta_ >= 0);
 	
+	// model variables remaining delta update
+	r1_ = r1_ * std::exp( - remaing_delta_ / tau_plus_);
+	r2_ = r2_ * std::exp( - remaing_delta_ / tau_x_);
+	o1_ = o1_ * std::exp( - remaing_delta_ / tau_minus_);
+	o2_ = o2_ * std::exp( - remaing_delta_ / tau_y_);
+	
+	// depress
+	// t = t^pre
+	weight_ = weight_ - o1_ * ( a2_minus_ + a3_minus_ * r2_before_last_prespike);
+	r1_ = r1_ + 1;
+	r2_ = r2_ + 1;
+	
+	// send event
 	e.set_receiver( *target );
 	e.set_weight( weight_ );
-	// use accessor functions (inherited from Connection< >) to obtain delay in steps and rport
 	e.set_delay( get_delay_steps() );
 	e.set_rport( get_rport() );
 	e();
 	
-	Kplus_ = Kplus_ * std::exp( ( t_lastspike - t_spike ) / tau_plus_ ) + 1.0;
 }
 
+// Get parameters
 template < typename targetidentifierT >
 void
-stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::get_status( DictionaryDatum& d ) const
+stdpmodule::STDPTripletConnection< targetidentifierT >::get_status( DictionaryDatum& d ) const
 {
 	ConnectionBase::get_status( d );
 	def< double_t >( d, names::weight, weight_ );
-	def< double_t >( d, "tau_plus", tau_plus_ );
-	def< double_t >( d, "lambda", lambda_ );
-	def< double_t >( d, "alpha", alpha_ );
-	def< double_t >( d, "mu_plus", mu_plus_ );
-	def< double_t >( d, "mu_minus", mu_minus_ );
-	def< double_t >( d, "Wmax", Wmax_ );
+	def< double_t >( d, stdpnames::tau_plus, tau_plus_ );
+	def< double_t >( d, stdpnames::tau_x, tau_x_ );
+	def< double_t >( d, stdpnames::tau_minus, tau_minus_ );
+	def< double_t >( d, stdpnames::tau_y, tau_y_ );
+	def< double_t >( d, stdpnames::a2_plus, a2_plus_ );
+	def< double_t >( d, stdpnames::a2_minus, a2_minus_ );
+	def< double_t >( d, stdpnames::a3_plus, a3_plus_ );
+	def< double_t >( d, stdpnames::a3_minus, a3_minus_ );
+	def< double_t >( d, stdpnames::r1, r1_ );
+	def< double_t >( d, stdpnames::r2, r2_ );
+	def< double_t >( d, stdpnames::o1, o1_ );
+	def< double_t >( d, stdpnames::o2, o2_ );
 	def< long_t >( d, names::size_of, sizeof( *this ) );
 }
 
-
-
+// Set parameters
 template < typename targetidentifierT >
 void
-stdpmodule::STDPConnectionWeightIndependent< targetidentifierT >::set_status( const DictionaryDatum& d, ConnectorModel& cm )
+stdpmodule::STDPTripletConnection< targetidentifierT >::set_status( const DictionaryDatum& d, ConnectorModel& cm )
 {
 	ConnectionBase::set_status( d, cm );
 	updateValue< double_t >( d, names::weight, weight_ );
-	updateValue< double_t >( d, "tau_plus", tau_plus_ );
-	updateValue< double_t >( d, "lambda", lambda_ );
-	updateValue< double_t >( d, "alpha", alpha_ );
-	updateValue< double_t >( d, "mu_plus", mu_plus_ );
-	updateValue< double_t >( d, "mu_minus", mu_minus_ );
-	updateValue< double_t >( d, "Wmax", Wmax_ );
+	updateValue< double_t >( d, stdpnames::tau_plus, tau_plus_ );
+	updateValue< double_t >( d, stdpnames::tau_x, tau_x_ );
+	updateValue< double_t >( d, stdpnames::tau_minus, tau_minus_ );
+	updateValue< double_t >( d, stdpnames::tau_y, tau_y_ );
+	updateValue< double_t >( d, stdpnames::a2_plus, a2_plus_ );
+	updateValue< double_t >( d, stdpnames::a2_minus, a2_minus_ );
+	updateValue< double_t >( d, stdpnames::a3_plus, a3_plus_ );
+	updateValue< double_t >( d, stdpnames::a3_minus, a3_minus_ );
+	updateValue< double_t >( d, stdpnames::r1, r1_ );
+	updateValue< double_t >( d, stdpnames::r2, r2_ );
+	updateValue< double_t >( d, stdpnames::o1, o1_ );
+	updateValue< double_t >( d, stdpnames::o2, o2_ );
+	
+	if ( ! ( tau_x_ > tau_plus_ ) ) {
+		throw BadProperty( "Potentiation time-constant for triplet (tau_x) must be bigger than pair-based one (tau_plus)." );
+	}
+	
+	if ( ! ( tau_y_ > tau_minus_ ) ) {
+		throw BadProperty( "Depression time-constant for triplet (tau_y) must be bigger than pair-based one (tau_minus)." );
+	}
+	
+	if ( ! ( r1_ >= 0 ) ) {
+		throw BadProperty( "Variable r1 must be positive." );
+	}
+	
+	if ( ! ( r2_ >= 0 ) ) {
+		throw BadProperty( "Variable r2 must be positive." );
+	}
+	
+	if ( ! ( o1_ >= 0 ) ) {
+		throw BadProperty( "TVariable o1 must be positive." );
+	}
+	
+	if ( ! ( o2_ >= 0 ) ) {
+		throw BadProperty( "Variable o2 must be positive." );
+	}
+	
 }
-
 
 #endif /* stdp_triplet_connection_h */

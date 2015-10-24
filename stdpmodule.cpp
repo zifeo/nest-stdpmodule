@@ -109,7 +109,7 @@ stdpmodule::STDPModule::init( SLIInterpreter* i )
   */
   //nest::register_connection_model< DropOddSpikeConnection< nest::TargetIdentifierPtrRport > >( nest::NestModule::get_network(), "drop_odd_synapse" );
 
-  nest::register_connection_model< STDPConnectionWeightIndependent< nest::TargetIdentifierPtrRport > >(
+  nest::register_connection_model< STDPTripletConnection< nest::TargetIdentifierPtrRport > >(
 	nest::NestModule::get_network(), "stdp_triplet_synapse" );
 	
 }

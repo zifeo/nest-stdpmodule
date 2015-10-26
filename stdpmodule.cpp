@@ -37,9 +37,8 @@
 
 // include headers with your own stuff
 #include "stdpmodule.h"
-#include "pif_psc_alpha.h"
-#include "drop_odd_spike_connection.h"
 #include "stdp_triplet_connection.h"
+#include "stdp_triplet_neuron.h"
 
 // -- Interface to dynamic module loader ---------------------------------------
 
@@ -60,10 +59,10 @@ stdpmodule::STDPModule stdpmodule_LTX_mod;
 stdpmodule::STDPModule::STDPModule()
 {
 #ifdef LINKED_MODULE
-  // register this module at the dynamic loader
-  // this is needed to allow for linking in this module at compile time
-  // all registered modules will be initialized by the main app's dynamic loader
-  nest::DynamicLoaderModule::registerLinkedModule( this );
+	// register this module at the dynamic loader
+	// this is needed to allow for linking in this module at compile time
+	// all registered modules will be initialized by the main app's dynamic loader
+	nest::DynamicLoaderModule::registerLinkedModule( this );
 #endif
 }
 
@@ -74,14 +73,14 @@ stdpmodule::STDPModule::~STDPModule()
 const std::string
 stdpmodule::STDPModule::name( void ) const
 {
-  return std::string( "STDP Module" ); // Return name of the module
+	return std::string( "STDP Module" ); // Return name of the module
 }
 
 const std::string
 stdpmodule::STDPModule::commandstring( void ) const
 {
-  // Instruct the interpreter to load mymodule-init.sli
-  return std::string( "(stdpmodule-init) run" );
+	// Instruct the interpreter to load mymodule-init.sli
+	return std::string( "(stdpmodule-init) run" );
 }
 
 //-------------------------------------------------------------------------------------
@@ -89,27 +88,26 @@ stdpmodule::STDPModule::commandstring( void ) const
 void
 stdpmodule::STDPModule::init( SLIInterpreter* i )
 {
-  /* Register a neuron or device model.
-     Give node type as template argument and the name as second argument.
-     The first argument is always a reference to the network.
-  */
-  //nest::register_model< pif_psc_alpha >( nest::NestModule::get_network(), "pif_psc_alpha" );
-
-  /* Register a synapse type.
-     Give synapse type as template argument and the name as second argument.
-     The first argument is always a reference to the network.
-
-     There are two choices for the template argument:
-         - nest::TargetIdentifierPtrRport
-         - nest::TargetIdentifierIndex
-     The first is the standard and you should usually stick to it.
-     nest::TargetIdentifierIndex reduces the memory requirement of synapses
-     even further, but limits the number of available rports. Please see
-     Kunkel et al, Front Neurofinfom 8:78 (2014), Sec 3.3.2, for details.
-  */
-  //nest::register_connection_model< DropOddSpikeConnection< nest::TargetIdentifierPtrRport > >( nest::NestModule::get_network(), "drop_odd_synapse" );
-
-  nest::register_connection_model< STDPTripletConnection< nest::TargetIdentifierPtrRport > >(
-	nest::NestModule::get_network(), "stdp_triplet_synapse" );
+	/* Register a neuron or device model.
+	 Give node type as template argument and the name as second argument.
+	 The first argument is always a reference to the network.
+	 */
+	
+	nest::register_model< STDPTripletNeuron >( nest::NestModule::get_network(), "stdp_triplet_neuron" );
+	
+	/* Register a synapse type.
+	 Give synapse type as template argument and the name as second argument.
+	 The first argument is always a reference to the network.
+	 
+	 There are two choices for the template argument:
+	 - nest::TargetIdentifierPtrRport
+	 - nest::TargetIdentifierIndex
+	 The first is the standard and you should usually stick to it.
+	 nest::TargetIdentifierIndex reduces the memory requirement of synapses
+	 even further, but limits the number of available rports. Please see
+	 Kunkel et al, Front Neurofinfom 8:78 (2014), Sec 3.3.2, for details.
+	 */
+	
+	nest::register_connection_model< STDPTripletConnection< nest::TargetIdentifierPtrRport > >(nest::NestModule::get_network(), "stdp_triplet_synapse" );
 	
 }

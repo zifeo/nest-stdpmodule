@@ -22,3 +22,13 @@ libtool
 config.status
 Makefile
 
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.cache
+target/
+*.iml
+.idea/
+

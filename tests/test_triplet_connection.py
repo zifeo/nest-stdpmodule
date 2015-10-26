@@ -17,7 +17,7 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
             "amplitude": 3920.0,
         })
 
-        # settings
+        # Settings
         self.dendritic_delay = 1.0 # should be no longer than 3 in order to avoid tests mixing
         self.decay_duration = 5.0
         self.synapse_model = "stdp_triplet_synapse"

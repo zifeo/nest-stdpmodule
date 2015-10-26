@@ -26,10 +26,9 @@ libdir= @libdir@/nest
 include_HEADERS = stdpmodule.h
 
 # All other source files
-source_files=  stdpmodule.cpp \
-			   stdp_triplet_connection.h stdp_triplet_connection.cpp \
-               pif_psc_alpha.cpp pif_psc_alpha.h \
-               drop_odd_spike_connection.h
+source_files=	stdpmodule.cpp \
+				stdp_triplet_connection.h stdp_triplet_connection.cpp \
+				stdp_triplet_neuron.h stdp_triplet_neuron.cpp
 
 if BUILD_DYNAMIC_USER_MODULES
   lib_LTLIBRARIES= libstdpmodule.la stdpmodule.la

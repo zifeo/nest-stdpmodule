@@ -42,6 +42,7 @@ namespace stdpmodule
 		
 	public:
 		STDPTripletNeuron();
+		STDPTripletNeuron( const STDPTripletNeuron& );
 		
 		/**
 		 * Import sets of overloaded virtual functions.
@@ -56,6 +57,8 @@ namespace stdpmodule
 		void handle( SpikeEvent& );
 		port handles_test_event( SpikeEvent&, rport );
 		
+		// TODO : handle state and parameter different way ?
+		// TODO : same name effet ?
 		void get_status( DictionaryDatum& ) const;
 		void set_status( const DictionaryDatum& );
 		
@@ -83,9 +86,44 @@ namespace stdpmodule
 		struct Buffers_
 		{
 			RingBuffer n_spikes_;
+			
+			// TODO : UniversalDataLogger< iaf_neuron > logger_; and RecordablesMap
 		};
 		
+		/**
+		 * Independent parameters of the model.
+		 */
+		struct Parameters_
+		{
+			
+			double_t weight_;
+			double_t tau_plus_;
+			double_t tau_x_;
+			double_t tau_minus_;
+			double_t tau_y_;
+			double_t a2_plus_;
+			double_t a2_minus_;
+			double_t a3_plus_;
+			double_t a3_minus_;
+			
+			double_t r1_;
+			double_t r2_;
+			double_t o1_;
+			double_t o2_;
+	  
+			Parameters_(); //!< Sets default parameter values
+	  
+			void get( DictionaryDatum& ) const; //!< Store current values in dictionary
+	  
+			/** Set values from dictionary.
+			 * @returns Change in reversal potential E_L, to be passed to State_::set()
+			 */
+			void set( const DictionaryDatum& );
+		};
+		
+		Parameters_ P_;
 		Buffers_ B_;
+		
 	};
 	
 	inline port

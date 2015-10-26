@@ -26,7 +26,7 @@ libdir= @libdir@/nest
 include_HEADERS = stdpmodule.h
 
 # All other source files
-source_files=	stdpmodule.cpp \
+source_files=	stdpnames.h stdpmodule.cpp \
 				stdp_triplet_connection.h stdp_triplet_connection.cpp \
 				stdp_triplet_neuron.h stdp_triplet_neuron.cpp
 

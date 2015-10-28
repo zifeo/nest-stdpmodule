@@ -51,7 +51,7 @@ multi_params = {
 
 reset()
 simulationDuration = 1000.0
-preSpikeTimes = [500.0]
+preSpikeTimes = [500.0, 700.0]
 postSpikeTimes = [400.0, 600.0]
 
 # Circuit setup
@@ -129,8 +129,8 @@ p1 = plt.subplot(211)
 plt.title("Pre-synaptic spikes and variables")
 plt.plot(time, r1, "b")
 plt.plot(time, r2, "r")
-plt.plot(time, r1Sim, "b")
-plt.plot(time, r2Sim, "r")
+plt.plot(time, r1Sim, "b", ls = "--")
+plt.plot(time, r2Sim, "r", ls = "--")
 plt.legend(["r1", "r2"], loc = "center left", bbox_to_anchor = (1, 0.5))
 plt.ylim(ylim)
 plt.eventplot(spikingStatsPre["times"], orientation = "horizontal", colors = "k", linelengths = 5)
@@ -139,8 +139,8 @@ plt.subplot(212, sharex = p1)
 plt.title("Post-synaptic spikes and variables")
 plt.plot(time, o1, "b")
 plt.plot(time, o2, "r")
-plt.plot(time, o1Sim, "b")
-plt.plot(time, o2Sim, "r")
+plt.plot(time, o1Sim, "b", ls = "--")
+plt.plot(time, o2Sim, "r", ls = "--")
 plt.legend(["o1", "o2"], loc = "center left", bbox_to_anchor = (1, 0.5))
 plt.ylim(ylim)
 plt.eventplot(spikingStatsPost["times"], orientation = "horizontal", colors = "k", linelengths = 5)

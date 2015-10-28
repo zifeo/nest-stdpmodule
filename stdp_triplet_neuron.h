@@ -86,6 +86,8 @@ namespace stdpmodule
 		struct Buffers_
 		{
 			RingBuffer n_spikes_;
+			RingBuffer n_pre_spikes_;
+			RingBuffer n_post_spikes_;
 			
 			// TODO : UniversalDataLogger< iaf_neuron > logger_; and RecordablesMap
 		};

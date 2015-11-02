@@ -71,17 +71,16 @@ generateSpikes(neuronPost, postSpikeTimes)
 
 # Simulation
 current = 0
-dt = 1
 time = [0.0]
 
 r1Sim = [0.0]
 r2Sim = [0.0]
 o1Sim = [0.0]
 o2Sim = [0.0]
-r1DecayRate = math.exp(- dt / syn_spec["tau_plus"])
-r2DecayRate = math.exp(- dt / syn_spec["tau_x"])
-o1DecayRate = math.exp(- dt / syn_spec["tau_minus"])
-o2DecayRate = math.exp(- dt / syn_spec["tau_y"])
+r1DecayRate = math.exp(- 1.0 / syn_spec["tau_plus"])
+r2DecayRate = math.exp(- 1.0 / syn_spec["tau_x"])
+o1DecayRate = math.exp(- 1.0 / syn_spec["tau_minus"])
+o2DecayRate = math.exp(- 1.0 / syn_spec["tau_y"])
 
 r1 = [0.0]
 r2 = [0.0]
@@ -98,23 +97,25 @@ while current < simulationDuration:
     o1.append(vars[2])
     o2.append(vars[3])
 
-    if (r1[-2] == r1[-1]): r1Sim.append(r1Sim[-1] * r1DecayRate)
-    else: r1Sim.append(r1[-1])
+    if (current in preSpikeTimes):
+        r1Sim.append(r1Sim[-1] + 1.0)
+        r2Sim.append(r2Sim[-1] + 1.0)
+    else:
+        r1Sim.append(r1Sim[-1] * r1DecayRate)
+        r2Sim.append(r2Sim[-1] * r2DecayRate)
 
-    if (r2[-2] == r2[-1]): r2Sim.append(r2Sim[-1] * r2DecayRate)
-    else: r2Sim.append(r2[-1])
-
-    if (o1[-2] == o1[-1]): o1Sim.append(o1Sim[-1] * o1DecayRate)
-    else: o1Sim.append(o1[-1])
-
-    if (o2[-2] == o2[-1]): o2Sim.append(o2Sim[-1] * o2DecayRate)
-    else: o2Sim.append(o2[-1])
+    if (current in postSpikeTimes):
+        o1Sim.append(o1Sim[-1] + 1.0)
+        o2Sim.append(o2Sim[-1] + 1.0)
+    else:
+        o1Sim.append(o1Sim[-1] * o1DecayRate)
+        o2Sim.append(o2Sim[-1] * o2DecayRate)
 
     weight.append(nest.GetStatus(connectionStats, ["weight"])[0])
     time.append(current)
 
-    current += dt
-    nest.Simulate(dt)
+    current += 1
+    nest.Simulate(1)
 
 spikingStatsPre = nest.GetStatus(spikeDetectorPre, keys = "events")[0]
 spikingStatsPost = nest.GetStatus(spikeDetectorPost, keys = "events")[0]
@@ -131,7 +132,7 @@ plt.plot(time, r1, "b")
 plt.plot(time, r2, "r")
 plt.plot(time, r1Sim, "b", ls = "--")
 plt.plot(time, r2Sim, "r", ls = "--")
-plt.legend(["r1", "r2"], loc = "center left", bbox_to_anchor = (1, 0.5))
+plt.legend(["r1", "r2", "r1 simulated", "r2 simulated"], loc = "upper left", frameon = False)
 plt.ylim(ylim)
 plt.eventplot(spikingStatsPre["times"], orientation = "horizontal", colors = "k", linelengths = 5)
 
@@ -141,7 +142,7 @@ plt.plot(time, o1, "b")
 plt.plot(time, o2, "r")
 plt.plot(time, o1Sim, "b", ls = "--")
 plt.plot(time, o2Sim, "r", ls = "--")
-plt.legend(["o1", "o2"], loc = "center left", bbox_to_anchor = (1, 0.5))
+plt.legend(["o1", "o2", "o1 simulated", "o2 simulated"], loc = "upper left", frameon = False)
 plt.ylim(ylim)
 plt.eventplot(spikingStatsPost["times"], orientation = "horizontal", colors = "k", linelengths = 5)
 

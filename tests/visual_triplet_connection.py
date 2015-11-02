@@ -1,12 +1,12 @@
 import math
 import nest
 import pylab as plt
-import numpy as np
 
 nest.Install("stdpmodule")
 nest.set_verbosity("M_WARNING")
 
 def reset():
+    """Reset NEST and add spike_trigger model."""
     nest.ResetKernel()
     nest.SetKernelStatus({"local_num_threads" : 1, "resolution" : 0.1, "print_time": False})
     nest.CopyModel("dc_generator", "spike_trigger", params = {
@@ -14,18 +14,17 @@ def reset():
     })
 
 def generateSpikes(neuron, times):
+    """Trigger spike to given neuron at specified times."""
     for t in times:
-        generator = nest.Create("spike_trigger", params = {
-            "start": t - 2.0,
-            "stop": t,
-        })
-        nest.Connect(generator, neuron)
+        trigger = nest.Create("spike_trigger", params = { "start": t - 2.0, "stop": t })
+        nest.Connect(trigger, neuron)
 
 def create(model, number):
+    """Allow multiple model instance to be unpack as they are created."""
     return map(lambda x: (x,), nest.Create(model, number))
 
-
-# Settings
+# settings
+reset()
 neuron_model = "iaf_neuron"
 synapse_model = "stdp_triplet_synapse"
 syn_spec = {
@@ -48,35 +47,27 @@ multi_params = {
     "withtime": True,
     "record_from": ["V_m"],
 }
-
-reset()
 simulationDuration = 1000.0
-preSpikeTimes = [500.0, 700.0]
+preSpikeTimes = [500.0, 680.0]
 postSpikeTimes = [400.0, 600.0]
 
-# Circuit setup
+# setup circuit
 multi = nest.Create("multimeter")
 (neuronPost, neuronPre) = create(neuron_model, 2)
 (spikeDetectorPre, spikeDetectorPost) = create("spike_detector", 2)
 
 nest.SetStatus(multi, params = multi_params)
+generateSpikes(neuronPre, preSpikeTimes)
+generateSpikes(neuronPost, postSpikeTimes)
 
 nest.Connect(multi, neuronPre)
 nest.Connect(neuronPre, neuronPost, syn_spec = syn_spec)
 nest.Connect(neuronPre, spikeDetectorPre)
 nest.Connect(neuronPost, spikeDetectorPost)
 
-generateSpikes(neuronPre, preSpikeTimes)
-generateSpikes(neuronPost, postSpikeTimes)
-
-# Simulation
+# simulation
 current = 0
 time = [0.0]
-
-r1Sim = [0.0]
-r2Sim = [0.0]
-o1Sim = [0.0]
-o2Sim = [0.0]
 r1DecayRate = math.exp(- 1.0 / syn_spec["tau_plus"])
 r2DecayRate = math.exp(- 1.0 / syn_spec["tau_x"])
 o1DecayRate = math.exp(- 1.0 / syn_spec["tau_minus"])
@@ -86,17 +77,22 @@ r1 = [0.0]
 r2 = [0.0]
 o1 = [0.0]
 o2 = [0.0]
-weight = [5.0]
+r1Sim = [0.0]
+r2Sim = [0.0]
+o1Sim = [0.0]
+o2Sim = [0.0]
 
 while current < simulationDuration:
     connectionStats = nest.GetConnections(neuronPre, synapse_model = synapse_model)
     vars = nest.GetStatus(connectionStats, ["r1", "r2", "o1", "o2"])[0]
 
+    # get variables from NEST
     r1.append(vars[0])
     r2.append(vars[1])
     o1.append(vars[2])
     o2.append(vars[3])
 
+    # simulate variable behavior
     if (current in preSpikeTimes):
         r1Sim.append(r1Sim[-1] + 1.0)
         r2Sim.append(r2Sim[-1] + 1.0)
@@ -111,17 +107,15 @@ while current < simulationDuration:
         o1Sim.append(o1Sim[-1] * o1DecayRate)
         o2Sim.append(o2Sim[-1] * o2DecayRate)
 
-    weight.append(nest.GetStatus(connectionStats, ["weight"])[0])
     time.append(current)
-
     current += 1
     nest.Simulate(1)
 
+# get spikes
 spikingStatsPre = nest.GetStatus(spikeDetectorPre, keys = "events")[0]
 spikingStatsPost = nest.GetStatus(spikeDetectorPost, keys = "events")[0]
 
-# Plot
-
+# plot
 plt.figure()
 plt.subplots_adjust(hspace = 0.3)
 ylim = [-0.5, 2]

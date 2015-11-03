@@ -1,5 +1,5 @@
 //
-//  stdp_triplet_connection.h
+//  stdp_triplet_all_connection.h
 //  NEST
 //
 //

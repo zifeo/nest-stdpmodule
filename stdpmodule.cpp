@@ -108,6 +108,6 @@ stdpmodule::STDPModule::init( SLIInterpreter* i )
 	 Kunkel et al, Front Neurofinfom 8:78 (2014), Sec 3.3.2, for details.
 	 */
 	
-	nest::register_connection_model< STDPTripletConnection< nest::TargetIdentifierPtrRport > >(nest::NestModule::get_network(), "stdp_triplet_synapse" );
+	nest::register_connection_model< STDPTripletConnection< nest::TargetIdentifierPtrRport > >(nest::NestModule::get_network(), "stdp_triplet_all_in_one_synapse" );
 	
 }

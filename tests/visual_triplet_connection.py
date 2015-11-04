@@ -24,17 +24,17 @@ syn_spec = {
     "receptor_type": 1, # set receptor 1 post-synaptically, to not generate extra spikes
     "weight": 5.0,
     "tau_plus": 16.8,
-    "triplet_tau_plus": 101.0,
+    "tau_plus_triplet": 101.0,
     "tau_minus": 33.7,
-    "triplet_tau_minus": 125.0,
+    "tau_minus_triplet": 125.0,
     "Aplus": 0.1,
     "Aminus": 0.1,
-    "triplet_Aplus": 0.1,
-    "triplet_Aminus": 0.1,
+    "Aplus_triplet": 0.1,
+    "Aminus_triplet": 0.1,
     "Kplus": 0.0,
-    "triplet_Kplus": 0.0,
+    "Kplus_triplet": 0.0,
     "Kminus": 0.0,
-    "triplet_Kminus": 0.0,
+    "Kminus_triplet": 0.0,
 }
 simulationDuration = 1000.0
 preSpikeTimes = [500.0, 680.0]
@@ -55,9 +55,9 @@ nest.Connect(neuronPost, spikeDetectorPost)
 current = 0
 time = [0.0]
 r1DecayRate = math.exp(- 1.0 / syn_spec["tau_plus"])
-r2DecayRate = math.exp(- 1.0 / syn_spec["triplet_tau_plus"])
+r2DecayRate = math.exp(- 1.0 / syn_spec["tau_plus_triplet"])
 o1DecayRate = math.exp(- 1.0 / syn_spec["tau_minus"])
-o2DecayRate = math.exp(- 1.0 / syn_spec["triplet_tau_minus"])
+o2DecayRate = math.exp(- 1.0 / syn_spec["tau_minus_triplet"])
 
 r1 = [0.0]
 r2 = [0.0]
@@ -70,7 +70,7 @@ o2Sim = [0.0]
 
 while current < simulationDuration:
     connectionStats = nest.GetConnections(neuronPre, synapse_model = synapse_model)
-    vars = nest.GetStatus(connectionStats, ["Kplus", "triplet_Kplus", "Kminus", "triplet_Kminus"])[0]
+    vars = nest.GetStatus(connectionStats, ["Kplus", "Kplus_triplet", "Kminus", "Kminus_triplet"])[0]
 
     # get variables from NEST
     r1.append(vars[0])

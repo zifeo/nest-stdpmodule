@@ -93,7 +93,7 @@ stdpmodule::STDPModule::init( SLIInterpreter* i )
 	 The first argument is always a reference to the network.
 	 */
 	
-	nest::register_model< STDPTripletNeuron >( nest::NestModule::get_network(), "stdp_triplet_neuron" );
+	//nest::register_model< STDPTripletNeuron >( nest::NestModule::get_network(), "stdp_triplet_neuron" );
 	
 	/* Register a synapse type.
 	 Give synapse type as template argument and the name as second argument.

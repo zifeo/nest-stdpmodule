@@ -26,7 +26,7 @@ def create(model, number):
 # settings
 reset()
 neuron_model = "iaf_neuron"
-synapse_model = "stdp_triplet_synapse"
+synapse_model = "stdp_triplet_all_in_one_synapse"
 syn_spec = {
     "model": synapse_model,
     "weight": 5.0,          # 5.0

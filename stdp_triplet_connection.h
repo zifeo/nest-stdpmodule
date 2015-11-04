@@ -69,6 +69,11 @@ namespace stdpmodule
 		 */
 		STDPTripletConnection( const STDPTripletConnection& );
 		
+		/**
+		 * Default Destructor.
+		 */
+		~STDPTripletConnection() {}
+		
 		// Explicitly declare all methods inherited from the dependent base ConnectionBase.
 		// This avoids explicit name prefixes in all places these functions are used.
 		// Since ConnectionBase depends on the template parameter, they are not automatically
@@ -195,13 +200,8 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 															 const CommonSynapseProperties& )
 {
 	
-	// save before spike value
-	double_t r2_before_last_prespike = r2_;
-	
 	// timing
 	double_t t_spike = e.get_stamp().get_ms();
-	double_t delta_with_lastspike = t_spike - t_lastspike;
-	assert(delta_with_lastspike >= 0);
 	
 	// get post-synaptic neuron
 	Node* target = get_target( t );
@@ -234,14 +234,17 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 		}
 		
 		// model variables each delta update
-		r1_ = r1_ * std::exp( - delta / tau_plus_);
-		r2_ = r2_ * std::exp( - delta / tau_x_);
-		o1_ = o1_ * std::exp( - delta / tau_minus_);
-		o2_ = o2_ * std::exp( - delta / tau_y_);
+		r1_ = r1_ * std::exp( - delta / tau_plus_);  // kplus
+		r2_ = r2_ * std::exp( - delta / tau_x_);	 // kx
+		o1_ = o1_ * std::exp( - delta / tau_minus_); // kminus
+		o2_ = o2_ * std::exp( - delta / tau_y_);	 // ky
+		// TODO rename ?
+		// TODO max weight ?
+		// TODO at the same time ?
 		
 		// potentiate
 		// t = t^post
-		weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_ );
+		weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_ ); // TODO cannot go negative ?
 		o1_ = o1_ + 1;
 		o2_ = o2_ + 1;
 	}
@@ -258,7 +261,7 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 	
 	// depress
 	// t = t^pre
-	weight_ = weight_ - o1_ * ( a2_minus_ + a3_minus_ * r2_before_last_prespike);
+	weight_ = weight_ - o1_ * ( a2_minus_ + a3_minus_ * r2_);
 	r1_ = r1_ + 1;
 	r2_ = r2_ + 1;
 	

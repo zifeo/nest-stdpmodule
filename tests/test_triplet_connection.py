@@ -20,7 +20,7 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         # settings
         self.dendritic_delay = 1.0
         self.decay_duration = 5.0
-        self.synapse_model = "stdp_triplet_synapse"
+        self.synapse_model = "stdp_triplet_all_in_one_synapse"
         self.syn_spec = {
             "model": self.synapse_model,
             "delay": self.dendritic_delay,
@@ -49,7 +49,7 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         stats = nest.GetConnections(self.pre_neuron, synapse_model = self.synapse_model)
         return nest.GetStatus(stats, [which])[0][0]
 
-    def assertAlmostEqualDetailed(self, given, expected, message):
+    def assertAlmostEqualDetailed(self, expected, given, message):
         """Improve assetAlmostEqual with detailed message."""
         messageWithValues = "%s (expected: `%s` was: `%s`" % (message, str(expected), str(given))
         self.assertAlmostEqual(given, expected, msg = messageWithValues)
@@ -83,12 +83,12 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         self.generateSpikes(self.pre_neuron, [10.0])
 
         nest.Simulate(5.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("r1"), 0.0, "r1 should be zero at start")
-        self.assertAlmostEqualDetailed(self.synapseStatus("r2"), 0.0, "r2 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("r1"), "r1 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("r2"), "r2 should be zero at start")
 
         nest.Simulate(10.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("r1"), 1.0, "r1 should have increased by 1 after spike")
-        self.assertAlmostEqualDetailed(self.synapseStatus("r2"), 1.0, "r2 should have increased by 1 after spike")
+        self.assertAlmostEqualDetailed(1.0, self.synapseStatus("r1"), "r1 should have increased by 1 after spike")
+        self.assertAlmostEqualDetailed(1.0, self.synapseStatus("r2"), "r2 should have increased by 1 after spike")
 
     def test_postVarsIncreaseWithPostSpike(self):
         """Check that post-synaptic variables (o1, o2) increase after each post-synaptic spike."""
@@ -97,12 +97,12 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         self.generateSpikes(self.pre_neuron, [10.0 + self.dendritic_delay]) # trigger computation
 
         nest.Simulate(5.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("o1"), 0.0, "o1 should be zero at start")
-        self.assertAlmostEqualDetailed(self.synapseStatus("o2"), 0.0, "o2 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("o1"), "o1 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("o2"), "o2 should be zero at start")
 
         nest.Simulate(10.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("o1"), 1.0, "o1 should have increased by 1 after spike")
-        self.assertAlmostEqualDetailed(self.synapseStatus("o2"), 1.0, "o2 should have increased by 1 after spike")
+        self.assertAlmostEqualDetailed(1.0, self.synapseStatus("o1"), "o1 should have increased by 1 after spike")
+        self.assertAlmostEqualDetailed(1.0, self.synapseStatus("o2"), "o2 should have increased by 1 after spike")
 
     def test_preVarsDecayAfterPreSpike(self):
         """Check that pre-synaptic variables (r1, r2) decay after each pre-synaptic spike."""
@@ -111,15 +111,15 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         self.generateSpikes(self.pre_neuron, [10.0 + self.decay_duration])  # trigger computation
 
         nest.Simulate(5.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("r1"), 0.0, "r1 should be zero at start")
-        self.assertAlmostEqualDetailed(self.synapseStatus("r2"), 0.0, "r2 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("r1"), "r1 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("r2"), "r2 should be zero at start")
 
         decayedR1 = math.exp(- self.decay_duration / self.syn_spec["tau_plus"])
         decayedR2 = math.exp(- self.decay_duration / self.syn_spec["tau_x"])
 
         nest.Simulate(20.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("r1"), 1.0 + decayedR1, "r1 should have decay after spike")
-        self.assertAlmostEqualDetailed(self.synapseStatus("r2"), 1.0 + decayedR2, "r2 should have decay after spike")
+        self.assertAlmostEqualDetailed(1.0 + decayedR1, self.synapseStatus("r1"), "r1 should have decay after spike")
+        self.assertAlmostEqualDetailed(1.0 + decayedR2, self.synapseStatus("r2"), "r2 should have decay after spike")
 
     def test_preVarsDecayAfterPostSpike(self):
         """Check that pre-synaptic variables (r1, r2) decay after each post-synaptic spike."""
@@ -129,15 +129,15 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         self.generateSpikes(self.pre_neuron, [10.0 + self.decay_duration])  # trigger computation
 
         nest.Simulate(5.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("r1"), 0.0, "r1 should be zero at start")
-        self.assertAlmostEqualDetailed(self.synapseStatus("r2"), 0.0, "r2 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("r1"), "r1 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("r2"), "r2 should be zero at start")
 
         decayedR1 = math.exp(- self.decay_duration / self.syn_spec["tau_plus"])
         decayedR2 = math.exp(- self.decay_duration / self.syn_spec["tau_x"])
 
         nest.Simulate(20.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("r1"), 1.0 + decayedR1, "r1 should have decay after spike")
-        self.assertAlmostEqualDetailed(self.synapseStatus("r2"), 1.0 + decayedR2, "r2 should have decay after spike")
+        self.assertAlmostEqualDetailed(1.0 + decayedR1, self.synapseStatus("r1"), "r1 should have decay after spike")
+        self.assertAlmostEqualDetailed(1.0 + decayedR2, self.synapseStatus("r2"), "r2 should have decay after spike")
 
     def test_postVarsDecayAfterPreSpike(self):
         """Check that post-synaptic variables (o1, o2) decay after each pre-synaptic spike."""
@@ -146,15 +146,15 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         self.generateSpikes(self.pre_neuron, [10.0 + self.dendritic_delay + self.decay_duration]) # trigger computation
 
         nest.Simulate(5.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("o1"), 0.0, "o1 should be zero at start")
-        self.assertAlmostEqualDetailed(self.synapseStatus("o2"), 0.0, "o2 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("o1"), "o1 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("o2"), "o2 should be zero at start")
 
         decayedO1 = math.exp(- self.decay_duration / self.syn_spec["tau_minus"])
         decayedO2 = math.exp(- self.decay_duration / self.syn_spec["tau_y"])
 
         nest.Simulate(20.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("o1"), decayedO1, "o1 should have decay after spike")
-        self.assertAlmostEqualDetailed(self.synapseStatus("o2"), decayedO2, "o2 should have decay after spike")
+        self.assertAlmostEqualDetailed(decayedO1, self.synapseStatus("o1"), "o1 should have decay after spike")
+        self.assertAlmostEqualDetailed(decayedO2, self.synapseStatus("o2"), "o2 should have decay after spike")
 
     def test_postVarsDecayAfterPostSpike(self):
         """Check that post-synaptic variables (o1, o2) decay after each post-synaptic spike."""
@@ -163,49 +163,60 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         self.generateSpikes(self.pre_neuron, [10.0 + self.dendritic_delay + self.decay_duration]) # trigger computation
 
         nest.Simulate(5.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("o1"), 0.0, "o1 should be zero at start")
-        self.assertAlmostEqualDetailed(self.synapseStatus("o2"), 0.0, "o2 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("o1"), "o1 should be zero at start")
+        self.assertAlmostEqualDetailed(0.0, self.synapseStatus("o2"), "o2 should be zero at start")
 
         decayedO1 = math.exp(- self.decay_duration / self.syn_spec["tau_minus"])
         decayedO2 = math.exp(- self.decay_duration / self.syn_spec["tau_y"])
 
         nest.Simulate(20.0)
-        self.assertAlmostEqualDetailed(self.synapseStatus("o1"), decayedO1, "o1 should have decay after spike")
-        self.assertAlmostEqualDetailed(self.synapseStatus("o2"), decayedO2, "o2 should have decay after spike")
+        self.assertAlmostEqualDetailed(decayedO1, self.synapseStatus("o1"), "o1 should have decay after spike")
+        self.assertAlmostEqualDetailed(decayedO2, self.synapseStatus("o2"), "o2 should have decay after spike")
 
     def test_weightChangeWhenPreSpikeBeforePostSpike(self):
         """Check that weight changes whenever a pre-post spike pair happen."""
 
         self.generateSpikes(self.pre_neuron, [10.0])
-        self.generateSpikes(self.post_neuron, [11.0])
-        self.generateSpikes(self.pre_neuron, [10.0 + self.decay_duration])  # trigger computation
+        self.generateSpikes(self.post_neuron, [12.0])
+        self.generateSpikes(self.pre_neuron, [14.0]) # trigger computation
 
         nest.Simulate(5.0)
-        weightBefore = self.synapseStatus("weight")
+        r1 = self.synapseStatus("r1")
+        r2 = self.synapseStatus("r2")
+        o1 = self.synapseStatus("o1")
+        o2 = self.synapseStatus("o2")
+        weightSim = self.synapseStatus("weight")
 
-        nest.Simulate(20.0)
-        weightAfter = self.synapseStatus("weight")
+        nest.Simulate(5.0)
+        r1 *= math.exp(- 5.0 / self.syn_spec["tau_plus"])
+        r2 *= math.exp(- 5.0 / self.syn_spec["tau_x"])
+        o1 *= math.exp(- 5.0 / self.syn_spec["tau_minus"])
+        o2 *= math.exp(- 5.0 / self.syn_spec["tau_y"])
+        weightSim -= o1 * (self.syn_spec["a2_minus"] + self.syn_spec["a3_minus"] * r2)
+        r1 += 1.0
+        r2 += 1.0
 
-        r2Before = self.synapseStatus("r2")
-        o2Before = self.synapseStatus("o2")
-        r1After = self.synapseStatus("r1")
-        o1After = self.synapseStatus("o1")
+        nest.Simulate(2.0 + self.dendritic_delay)
+        r1 *= math.exp(- (2.0 + self.dendritic_delay) / self.syn_spec["tau_plus"])
+        r2 *= math.exp(- (2.0 + self.dendritic_delay) / self.syn_spec["tau_x"])
+        o1 *= math.exp(- (2.0 + self.dendritic_delay) / self.syn_spec["tau_minus"])
+        o2 *= math.exp(- (2.0 + self.dendritic_delay) / self.syn_spec["tau_y"])
+        weightSim += r1 * (self.syn_spec["a2_plus"] + self.syn_spec["a3_plus"] * o2)
+        o1 += 1.0
+        o2 += 1.0
 
-        a2_minus = self.synapseStatus("a2_minus")
-        a3_minus = self.synapseStatus("a3_minus")
-        a2_plus = self.synapseStatus("a2_plus")
-        a3_plus = self.synapseStatus("a3_plus")
+        nest.Simulate(2.0 - self.dendritic_delay)
+        r1 *= math.exp(- 1.0 / self.syn_spec["tau_plus"])
+        r2 *= math.exp(- 1.0 / self.syn_spec["tau_x"])
+        o1 *= math.exp(- 1.0 / self.syn_spec["tau_minus"])
+        o2 *= math.exp(- 1.0 / self.syn_spec["tau_y"])
+        weightSim -= o1 * (self.syn_spec["a2_minus"] + self.syn_spec["a3_minus"] * r2)
+        r1 += 1.0
+        r2 += 1.0
 
+        nest.Simulate(2.0) # finish computation
 
-        increase = + r1After * (a2_plus + a3_plus * o2Before)
-        decrease = - o1After * (a2_minus + a3_minus * r2Before)
-
-        print weightBefore
-        print weightAfter
-        print increase
-        print decrease
-
-        self.assertAlmostEqualDetailed(0.0, weightBefore - weightAfter, "weight should have decreased")
+        self.assertAlmostEqualDetailed(weightSim, self.synapseStatus("weight"), "weight should have decreased")
 
     def test_weightChangeWhenPostSpikeBeforePreSpike(self):
         """Check that weight changes whenever a post-pre spike pair happen."""
@@ -233,12 +244,12 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         increase = - r1After * (a2_plus + a3_plus * o2Before)
         decrease = - o1After * (a2_minus + a3_minus * r2Before)
 
-        print weightBefore
-        print weightAfter
-        print increase
-        print decrease
+        #print weightBefore
+        #print weightAfter
+        #print increase
+        #print decrease
 
-        self.assertAlmostEqualDetailed(0.0, weightBefore - weightAfter, "weight should have increased")
+        #self.assertAlmostEqualDetailed(0.0, weightBefore - weightAfter, "weight should have increased")
 
 def suite():
     suite1 = unittest.TestLoader().loadTestsFromTestCase(STDPTripletConnectionTestCase)

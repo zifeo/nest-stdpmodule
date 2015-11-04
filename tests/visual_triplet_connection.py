@@ -5,11 +5,6 @@ import pylab as plt
 nest.Install("stdpmodule")
 nest.set_verbosity("M_WARNING")
 
-def reset():
-    """Reset NEST and add spike_trigger model."""
-    nest.ResetKernel()
-    nest.SetKernelStatus({"local_num_threads" : 1, "resolution" : 0.1, "print_time": False})
-
 def generateSpikes(neuron, times):
     """Trigger spike to given neuron at specified times."""
     gen = nest.Create("spike_generator", 1, { "spike_times": times })
@@ -19,33 +14,34 @@ def create(model, number):
     """Allow multiple model instance to be unpack as they are created."""
     return map(lambda x: (x,), nest.Create(model, number))
 
+nest.set_verbosity('M_WARNING')
+nest.ResetKernel()
+
 # settings
-reset()
-neuron_model = "parrot_neuron"
 synapse_model = "stdp_triplet_all_in_one_synapse"
 syn_spec = {
     "model": synapse_model,
-    "receptor_type": 1,     # set receptor 1 post-synaptically, to not generate extra spikes
-    "weight": 5.0,          # 5.0
-    "tau_plus": 16.8,       # 16.8
-    "tau_x": 101.0,         # 101.0
-    "tau_minus": 33.7,      # 33.7
-    "tau_y": 125.0,         # 125.0
-    "a2_plus": 1.0,         # 1.0
-    "a2_minus": 1.0,        # 1.0
-    "a3_plus": 0.0,         # 1.0
-    "a3_minus": 0.0,        # 1.0
-    "r1": 0.0,              # 0.0
-    "r2": 0.0,              # 0.0
-    "o1": 0.0,              # 0.0
-    "o2": 0.0,              # 0.0
+    "receptor_type": 1, # set receptor 1 post-synaptically, to not generate extra spikes
+    "weight": 5.0,
+    "tau_plus": 16.8,
+    "triplet_tau_plus": 101.0,
+    "tau_minus": 33.7,
+    "triplet_tau_minus": 125.0,
+    "Aplus": 0.1,
+    "Aminus": 0.1,
+    "triplet_Aplus": 0.1,
+    "triplet_Aminus": 0.1,
+    "Kplus": 0.0,
+    "triplet_Kplus": 0.0,
+    "Kminus": 0.0,
+    "triplet_Kminus": 0.0,
 }
 simulationDuration = 1000.0
 preSpikeTimes = [500.0, 680.0]
 postSpikeTimes = [400.0, 600.0]
 
 # setup circuit
-(neuronPost, neuronPre) = create(neuron_model, 2)
+(neuronPost, neuronPre) = create("parrot_neuron", 2)
 (spikeDetectorPre, spikeDetectorPost) = create("spike_detector", 2)
 
 generateSpikes(neuronPre, preSpikeTimes)
@@ -59,9 +55,9 @@ nest.Connect(neuronPost, spikeDetectorPost)
 current = 0
 time = [0.0]
 r1DecayRate = math.exp(- 1.0 / syn_spec["tau_plus"])
-r2DecayRate = math.exp(- 1.0 / syn_spec["tau_x"])
+r2DecayRate = math.exp(- 1.0 / syn_spec["triplet_tau_plus"])
 o1DecayRate = math.exp(- 1.0 / syn_spec["tau_minus"])
-o2DecayRate = math.exp(- 1.0 / syn_spec["tau_y"])
+o2DecayRate = math.exp(- 1.0 / syn_spec["triplet_tau_minus"])
 
 r1 = [0.0]
 r2 = [0.0]
@@ -74,7 +70,7 @@ o2Sim = [0.0]
 
 while current < simulationDuration:
     connectionStats = nest.GetConnections(neuronPre, synapse_model = synapse_model)
-    vars = nest.GetStatus(connectionStats, ["r1", "r2", "o1", "o2"])[0]
+    vars = nest.GetStatus(connectionStats, ["Kplus", "triplet_Kplus", "Kminus", "triplet_Kminus"])[0]
 
     # get variables from NEST
     r1.append(vars[0])

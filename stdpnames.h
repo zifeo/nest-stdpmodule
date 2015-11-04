@@ -12,17 +12,17 @@
 namespace stdpnames
 {
 	const Name tau_plus( "tau_plus" );
-	const Name tau_x( "tau_x" );
+	const Name triplet_tau_plus( "triplet_tau_plus" );
 	const Name tau_minus( "tau_minus" );
-	const Name tau_y( "tau_y" );
-	const Name a2_plus( "a2_plus" );
-	const Name a2_minus( "a2_minus" );
-	const Name a3_plus( "a3_plus" );
-	const Name a3_minus( "a3_minus" );
-	const Name r1( "r1" );
-	const Name r2( "r2" );
-	const Name o1( "o1" );
-	const Name o2( "o2" );
+	const Name triplet_tau_minus( "triplet_tau_minus" );
+	const Name Aplus( "Aplus" );
+	const Name triplet_Aplus( "triplet_Aplus" );
+	const Name Aminus( "Aminus" );
+	const Name triplet_Aminus( "triplet_Aminus" );
+	const Name Kplus( "Kplus" );
+	const Name triplet_Kplus( "triplet_Kplus" );
+	const Name Kminus( "Kminus" );
+	const Name triplet_Kminus( "triplet_Kminus" );
 }
 
 #endif /* stdpnames_h */

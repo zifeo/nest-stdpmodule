@@ -13,22 +13,22 @@
 	dependent plasticity (as defined in the references).
 	
 	STDP Examples:
-	pair-based		a3_plus = a3_minus = 0
+	pair-based		triplet_Aplus = triplet_Aminus = 0
 	triplet			otherwise
 	
 	Parameters:
 	- tau_plus		double: pair-based potentiation time constant (ms)
-	- tau_x			double: triplet potentiation time constant (ms)
+	- triplet_tau_plus			double: triplet potentiation time constant (ms)
 	- tau_minus		double: pair-based depression time constant (ms) (normally defined in post-synaptic neuron)
-	- tau_y			double:	triplet depression time constant (ms)
-	- a2_plus		double: weight change amplitude for pre-post spikes
-	- a2_minus		double: weight change amplitude for post-pre spikes
-	- a3_plus		double: weight change amplitude for pre-post-pre spikes
-	- a3_minus		double: weight change amplitude for post-pre-post spikes
-	- r1			double: pre variable r1 (e.g. amount of glutamate bound...)
-	- r2			double: pre variable r2 (e.g. number of NMDA receptors...)
-	- o1			double: post variable r3 (e.g. influx of calcium concentration...)
-	- o2			double: post variable r4 (e.g. number of secondary messengers...)
+	- triplet_tau_minus			double:	triplet depression time constant (ms)
+	- Aplus		double: weight change amplitude for pre-post spikes
+	- Aminus		double: weight change amplitude for post-pre spikes
+	- triplet_Aplus		double: weight change amplitude for pre-post-pre spikes
+	- triplet_Aminus		double: weight change amplitude for post-pre-post spikes
+	- Kplus			double: pre variable Kplus (e.g. amount of glutamate bound...)
+	- triplet_Kplus			double: pre variable triplet_Kplus (e.g. number of NMDA receptors...)
+	- Kminus			double: post variable r3 (e.g. influx of calcium concentration...)
+	- triplet_Kminus			double: post variable r4 (e.g. number of secondary messengers...)
  
 	Reference:
 	- Triplets of Spikes in a Model of Spike Timing-Dependent Plasticity, Pfister/Gerstner, 2006.
@@ -135,18 +135,18 @@ namespace stdpmodule
 	private:
 		double_t weight_;
 		double_t tau_plus_;
-		double_t tau_x_;
+		double_t triplet_tau_plus_;
 		double_t tau_minus_;
-		double_t tau_y_;
-		double_t a2_plus_;
-		double_t a2_minus_;
-		double_t a3_plus_;
-		double_t a3_minus_;
+		double_t triplet_tau_minus_;
+		double_t Aplus_;
+		double_t Aminus_;
+		double_t triplet_Aplus_;
+		double_t triplet_Aminus_;
 		
-		double_t r1_;
-		double_t r2_;
-		double_t o1_;
-		double_t o2_;
+		double_t Kplus_;
+		double_t triplet_Kplus_;
+		double_t Kminus_;
+		double_t triplet_Kminus_;
 	};
 	
 }
@@ -155,19 +155,19 @@ namespace stdpmodule
 template < typename targetidentifierT >
 stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection()
 : ConnectionBase()
-, weight_( 5.0 )
+, weight_( 1.0 )
 , tau_plus_( 16.8 ) // visual cortex data set
-, tau_x_( 101 )
+, triplet_tau_plus_( 101 )
 , tau_minus_( 33.7 ) // visual cortex data set
-, tau_y_( 125 )
-, a2_plus_( 1.0 )
-, a2_minus_( 1.0 )
-, a3_plus_( 1.0 )
-, a3_minus_( 1.0 )
-, r1_( 0.0 )
-, r2_( 0.0 )
-, o1_( 0.0 )
-, o2_( 0.0 )
+, triplet_tau_minus_( 125 )
+, Aplus_( 0.1 )
+, Aminus_( 0.1 )
+, triplet_Aplus_( 0.1 )
+, triplet_Aminus_( 0.1 )
+, Kplus_( 0.0 )
+, triplet_Kplus_( 0.0 )
+, Kminus_( 0.0 )
+, triplet_Kminus_( 0.0 )
 {
 }
 
@@ -177,17 +177,17 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::STDPTripletConnection( c
 : ConnectionBase( rhs )
 , weight_( rhs.weight_ )
 , tau_plus_( rhs.tau_plus_ )
-, tau_x_( rhs.tau_x_ )
+, triplet_tau_plus_( rhs.triplet_tau_plus_ )
 , tau_minus_( rhs.tau_minus_ )
-, tau_y_( rhs.tau_y_ )
-, a2_plus_( rhs.a2_plus_ )
-, a2_minus_( rhs.a2_minus_ )
-, a3_plus_( rhs.a3_plus_ )
-, a3_minus_( rhs.a3_minus_ )
-, r1_( rhs.r1_ )
-, r2_( rhs.r2_ )
-, o1_( rhs.o1_ )
-, o2_( rhs.o2_ )
+, triplet_tau_minus_( rhs.triplet_tau_minus_ )
+, Aplus_( rhs.Aplus_ )
+, Aminus_( rhs.Aminus_ )
+, triplet_Aplus_( rhs.triplet_Aplus_ )
+, triplet_Aminus_( rhs.triplet_Aminus_ )
+, Kplus_( rhs.Kplus_ )
+, triplet_Kplus_( rhs.triplet_Kplus_ )
+, Kminus_( rhs.Kminus_ )
+, triplet_Kminus_( rhs.triplet_Kminus_ )
 {
 }
 
@@ -234,19 +234,19 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 		}
 		
 		// model variables each delta update
-		r1_ = r1_ * std::exp( - delta / tau_plus_);  // kplus
-		r2_ = r2_ * std::exp( - delta / tau_x_);	 // kx
-		o1_ = o1_ * std::exp( - delta / tau_minus_); // kminus
-		o2_ = o2_ * std::exp( - delta / tau_y_);	 // ky
+		Kplus_ = Kplus_ * std::exp( - delta / tau_plus_);  // kplus
+		triplet_Kplus_ = triplet_Kplus_ * std::exp( - delta / triplet_tau_plus_);	 // kx
+		Kminus_ = Kminus_ * std::exp( - delta / tau_minus_); // kminus
+		triplet_Kminus_ = triplet_Kminus_ * std::exp( - delta / triplet_tau_minus_);	 // ky
 		// TODO rename ?
 		// TODO max weight ?
 		// TODO at the same time ?
 		
 		// potentiate
 		// t = t^post
-		weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_ ); // TODO cannot go negative ?
-		o1_ = o1_ + 1;
-		o2_ = o2_ + 1;
+		weight_ = weight_ + Kplus_ * ( Aplus_ + triplet_Aplus_ * triplet_Kminus_ ); // TODO cannot go negative ?
+		Kminus_ = Kminus_ + 1;
+		triplet_Kminus_ = triplet_Kminus_ + 1;
 		
 	}
 	
@@ -255,16 +255,16 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 	assert(remaing_delta_ >= 0);
 	
 	// model variables remaining delta update
-	r1_ = r1_ * std::exp( - remaing_delta_ / tau_plus_);
-	r2_ = r2_ * std::exp( - remaing_delta_ / tau_x_);
-	o1_ = o1_ * std::exp( - remaing_delta_ / tau_minus_);
-	o2_ = o2_ * std::exp( - remaing_delta_ / tau_y_);
-		
+	Kplus_ = Kplus_ * std::exp( - remaing_delta_ / tau_plus_);
+	triplet_Kplus_ = triplet_Kplus_ * std::exp( - remaing_delta_ / triplet_tau_plus_);
+	Kminus_ = Kminus_ * std::exp( - remaing_delta_ / tau_minus_);
+	triplet_Kminus_ = triplet_Kminus_ * std::exp( - remaing_delta_ / triplet_tau_minus_);
+	
 	// depress
 	// t = t^pre
-	weight_ = weight_ - o1_ * ( a2_minus_ + a3_minus_ * r2_);
-	r1_ = r1_ + 1;
-	r2_ = r2_ + 1;
+	weight_ = weight_ - Kminus_ * ( Aminus_ + triplet_Aminus_ * triplet_Kplus_);
+	Kplus_ = Kplus_ + 1;
+	triplet_Kplus_ = triplet_Kplus_ + 1;
 	
 	// send event
 	e.set_receiver( *target );
@@ -283,17 +283,17 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::get_status( DictionaryDa
 	ConnectionBase::get_status( d );
 	def< double_t >( d, names::weight, weight_ );
 	def< double_t >( d, stdpnames::tau_plus, tau_plus_ );
-	def< double_t >( d, stdpnames::tau_x, tau_x_ );
+	def< double_t >( d, stdpnames::triplet_tau_plus, triplet_tau_plus_ );
 	def< double_t >( d, stdpnames::tau_minus, tau_minus_ );
-	def< double_t >( d, stdpnames::tau_y, tau_y_ );
-	def< double_t >( d, stdpnames::a2_plus, a2_plus_ );
-	def< double_t >( d, stdpnames::a2_minus, a2_minus_ );
-	def< double_t >( d, stdpnames::a3_plus, a3_plus_ );
-	def< double_t >( d, stdpnames::a3_minus, a3_minus_ );
-	def< double_t >( d, stdpnames::r1, r1_ );
-	def< double_t >( d, stdpnames::r2, r2_ );
-	def< double_t >( d, stdpnames::o1, o1_ );
-	def< double_t >( d, stdpnames::o2, o2_ );
+	def< double_t >( d, stdpnames::triplet_tau_minus, triplet_tau_minus_ );
+	def< double_t >( d, stdpnames::Aplus, Aplus_ );
+	def< double_t >( d, stdpnames::Aminus, Aminus_ );
+	def< double_t >( d, stdpnames::triplet_Aplus, triplet_Aplus_ );
+	def< double_t >( d, stdpnames::triplet_Aminus, triplet_Aminus_ );
+	def< double_t >( d, stdpnames::Kplus, Kplus_ );
+	def< double_t >( d, stdpnames::triplet_Kplus, triplet_Kplus_ );
+	def< double_t >( d, stdpnames::Kminus, Kminus_ );
+	def< double_t >( d, stdpnames::triplet_Kminus, triplet_Kminus_ );
 	def< long_t >( d, names::size_of, sizeof( *this ) );
 }
 
@@ -305,40 +305,40 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::set_status( const Dictio
 	ConnectionBase::set_status( d, cm );
 	updateValue< double_t >( d, names::weight, weight_ );
 	updateValue< double_t >( d, stdpnames::tau_plus, tau_plus_ );
-	updateValue< double_t >( d, stdpnames::tau_x, tau_x_ );
+	updateValue< double_t >( d, stdpnames::triplet_tau_plus, triplet_tau_plus_ );
 	updateValue< double_t >( d, stdpnames::tau_minus, tau_minus_ );
-	updateValue< double_t >( d, stdpnames::tau_y, tau_y_ );
-	updateValue< double_t >( d, stdpnames::a2_plus, a2_plus_ );
-	updateValue< double_t >( d, stdpnames::a2_minus, a2_minus_ );
-	updateValue< double_t >( d, stdpnames::a3_plus, a3_plus_ );
-	updateValue< double_t >( d, stdpnames::a3_minus, a3_minus_ );
-	updateValue< double_t >( d, stdpnames::r1, r1_ );
-	updateValue< double_t >( d, stdpnames::r2, r2_ );
-	updateValue< double_t >( d, stdpnames::o1, o1_ );
-	updateValue< double_t >( d, stdpnames::o2, o2_ );
+	updateValue< double_t >( d, stdpnames::triplet_tau_minus, triplet_tau_minus_ );
+	updateValue< double_t >( d, stdpnames::Aplus, Aplus_ );
+	updateValue< double_t >( d, stdpnames::Aminus, Aminus_ );
+	updateValue< double_t >( d, stdpnames::triplet_Aplus, triplet_Aplus_ );
+	updateValue< double_t >( d, stdpnames::triplet_Aminus, triplet_Aminus_ );
+	updateValue< double_t >( d, stdpnames::Kplus, Kplus_ );
+	updateValue< double_t >( d, stdpnames::triplet_Kplus, triplet_Kplus_ );
+	updateValue< double_t >( d, stdpnames::Kminus, Kminus_ );
+	updateValue< double_t >( d, stdpnames::triplet_Kminus, triplet_Kminus_ );
 	
-	if ( ! ( tau_x_ > tau_plus_ ) ) {
-		throw BadProperty( "Potentiation time-constant for triplet (tau_x) must be bigger than pair-based one (tau_plus)." );
+	if ( ! ( triplet_tau_plus_ > tau_plus_ ) ) {
+		throw BadProperty( "Potentiation time-constant for triplet (triplet_tau_plus) must be bigger than pair-based one (tau_plus)." );
 	}
 	
-	if ( ! ( tau_y_ > tau_minus_ ) ) {
-		throw BadProperty( "Depression time-constant for triplet (tau_y) must be bigger than pair-based one (tau_minus)." );
+	if ( ! ( triplet_tau_minus_ > tau_minus_ ) ) {
+		throw BadProperty( "Depression time-constant for triplet (triplet_tau_minus) must be bigger than pair-based one (tau_minus)." );
 	}
 	
-	if ( ! ( r1_ >= 0 ) ) {
-		throw BadProperty( "Variable r1 must be positive." );
+	if ( ! ( Kplus_ >= 0 ) ) {
+		throw BadProperty( "Variable Kplus must be positive." );
 	}
 	
-	if ( ! ( r2_ >= 0 ) ) {
-		throw BadProperty( "Variable r2 must be positive." );
+	if ( ! ( triplet_Kplus_ >= 0 ) ) {
+		throw BadProperty( "Variable triplet_Kplus must be positive." );
 	}
 	
-	if ( ! ( o1_ >= 0 ) ) {
-		throw BadProperty( "TVariable o1 must be positive." );
+	if ( ! ( Kminus_ >= 0 ) ) {
+		throw BadProperty( "TVariable Kminus must be positive." );
 	}
 	
-	if ( ! ( o2_ >= 0 ) ) {
-		throw BadProperty( "Variable o2 must be positive." );
+	if ( ! ( triplet_Kminus_ >= 0 ) ) {
+		throw BadProperty( "Variable triplet_Kminus must be positive." );
 	}
 	
 }

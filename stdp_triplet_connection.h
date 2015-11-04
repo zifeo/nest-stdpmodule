@@ -247,6 +247,7 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 		weight_ = weight_ + r1_ * ( a2_plus_ + a3_plus_ * o2_ ); // TODO cannot go negative ?
 		o1_ = o1_ + 1;
 		o2_ = o2_ + 1;
+		
 	}
 	
 	// handeling the remaing delta between the last postspike and current spike time
@@ -258,7 +259,7 @@ stdpmodule::STDPTripletConnection< targetidentifierT >::send( Event& e,
 	r2_ = r2_ * std::exp( - remaing_delta_ / tau_x_);
 	o1_ = o1_ * std::exp( - remaing_delta_ / tau_minus_);
 	o2_ = o2_ * std::exp( - remaing_delta_ / tau_y_);
-	
+		
 	// depress
 	// t = t^pre
 	weight_ = weight_ - o1_ * ( a2_minus_ + a3_minus_ * r2_);

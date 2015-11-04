@@ -82,15 +82,15 @@ while current < simulationDuration:
     o1.append(vars[2])
     o2.append(vars[3])
 
-    # simulate variable behavior
-    if (current in preSpikeTimes):
+    # simulate variable behavior, -1 is for dendritic delay
+    if (current - 1 in preSpikeTimes):
         r1Sim.append(r1Sim[-1] + 1.0)
         r2Sim.append(r2Sim[-1] + 1.0)
     else:
         r1Sim.append(r1Sim[-1] * r1DecayRate)
         r2Sim.append(r2Sim[-1] * r2DecayRate)
 
-    if (current in postSpikeTimes):
+    if (current - 1 in postSpikeTimes):
         o1Sim.append(o1Sim[-1] + 1.0)
         o2Sim.append(o2Sim[-1] + 1.0)
     else:

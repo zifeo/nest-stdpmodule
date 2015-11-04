@@ -9,15 +9,11 @@ def reset():
     """Reset NEST and add spike_trigger model."""
     nest.ResetKernel()
     nest.SetKernelStatus({"local_num_threads" : 1, "resolution" : 0.1, "print_time": False})
-    nest.CopyModel("dc_generator", "spike_trigger", params = {
-        "amplitude": 3920.0,
-    })
 
 def generateSpikes(neuron, times):
     """Trigger spike to given neuron at specified times."""
-    for t in times:
-        trigger = nest.Create("spike_trigger", params = { "start": t - 2.0, "stop": t })
-        nest.Connect(trigger, neuron)
+    gen = nest.Create("spike_generator", 1, { "spike_times": times })
+    nest.Connect(gen, neuron)
 
 def create(model, number):
     """Allow multiple model instance to be unpack as they are created."""
@@ -25,10 +21,11 @@ def create(model, number):
 
 # settings
 reset()
-neuron_model = "iaf_neuron"
+neuron_model = "parrot_neuron"
 synapse_model = "stdp_triplet_all_in_one_synapse"
 syn_spec = {
     "model": synapse_model,
+    "receptor_type": 1,     # set receptor 1 post-synaptically, to not generate extra spikes
     "weight": 5.0,          # 5.0
     "tau_plus": 16.8,       # 16.8
     "tau_x": 101.0,         # 101.0
@@ -43,24 +40,17 @@ syn_spec = {
     "o1": 0.0,              # 0.0
     "o2": 0.0,              # 0.0
 }
-multi_params = {
-    "withtime": True,
-    "record_from": ["V_m"],
-}
 simulationDuration = 1000.0
 preSpikeTimes = [500.0, 680.0]
 postSpikeTimes = [400.0, 600.0]
 
 # setup circuit
-multi = nest.Create("multimeter")
 (neuronPost, neuronPre) = create(neuron_model, 2)
 (spikeDetectorPre, spikeDetectorPost) = create("spike_detector", 2)
 
-nest.SetStatus(multi, params = multi_params)
 generateSpikes(neuronPre, preSpikeTimes)
 generateSpikes(neuronPost, postSpikeTimes)
 
-nest.Connect(multi, neuronPre)
 nest.Connect(neuronPre, neuronPost, syn_spec = syn_spec)
 nest.Connect(neuronPre, spikeDetectorPre)
 nest.Connect(neuronPost, spikeDetectorPost)

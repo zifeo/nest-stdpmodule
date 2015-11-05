@@ -32,3 +32,13 @@ target/
 *.iml
 .idea/
 
+logs
+npm-debug.log*
+pids
+lib-cov
+coverage
+.grunt
+.lock-wscript
+build/Release
+node_modules
+

@@ -39,7 +39,7 @@
 						## A generalizable model of spike-timing dependent plasticity for the NEST simulator
 						**Teo Stocco** · communication systems
 						
-						**Alex Seeholzer** · supervisor
+						with **Alex Seeholzer**
 					</script>
 				</section>
 
@@ -51,7 +51,7 @@
 							- started in 1993
 							- switched to General Public License in 2012
 							- mostly written in C++
-							- python and SLI interface
+							- python and custom language (SLI) interface
 							- massively multi-threaded (OpenMP)
 							- 50+ neuron & 10+ synapse models
 						
@@ -60,9 +60,9 @@
 					</section>
 					<section data-markdown>
 						<script type="text/template">
-							## Project objective
+							## Project goal
 							
-							Currently, connections (synapses) depend on pre-synaptic neuron for updates. This discard some synaptic processes:
+							Currently, connections (synapses) depend on pre-synaptic neurons for updates. This discard some synaptic processes:
 							
 							- neuromodulation
 							- some STDP protocols 
@@ -78,8 +78,8 @@
 						<script type="text/template">
 							## Pfister-Gerstner Model · 2006
 
-							- triplet spike timing-dependent plasticity protocol
-							- fits experimental data (e.g. visual cortical slices)
+							- triplet rule STDP protocol
+							- fits experimental datas (e.g. visual cortical slices)
 							- 2 pre-synaptic variables (e.g. # of active NMDA receptors)
 							- 2 post-synaptic variables (e.g. influx of calcium concentration)
 						</script>
@@ -180,14 +180,14 @@
 					</section>
 					<section data-markdown>
 						<script type="text/template">
-							## Plotting the decay
+							## Plotting decays
 
 							![](img/decay_raw.png)
 						</script>
 					</section>
 					<section data-markdown>
 						<script type="text/template">
-							## Simulating the decay
+							## Simulating decays
 
 							![](img/decay_sim.png)
 						</script>
@@ -223,10 +223,10 @@
 					</section>
 					<section data-markdown>
 						<script type="text/template">
-							## Back to the objective
+							## Back to the goal
 
-							- `stdp` neuron plays the role of `stdp_triplet_synapse`
-							- every connections is `static_stdp`
+							- 1 STDP neuron plays the role of `stdp_triplet_synapse`
+							- every connections is `static_synapse`
 							- spike on port 1 are post-synaptic events (feedback connection)
 							- now the "fake" synapse is independent of other neurons
 							- currently prototyped

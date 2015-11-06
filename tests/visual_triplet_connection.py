@@ -7,8 +7,9 @@ nest.set_verbosity("M_WARNING")
 
 def generateSpikes(neuron, times):
     """Trigger spike to given neuron at specified times."""
-    gen = nest.Create("spike_generator", 1, { "spike_times": times })
-    nest.Connect(gen, neuron)
+    delay = 1.0
+    gen = nest.Create("spike_generator", 1, { "spike_times": [t-delay for t in times] })
+    nest.Connect(gen, neuron, syn_spec = { "delay": delay })
 
 def create(model, number):
     """Allow multiple model instance to be unpack as they are created."""

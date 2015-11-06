@@ -20,6 +20,12 @@
 			document.getElementsByTagName( 'head' )[0].appendChild( link );
 		</script>
 		
+		<style>
+			.reveal section img { border: 0; box-shadow: none; }
+			* { line-height: 1.5em !important; }
+			h2 { line-height: 1.1em !important; }
+		</style>
+		
 		<!--[if lt IE 9]>
 		<script src="lib/js/html5shiv.js"></script>
 		<![endif]-->
@@ -31,47 +37,38 @@
 				<section data-markdown>
 					<script type="text/template">
 						## A generalizable model of spike-timing dependent plasticity for the NEST simulator
-
-						Teo Stocco · Alex Seeholzer
+						**Teo Stocco** · communication systems
+						
+						**Alex Seeholzer** · supervisor
 					</script>
 				</section>
 
 				<section>
 					<section data-markdown>
 						<script type="text/template">
-							## Neural Simulation Tool · NEST
-							
+							## Behind [NEST](http://www.nest-simulator.org)
+														
+							- started in 1993
+							- switched to General Public License in 2012
+							- mostly written in C++
+							- python and SLI interface
+							- massively multi-threaded (OpenMP)
+							- 50+ neuron & 10+ synapse models
+						
+							![](img/nest.svg)
 						</script>
 					</section>
 					<section data-markdown>
 						<script type="text/template">
-							## IAF neuron example
+							## Project objective
+							
+							Currently, connections (synapses) depend on pre-synaptic neuron for updates. This discard some synaptic processes:
 							
 							- neuromodulation
+							- some STDP protocols 
+							- others external influx
 							
-							```c++
-							// Soon
-							
-							```
-						</script>
-					</section>
-					<section data-markdown>
-						<script type="text/template">
-							## Simulation example
-							
-							```python
-							neuron = nest.Create("iaf_neuron")
-							multimeter = nest.Create("multimeter")
-
-							nest.SetStatus(neuron, { "I_e": 400.0 }) # dc current (pA)
-							nest.SetStatus(multimeter, { 
-								"withtime": True, 
-								"record_from": ["V_m"]
-							})
-							
-							nest.Connect(multimeter, neuron)
-							nest.Simulate(200) # ms
-							```
+							**Let's build a workaround!**
 						</script>
 					</section>
 				</section>
@@ -81,13 +78,43 @@
 						<script type="text/template">
 							## Pfister-Gerstner Model · 2006
 
+							- triplet spike timing-dependent plasticity protocol
+							- fits experimental data (e.g. visual cortical slices)
+							- 2 pre-synaptic variables (e.g. # of active NMDA receptors)
+							- 2 post-synaptic variables (e.g. influx of calcium concentration)
 						</script>
 					</section>
 					<section data-markdown>
 						<script type="text/template">
-							## 4 variables
+							## Pre-synaptically
 							
-							$$\frac{dr_1(t)}{dt}=-\frac{r_1(t)}{\tau_p}$$
+							$$\displaystyle\frac{dr_1(t)}{dt}=-\frac{r_1(t)}{\tau_+}\quad\text{if}~t=t_{pre}~~r_1\to r_1+1$$
+							
+							$$\displaystyle\frac{dr_2(t)}{dt}=-\frac{r_2(t)}{\tau_x}\quad\text{if}~t=t_{pre}~~r_2\to r_2+1$$
+							
+							where $\tau_+,\tau_x$ are decay time-constants
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							## Post-synaptically
+							
+							$$\displaystyle\frac{do_1(t)}{dt}=-\frac{o_1(t)}{\tau_-}\quad\text{if}~t=t_{post}~~o_1\to o_1+1$$
+							
+							$$\displaystyle\frac{do_2(t)}{dt}=-\frac{o_2(t)}{\tau_y}\quad\text{if}~t=t_{post}~~o_2\to o_2+1$$
+							
+							where $\tau_-,\tau_y$ are decay time-constants
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							## Weight updates
+							
+							$$\displaystyle w(t)\to w(t)-o_1(t)[A_2^-+A_3^-r_2(t-\epsilon)]\quad\text{if}~t=t_{pre}$$
+							
+							$$\displaystyle w(t)\to w(t)+r_1(t)[A_2^++A_3^+o_2(t-\epsilon)]\quad\text{if}~t=t_{post}$$
+							
+							where $A_2^+,A_2^-,A_3^+,A_3^-$ are amplitudes of weight change respective to spike pairs and spike triplets
 						</script>
 					</section>
 				</section>
@@ -97,12 +124,79 @@
 						<script type="text/template">
 							## Connection implementation 
 
+							$$\enclose{circle}{\bbox[20px]{\text{pre}}}\xrightarrow[\text{stdp_triplet_synapse}]{w(t)}\enclose{circle}{\bbox[20px]{\text{post}}}\\\$$
+							
+							```python
+							neuron_pre = nest.Create("parrot_neuron")
+							neuron_post = nest.Create("parrot_neuron")
+							
+							nest.Connect(neuron_pre, neuron_post, syn_spec = {
+								"model": "stdp_triplet_synapse",
+								# other connection specs	
+							})
+							```
 						</script>
 					</section>
 					<section data-markdown>
 						<script type="text/template">
-							## Triggering spike 
+							## Triggering spikes: 1st solution
 
+							```python
+							gen = nest.Create("dc_generator", params = {
+								"amplitude": 3920.0,
+								"start": time - 2.0,
+								"stop": time,
+							})
+							nest.Connect(gen, neuron)
+							```
+							
+							- heavy cost: 1 generator per spike
+							- current varies for each model (here for `iaf_neuron`)
+							- imprecise spike timing
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							## Triggering spikes: 2nd solution
+
+							```python
+							delay = 1.0
+							gen = nest.Create("spike_generator", 1, { 
+								"spike_times": [t - delay for t in times] 
+							})
+							nest.Connect(gen, neuron_pre, syn_spec = { "delay": delay })
+							
+							nest.Connect(neuron_pre, neuron_post, syn_spec = {
+								"receptor_type": 1,
+								# other connection specs	
+							})
+							```
+							
+							- spike on port 1 are ignored
+							- reasonable cost: 1 generator per `parrot_neuron`
+							- precise spike timing
+							- now on NEST thanks to Alex
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							## Plotting the decay
+
+							![](img/decay_raw.png)
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							## Simulating the decay
+
+							![](img/decay_sim.png)
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							## Pairing protocol
+
+							![](img/pairing_paper.png) ![](img/pairing_nest.png)
 						</script>
 					</section>
 				</section>
@@ -110,8 +204,32 @@
 				<section>
 					<section data-markdown>
 						<script type="text/template">
-							## Node implementation
+							## Neuron implementation
 
+							$$\enclose{circle}{\bbox[20px]{\text{pre}}}\rightarrow\enclose{circle}{\bbox[20px]{\text{stdp}~w(t)}}\leftrightarrows\enclose{circle}{\bbox[20px]{\text{post}}}\\\$$
+
+							```python
+							neuron_pre = nest.Create("parrot_neuron")
+							neuron_post = nest.Create("parrot_neuron")
+							triplet_neuron = nest.Create("stdp_triplet_neuron")
+
+							nest.Connect(neuron_pre, triplet_neuron)
+							nest.Connect(neuron_post, neuronPost)
+							nest.Connect(neuron_post, triplet_neuron, syn_spec = { 
+								"receptor_type": 1
+							})
+							```
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							## Back to the objective
+
+							- `stdp` neuron plays the role of `stdp_triplet_synapse`
+							- every connections is `static_stdp`
+							- spike on port 1 are post-synaptic events (feedback connection)
+							- now the "fake" synapse is independent of other neurons
+							- currently prototyped
 						</script>
 					</section>
 				</section>
@@ -121,6 +239,10 @@
 						<script type="text/template">
 							## What's next?
 
+							- reproducing some other results
+							- allow neuromodulation
+							- reducing solution verbosity
+							- increasing the flexibility and generality
 						</script>
 					</section>
 				</section>
@@ -130,7 +252,9 @@
 						<script type="text/template">
 							## Thanks!
 
-							Questions? <!-- .element: class="fragment" -->
+							Work is on Github under [zifeo/NEST-STDPModule](https://github.com/zifeo/NEST-STDPModule) or on the official NEST repository (currently PR).
+							
+							![](img/github.png)
 						</script>
 					</section>
 					<section>

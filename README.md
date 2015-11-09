@@ -4,7 +4,7 @@ This project is currently underway until January 2016.
 
 ### Requirements
 
-- having already NEST installed (version > 2.6.0)
+- having already NEST installed (version > 2.8.0)
 
 ### Installation steps
 

@@ -19,34 +19,6 @@ def create(model, number):
     """Allow multiple model instance to be unpack as they are created."""
     return map(lambda x: (x,), nest.Create(model, number))
 
-def evaluate(spikePairs, rho, dt):
-    """Evaluate connection change of weight and returns it."""
-    nest.ResetKernel()
-    nest.SetKernelStatus({"local_num_threads" : 1, "resolution" : 0.1, "print_time": False})
-
-    step = round(1000.0 / rho)
-    simulationDuration = spikePairs * step
-    preSpikeTimes = np.arange(startSpikes, simulationDuration, step)
-    postSpikeTimes = map(lambda t: t + dt, preSpikeTimes)
-
-    # Entities
-    (neuronPre, neuronPost) = create(neuron_model, 2)
-
-    # Connections
-    generateSpikes(neuronPre, preSpikeTimes)
-    generateSpikes(neuronPost, postSpikeTimes)
-    nest.Connect(neuronPre, neuronPost, syn_spec = syn_spec)
-
-    # Simulation
-    connectionStats = nest.GetConnections(neuronPre, synapse_model = synapse_model)
-    currentWeight = nest.GetStatus(connectionStats, ["weight"])[0]
-    nest.Simulate(startSpikes + simulationDuration)
-
-    # Results
-    connectionStats = nest.GetConnections(neuronPre, synapse_model = synapse_model)
-    endWeight = nest.GetStatus(connectionStats, ["weight"])[0]
-    return endWeight[0] - currentWeight[0]
-
 neuron_model = "parrot_neuron"
 synapse_model = "stdp_triplet_all_in_one_synapse"
 syn_spec = {
@@ -70,13 +42,43 @@ syn_spec = {
 n = 60 # pair of presynaptic and post synpatic spikes
 dt = 10 # ms shift pre/post
 startSpikes = dt + 20
-rhos = range(1, 51, 2) # hz spiking frequence
+rhos = np.arange(1., 100.) # hz spiking frequence
 weights_plus = []
 weights_minus = []
 
+
+def evaluate(rho, dt):
+    """Evaluate connection change of weight and returns it."""
+    nest.ResetKernel()
+    nest.SetKernelStatus({"local_num_threads" : 1, "resolution" : 0.1, "print_time": False})
+
+    step = 1000.0 / rho
+    simulationDuration = np.ceil(n * step)
+    times_pre = np.arange(startSpikes, simulationDuration, step).round(1)
+    times_post = [t + dt for t in times_pre]
+
+    # Entities
+    neuron_pre = nest.Create(neuron_model)
+    neuron_post = nest.Create(neuron_model)
+
+    # Connections
+    generateSpikes(neuron_pre, times_pre)
+    generateSpikes(neuron_post, times_post)
+    nest.Connect(neuron_pre, neuron_post, syn_spec = syn_spec)
+
+    # Simulation
+    connectionStats = nest.GetConnections(neuron_pre, synapse_model = synapse_model)
+    currentWeight = nest.GetStatus(connectionStats, ["weight"])[0][0]
+    nest.Simulate(startSpikes + simulationDuration)
+
+    # Results
+    connectionStats = nest.GetConnections(neuron_pre, synapse_model = synapse_model)
+    endWeight = nest.GetStatus(connectionStats, ["weight"])[0][0]
+    return endWeight - currentWeight
+
 for rho in rhos:
-    weights_plus.append(evaluate(n, rho, dt))
-    weights_minus.append(evaluate(n, rho, -dt))
+    weights_plus.append(evaluate(rho, dt))
+    weights_minus.append(evaluate(rho, -dt))
 
 plt.figure()
 plt.title('Pairing experiment (Pfister-Gerstner 2006)')

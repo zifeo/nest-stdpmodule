@@ -46,7 +46,7 @@
  26(38):9673-9682; doi:10.1523/JNEUROSCI.1425-06.2006
 
  FirstVersion: Octo 2015
- Author: Teo Stocco
+ Author: Alexander Seeholzer, Teo Stocco
  SeeAlso: synapsedict, stdp_synapse, static_synapse
  */
 

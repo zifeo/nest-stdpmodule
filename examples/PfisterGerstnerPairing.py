@@ -41,11 +41,10 @@ syn_spec = {
 
 n = 60 # pair of presynaptic and post synpatic spikes
 dt = 10 # ms shift pre/post
-startSpikes = dt + 20
+start_spikes = dt + 20
 rhos = np.arange(1., 100.) # hz spiking frequence
 weights_plus = []
 weights_minus = []
-
 
 def evaluate(rho, dt):
     """Evaluate connection change of weight and returns it."""
@@ -53,8 +52,8 @@ def evaluate(rho, dt):
     nest.SetKernelStatus({"local_num_threads" : 1, "resolution" : 0.1, "print_time": False})
 
     step = 1000.0 / rho
-    simulationDuration = np.ceil(n * step)
-    times_pre = np.arange(startSpikes, simulationDuration, step).round(1)
+    simulation_duration = np.ceil(n * step)
+    times_pre = np.arange(start_spikes, simulation_duration, step).round(1)
     times_post = [t + dt for t in times_pre]
 
     # Entities
@@ -67,14 +66,14 @@ def evaluate(rho, dt):
     nest.Connect(neuron_pre, neuron_post, syn_spec = syn_spec)
 
     # Simulation
-    connectionStats = nest.GetConnections(neuron_pre, synapse_model = synapse_model)
-    currentWeight = nest.GetStatus(connectionStats, ["weight"])[0][0]
-    nest.Simulate(startSpikes + simulationDuration)
+    connection_stats = nest.GetConnections(neuron_pre, synapse_model = synapse_model)
+    current_weight = nest.GetStatus(connection_stats, ["weight"])[0][0]
+    nest.Simulate(start_spikes + simulation_duration)
 
     # Results
-    connectionStats = nest.GetConnections(neuron_pre, synapse_model = synapse_model)
-    endWeight = nest.GetStatus(connectionStats, ["weight"])[0][0]
-    return endWeight - currentWeight
+    connection_stats = nest.GetConnections(neuron_pre, synapse_model = synapse_model)
+    end_weight = nest.GetStatus(connection_stats, ["weight"])[0][0]
+    return end_weight - current_weight
 
 for rho in rhos:
     weights_plus.append(evaluate(rho, dt))

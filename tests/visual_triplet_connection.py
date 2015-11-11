@@ -11,10 +11,6 @@ def generateSpikes(neuron, times):
     gen = nest.Create("spike_generator", 1, { "spike_times": [t-delay for t in times] })
     nest.Connect(gen, neuron, syn_spec = { "delay": delay })
 
-def create(model, number):
-    """Allow multiple model instance to be unpack as they are created."""
-    return map(lambda x: (x,), nest.Create(model, number))
-
 nest.set_verbosity('M_WARNING')
 nest.ResetKernel()
 
@@ -37,41 +33,43 @@ syn_spec = {
     "Kminus": 0.0,
     "Kminus_triplet": 0.0,
 }
-simulationDuration = 1000.0
-preSpikeTimes = [500.0, 680.0]
-postSpikeTimes = [400.0, 600.0]
+simulation_duration = 1000.0
+times_pre = [500.0, 680.0]
+times_post = [400.0, 600.0]
 
 # setup circuit
-(neuronPost, neuronPre) = create("parrot_neuron", 2)
-(spikeDetectorPre, spikeDetectorPost) = create("spike_detector", 2)
+neuron_pre = nest.Create("parrot_neuron")
+neuron_post = nest.Create("parrot_neuron")
+detector_pre = nest.Create("spike_detector")
+detector_post = nest.Create("spike_detector")
 
-generateSpikes(neuronPre, preSpikeTimes)
-generateSpikes(neuronPost, postSpikeTimes)
+generateSpikes(neuron_pre, times_pre)
+generateSpikes(neuron_post, times_post)
 
-nest.Connect(neuronPre, neuronPost, syn_spec = syn_spec)
-nest.Connect(neuronPre, spikeDetectorPre)
-nest.Connect(neuronPost, spikeDetectorPost)
+nest.Connect(neuron_pre, neuron_post, syn_spec = syn_spec)
+nest.Connect(neuron_pre, detector_pre)
+nest.Connect(neuron_post, detector_post)
 
 # simulation
 current = 0
 time = [0.0]
-r1DecayRate = math.exp(- 1.0 / syn_spec["tau_plus"])
-r2DecayRate = math.exp(- 1.0 / syn_spec["tau_plus_triplet"])
-o1DecayRate = math.exp(- 1.0 / syn_spec["tau_minus"])
-o2DecayRate = math.exp(- 1.0 / syn_spec["tau_minus_triplet"])
+r1_decay_rate = math.exp(- 1.0 / syn_spec["tau_plus"])
+r2_decay_rate = math.exp(- 1.0 / syn_spec["tau_plus_triplet"])
+o1_decay_rate = math.exp(- 1.0 / syn_spec["tau_minus"])
+o2_decay_rate = math.exp(- 1.0 / syn_spec["tau_minus_triplet"])
 
 r1 = [0.0]
 r2 = [0.0]
 o1 = [0.0]
 o2 = [0.0]
-r1Sim = [0.0]
-r2Sim = [0.0]
-o1Sim = [0.0]
-o2Sim = [0.0]
+r1_sim = [0.0]
+r2_sim = [0.0]
+o1_sim = [0.0]
+o2_sim = [0.0]
 
-while current < simulationDuration:
-    connectionStats = nest.GetConnections(neuronPre, synapse_model = synapse_model)
-    vars = nest.GetStatus(connectionStats, ["Kplus", "Kplus_triplet", "Kminus", "Kminus_triplet"])[0]
+while current < simulation_duration:
+    connection_stats = nest.GetConnections(neuron_pre, synapse_model = synapse_model)
+    vars = nest.GetStatus(connection_stats, ["Kplus", "Kplus_triplet", "Kminus", "Kminus_triplet"])[0]
 
     # get variables from NEST
     r1.append(vars[0])
@@ -80,27 +78,27 @@ while current < simulationDuration:
     o2.append(vars[3])
 
     # simulate variable behavior, -1 is for dendritic delay
-    if (current - 1 in preSpikeTimes):
-        r1Sim.append(r1Sim[-1] + 1.0)
-        r2Sim.append(r2Sim[-1] + 1.0)
+    if (current - 1 in times_pre):
+        r1_sim.append(r1_sim[-1] + 1.0)
+        r2_sim.append(r2_sim[-1] + 1.0)
     else:
-        r1Sim.append(r1Sim[-1] * r1DecayRate)
-        r2Sim.append(r2Sim[-1] * r2DecayRate)
+        r1_sim.append(r1_sim[-1] * r1_decay_rate)
+        r2_sim.append(r2_sim[-1] * r2_decay_rate)
 
-    if (current - 1 in postSpikeTimes):
-        o1Sim.append(o1Sim[-1] + 1.0)
-        o2Sim.append(o2Sim[-1] + 1.0)
+    if (current - 1 in times_post):
+        o1_sim.append(o1_sim[-1] + 1.0)
+        o2_sim.append(o2_sim[-1] + 1.0)
     else:
-        o1Sim.append(o1Sim[-1] * o1DecayRate)
-        o2Sim.append(o2Sim[-1] * o2DecayRate)
+        o1_sim.append(o1_sim[-1] * o1_decay_rate)
+        o2_sim.append(o2_sim[-1] * o2_decay_rate)
 
     time.append(current)
     current += 1
     nest.Simulate(1)
 
 # get spikes
-spikingStatsPre = nest.GetStatus(spikeDetectorPre, keys = "events")[0]
-spikingStatsPost = nest.GetStatus(spikeDetectorPost, keys = "events")[0]
+spiking_stats_pre = nest.GetStatus(detector_pre, keys ="events")[0]
+spiking_stats_post = nest.GetStatus(detector_post, keys ="events")[0]
 
 # plot
 plt.figure()
@@ -111,20 +109,20 @@ p1 = plt.subplot(211)
 plt.title("Pre-synaptic spikes and variables")
 plt.plot(time, r1, "b")
 plt.plot(time, r2, "r")
-plt.plot(time, r1Sim, "b", ls = "--")
-plt.plot(time, r2Sim, "r", ls = "--")
+plt.plot(time, r1_sim, "b", ls ="--")
+plt.plot(time, r2_sim, "r", ls ="--")
 plt.legend(["r1", "r2", "r1 simulated", "r2 simulated"], loc = "upper left", frameon = False)
 plt.ylim(ylim)
-plt.eventplot(spikingStatsPre["times"], orientation = "horizontal", colors = "k", linelengths = 5)
+plt.eventplot(spiking_stats_pre["times"], orientation ="horizontal", colors ="k", linelengths = 5)
 
 plt.subplot(212, sharex = p1)
 plt.title("Post-synaptic spikes and variables")
 plt.plot(time, o1, "b")
 plt.plot(time, o2, "r")
-plt.plot(time, o1Sim, "b", ls = "--")
-plt.plot(time, o2Sim, "r", ls = "--")
+plt.plot(time, o1_sim, "b", ls ="--")
+plt.plot(time, o2_sim, "r", ls ="--")
 plt.legend(["o1", "o2", "o1 simulated", "o2 simulated"], loc = "upper left", frameon = False)
 plt.ylim(ylim)
-plt.eventplot(spikingStatsPost["times"], orientation = "horizontal", colors = "k", linelengths = 5)
+plt.eventplot(spiking_stats_post["times"], orientation ="horizontal", colors ="k", linelengths = 5)
 
 plt.show()

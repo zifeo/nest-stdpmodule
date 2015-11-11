@@ -15,10 +15,7 @@ nest.set_verbosity('M_WARNING')
 nest.ResetKernel()
 
 # settings
-synapse_model = "stdp_triplet_all_in_one_synapse"
 syn_spec = {
-    "model": synapse_model,
-    "receptor_type": 1, # set receptor 1 post-synaptically, to not generate extra spikes
     "weight": 5.0,
     "tau_plus": 16.8,
     "tau_plus_triplet": 101.0,
@@ -40,13 +37,18 @@ times_post = [400.0, 600.0]
 # setup circuit
 neuron_pre = nest.Create("parrot_neuron")
 neuron_post = nest.Create("parrot_neuron")
+triplet_synapse = nest.Create("stdp_triplet_neuron", params = syn_spec)
+
 detector_pre = nest.Create("spike_detector")
 detector_post = nest.Create("spike_detector")
 
 generateSpikes(neuron_pre, times_pre)
 generateSpikes(neuron_post, times_post)
 
-nest.Connect(neuron_pre, neuron_post, syn_spec = syn_spec)
+nest.Connect(neuron_pre, triplet_synapse)
+nest.Connect(neuron_pre, neuron_post)
+nest.Connect(triplet_synapse, neuron_post, syn_spec = { "receptor_type": 1 }) # differentiate post-synaptic feedback
+
 nest.Connect(neuron_pre, detector_pre)
 nest.Connect(neuron_post, detector_post)
 
@@ -68,8 +70,7 @@ o1_sim = [0.0]
 o2_sim = [0.0]
 
 while current < simulation_duration:
-    connection_stats = nest.GetConnections(neuron_pre, synapse_model = synapse_model)
-    vars = nest.GetStatus(connection_stats, ["Kplus", "Kplus_triplet", "Kminus", "Kminus_triplet"])[0]
+    vars = nest.GetStatus(triplet_synapse, ["Kplus", "Kplus_triplet", "Kminus", "Kminus_triplet"])[0]
 
     # get variables from NEST
     r1.append(vars[0])

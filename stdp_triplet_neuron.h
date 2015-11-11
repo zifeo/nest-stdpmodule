@@ -63,7 +63,7 @@ private:
   void update(Time const &, const long_t, const long_t);
 
   friend class RecordablesMap<STDPTripletNeuron>;
-  friend class UniversalDataLogger<STDPTripletNeuron>;
+  //friend class UniversalDataLogger<STDPTripletNeuron>;
 
   struct Parameters_ {
     double_t weight_;
@@ -96,7 +96,7 @@ private:
     RingBuffer n_spikes_;
     RingBuffer n_pre_spikes_;
     RingBuffer n_post_spikes_;
-    UniversalDataLogger<STDPTripletNeuron> logger_;
+    // UniversalDataLogger<STDPTripletNeuron> logger_;
 
     Buffers_(STDPTripletNeuron &);
     Buffers_(const Buffers_ &, STDPTripletNeuron &);
@@ -125,12 +125,14 @@ inline port STDPTripletNeuron::send_test_event(Node &target,
                                                bool) {
   SpikeEvent e;
   e.set_sender(*this);
+  //std::cout << "Send test spike event: " << receptor_type << std::endl;
   return target.handles_test_event(e, receptor_type);
 }
 
 inline port STDPTripletNeuron::handles_test_event(SpikeEvent &,
                                                   rport receptor_type) {
   // Allow connections to port 0 (pre-synaptic) and port 1 (post-synaptic)
+	//std::cout << "Handles test spike event: " << receptor_type << std::endl;
   if (receptor_type == 0 or receptor_type == 1) {
     return receptor_type;
   } else {
@@ -140,10 +142,11 @@ inline port STDPTripletNeuron::handles_test_event(SpikeEvent &,
 
 inline port STDPTripletNeuron::handles_test_event(DataLoggingRequest &dlr,
                                                   rport receptor_type) {
+	//std::cout << "Handles test data logging event: " << receptor_type << std::endl;
 	if (receptor_type != 0) {
     throw UnknownReceptorType(receptor_type, get_name());
 	}
-	return B_.logger_.connect_logging_device(dlr, recordablesMap_);
+	return 0;// B_.logger_.connect_logging_device(dlr, recordablesMap_);
 }
 
 inline void STDPTripletNeuron::get_status(DictionaryDatum &d) const {

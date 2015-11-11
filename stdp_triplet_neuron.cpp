@@ -43,8 +43,8 @@ template <> void RecordablesMap<stdpmodule::STDPTripletNeuron>::create() {
 /* ----------------------------------------------------------- parameters */
 
 stdpmodule::STDPTripletNeuron::Parameters_::Parameters_()
-    : weight_(5.0), tau_plus_(16.8), tau_x_(101), tau_minus_(33.7), tau_y_(125),
-      Aplus_(1.0), Aminus_(1.0), Aplus_triplet_(1.0), Aminus_triplet_(1.0) {}
+    : weight_(5.0), tau_plus_(16.8), tau_x_(101.0), tau_minus_(33.7), tau_y_(125),
+      Aplus_(0.1), Aminus_(0.1), Aplus_triplet_(0.1), Aminus_triplet_(0.1) {}
 
 void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
   def<double_t>(d, names::weight, weight_);
@@ -121,11 +121,11 @@ void stdpmodule::STDPTripletNeuron::State_::set(const DictionaryDatum &d) {
 /* ----------------------------------------------------------- buffers */
 
 stdpmodule::STDPTripletNeuron::Buffers_::Buffers_(STDPTripletNeuron &n)
-    : logger_(n) {}
+    /*: logger_(n)*/ {}
 
 stdpmodule::STDPTripletNeuron::Buffers_::Buffers_(const Buffers_ &,
                                                   STDPTripletNeuron &n)
-    : logger_(n) {}
+    /*: logger_(n)*/ {}
 
 /* ----------------------------------------------------------- constructors
  */
@@ -142,37 +142,44 @@ void stdpmodule::STDPTripletNeuron::init_buffers_() {
   B_.n_spikes_.clear(); // includes resize
   B_.n_pre_spikes_.clear();
   B_.n_post_spikes_.clear();
-  B_.logger_.reset(); // includes resize
+  //B_.logger_.reset(); // includes resize
   Archiving_Node::clear_history();
 }
 
-void stdpmodule::STDPTripletNeuron::calibrate() { B_.logger_.init(); }
+void stdpmodule::STDPTripletNeuron::calibrate() { /*B_.logger_.init();*/ }
 
 /* ----------------------------------------------------------- updates */
 
 void stdpmodule::STDPTripletNeuron::update(Time const &origin,
                                            const long_t from, const long_t to) {
-  assert(to >= 0 && (delay)from < Scheduler::get_min_delay());
+  assert(to >= 0 && (delay) from < Scheduler::get_min_delay());
   assert(from < to);
-
+	
+	// called each second
+	
+	double delta = 1.0 / (to - from);
+	
+	//std::cout << "From: " << from << std::endl;
+	//std::cout << "To: " << to << std::endl;
+	
   // TODO : not efficient at all... ?
   for (long_t lag = from; lag < to; ++lag) {
     // const ulong_t current_spikes_n = static_cast< ulong_t >(
     // B_.n_spikes_.get_value( lag ) );
 
     const double_t current_pre_spikes_n = B_.n_pre_spikes_.get_value(lag);
-    const double_t current_post_spikes_n = B_.n_pre_spikes_.get_value(lag);
-
-    std::cout << "Current lag: " << lag << std::endl;
-    std::cout << "Current pre spike: " << current_pre_spikes_n << std::endl;
-    std::cout << "Current post spike: " << current_post_spikes_n << std::endl;
+    const double_t current_post_spikes_n = B_.n_post_spikes_.get_value(lag);
 
     // model variables remaining delta update
-    S_.Kplus_ = S_.Kplus_ * std::exp(-1.0 / P_.tau_plus_);
-    S_.Kplus_triplet_ = S_.Kplus_triplet_ * std::exp(-1.0 / P_.tau_x_);
-    S_.Kminus_ = S_.Kminus_ * std::exp(-1.0 / P_.tau_minus_);
-    S_.Kminus_triplet_ = S_.Kminus_triplet_ * std::exp(-1.0 / P_.tau_y_);
-
+    S_.Kplus_ = S_.Kplus_ * std::exp(-delta / P_.tau_plus_);
+    S_.Kplus_triplet_ = S_.Kplus_triplet_ * std::exp(-delta / P_.tau_x_);
+    S_.Kminus_ = S_.Kminus_ * std::exp(-delta / P_.tau_minus_);
+    S_.Kminus_triplet_ = S_.Kminus_triplet_ * std::exp(-delta / P_.tau_y_);
+	  
+	  //std::cout << "Current lag: " << lag << std::endl;
+	  //std::cout << "Current pre spike: " << current_pre_spikes_n << std::endl;
+	  //std::cout << "Current post spike: " << current_post_spikes_n << std::endl;
+	  
     if (current_pre_spikes_n > 0) {
 
       // depress
@@ -193,7 +200,6 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
     }
 
     if (current_post_spikes_n > 0) {
-
       // potentiate
       // t = t^post
       P_.weight_ =
@@ -224,14 +230,14 @@ void stdpmodule::STDPTripletNeuron::handle(SpikeEvent &e) {
     B_.n_post_spikes_.add_value(
         e.get_rel_delivery_steps(network()->get_slice_origin()),
         e.get_weight() * e.get_multiplicity());
-    // TODO : actually don't care about the weight here ?
     break;
 
   default:
+		  std::cout << "Bad port" << std::endl;
     break;
   }
 }
 
 void stdpmodule::STDPTripletNeuron::handle(DataLoggingRequest &e) {
-  B_.logger_.handle(e);
+  //B_.logger_.handle(e);
 }

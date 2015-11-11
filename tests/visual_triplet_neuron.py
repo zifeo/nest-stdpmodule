@@ -46,8 +46,8 @@ generateSpikes(neuron_pre, times_pre)
 generateSpikes(neuron_post, times_post)
 
 nest.Connect(neuron_pre, triplet_synapse)
-nest.Connect(neuron_pre, neuron_post)
-nest.Connect(triplet_synapse, neuron_post, syn_spec = { "receptor_type": 1 }) # differentiate post-synaptic feedback
+nest.Connect(triplet_synapse, neuron_post, syn_spec = { "receptor_type": 1 }) # do not repeat spike
+nest.Connect(neuron_post, triplet_synapse, syn_spec = { "receptor_type": 1 }) # differentiate post-synaptic feedback
 
 nest.Connect(neuron_pre, detector_pre)
 nest.Connect(neuron_post, detector_post)

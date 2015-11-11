@@ -3,8 +3,8 @@ import unittest
 from math import exp
 
 @nest.check_stack
-class STDPTripletConnectionTestCase(unittest.TestCase):
-    """Check stdp_triplet_connection model properties."""
+class STDPTripletNeuronTestCase(unittest.TestCase):
+    """Check stdp_triplet_neuron model properties."""
 
     @classmethod
     def setUpClass(self):
@@ -17,11 +17,7 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         # settings
         self.dendritic_delay = 1.0
         self.decay_duration = 5.0
-        self.synapse_model = "stdp_triplet_all_in_one_synapse"
         self.syn_spec = {
-            "model": self.synapse_model,
-            "delay": self.dendritic_delay,
-            "receptor_type": 1, # set receptor 1 post-synaptically, to not generate extra spikes
             "weight": 5.0,
             "tau_plus": 16.8,
             "tau_plus_triplet": 101.0,
@@ -42,7 +38,14 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         self.post_neuron = nest.Create("parrot_neuron")
         self.triplet_synapse = nest.Create("stdp_triplet_neuron", params = self.syn_spec)
 
-        nest.Connect(self.pre_neuron, self.post_neuron, syn_spec = self.syn_spec)
+        nest.Connect(self.pre_neuron, self.triplet_synapse)
+        nest.Connect(self.triplet_synapse, self.post_neuron, syn_spec = {
+            "receptor_type": 1,
+            "delay": self.dendritic_delay
+        }) # do not repeat spike
+        nest.Connect(self.post_neuron, self.triplet_synapse, syn_spec = {
+            "receptor_type": 1
+        }) # differentiate post-synaptic feedback
 
     def generateSpikes(self, neuron, times):
         """Trigger spike to given neuron at specified times."""
@@ -52,8 +55,7 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
 
     def status(self, which):
         """Get synapse parameter status."""
-        stats = nest.GetConnections(self.pre_neuron, synapse_model = self.synapse_model)
-        return nest.GetStatus(stats, [which])[0][0]
+        return nest.GetStatus(self.triplet_synapse, [which])[0][0]
 
     def decay(self, time, Kplus, Kplus_triplet, Kminus, Kminus_triplet):
         """Decay variables."""
@@ -82,7 +84,7 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         def setupProperty(property):
             bad_syn_spec = self.syn_spec.copy()
             bad_syn_spec.update(property)
-            nest.Connect(self.pre_neuron, self.post_neuron, syn_spec = bad_syn_spec)
+            self.triplet_synapse = nest.Create("stdp_triplet_neuron", params = bad_syn_spec)
 
         def badPropertyWith(content, parameters):
             self.assertRaisesRegexp(nest.NESTError, "BadProperty(.+)" + content, setupProperty, parameters)

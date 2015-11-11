@@ -5,7 +5,7 @@
 //
 
 /*	BeginDocumentation
-        Name: stdp_triplet_all_in_one_synapse - Synapse type with spike-timing
+ Name: stdp_triplet_all_in_one_synapse - Synapse type with spike-timing
  dependent
  plasticity accounting for spike triplets as described in [1].
 
@@ -33,12 +33,12 @@
  bound...) (r_1 of [1])
  Kplus_triplet      double: triplet pre-synaptic trace (e.g. number of NMDA
  receptors...) (r_2 of [1])
- Kminus		double: post-synaptic trace (e.g. influx of calcium
+ Kminus				double: post-synaptic trace (e.g. influx of calcium
  concentration...) (o_1 of [1])
-        Kminus_tripletdouble: triplet post-synaptic trace (e.g. number of
+ Kminus_triplet		double: triplet post-synaptic trace (e.g. number of
  secondary messengers...) (o_2 of [1])
 
-        Transmits: SpikeEvent
+ Transmits: SpikeEvent
 
  References:
  [1] J.-P. Pfister & W. Gerstner (2006) Triplets of Spikes in a Model

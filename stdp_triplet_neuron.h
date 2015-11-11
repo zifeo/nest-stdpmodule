@@ -42,11 +42,6 @@ public:
   STDPTripletNeuron();
   STDPTripletNeuron(const STDPTripletNeuron &);
 
-  /**
-   * Import sets of overloaded virtual functions.
-   * @see Technical Issues / Virtual Functions: Overriding,
-   * Overloading, and Hiding
-   */
   using Node::handle;
   using Node::handles_test_event;
 
@@ -82,10 +77,10 @@ private:
     double_t tau_x_;
     double_t tau_minus_;
     double_t tau_y_;
-    double_t a2_plus_;
-    double_t a2_minus_;
-    double_t a3_plus_;
-    double_t a3_minus_;
+    double_t Aplus_;
+    double_t Aminus_;
+    double_t Aplus_triplet_;
+    double_t Aminus_triplet_;
 
     Parameters_(); //!< Sets default parameter values
 
@@ -102,10 +97,10 @@ private:
    */
   struct State_ {
 
-    double_t r1_;
-    double_t r2_;
-    double_t o1_;
-    double_t o2_;
+    double_t Kplus_;
+    double_t Kplus_triplet_;
+    double_t Kminus_;
+    double_t Kminus_triplet_;
 
     State_(); //!< Default initialization
 
@@ -141,10 +136,10 @@ private:
   struct Variables_ {};
 
   // Access functions for UniversalDataLogger
-  double_t get_r1_() const { return S_.r1_; }
-  double_t get_r2_() const { return S_.r2_; }
-  double_t get_o1_() const { return S_.o1_; }
-  double_t get_o2_() const { return S_.o2_; }
+  double_t get_Kplus_() const { return S_.Kplus_; }
+  double_t get_Kplus_triplet_() const { return S_.Kplus_triplet_; }
+  double_t get_Kminus_() const { return S_.Kminus_; }
+  double_t get_Kminus_triplet_() const { return S_.Kminus_triplet_; }
 
   /**
    * Instances of private data structures for the different types

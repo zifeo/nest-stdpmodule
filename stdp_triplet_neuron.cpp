@@ -21,9 +21,7 @@
 
 using namespace nest;
 
-/* ----------------------------------------------------------------
- * Recordables map
- * ---------------------------------------------------------------- */
+/* ---------------------------------------------------------------- devices */
 
 nest::RecordablesMap<stdpmodule::STDPTripletNeuron>
     stdpmodule::STDPTripletNeuron::recordablesMap_;
@@ -35,31 +33,23 @@ template <>
 void
 nest::RecordablesMap<stdpmodule::STDPTripletNeuron>::create() {
   // use standard names whereever you can for consistency!
-  insert_("r1", &stdpmodule::STDPTripletNeuron::get_r1_);
-  insert_("r2", &stdpmodule::STDPTripletNeuron::get_r2_);
-  insert_("o1", &stdpmodule::STDPTripletNeuron::get_o1_);
-  insert_("o2", &stdpmodule::STDPTripletNeuron::get_o2_);
+  insert_(stdpnames::Kplus, &stdpmodule::STDPTripletNeuron::get_Kplus_);
+  insert_(stdpnames::Kplus_triplet, &stdpmodule::STDPTripletNeuron::get_Kplus_triplet_);
+  insert_(stdpnames::Kminus, &stdpmodule::STDPTripletNeuron::get_Kminus_);
+  insert_(stdpnames::Kminus_triplet, &stdpmodule::STDPTripletNeuron::get_Kminus_triplet_);
 }
 }
 
-/* ----------------------------------------------------------------
- * Default constructors defining default parameters and state
- * ---------------------------------------------------------------- */
+/* ---------------------------------------------------------------- parameters */
 
 stdpmodule::STDPTripletNeuron::Parameters_::Parameters_()
-    : weight_(5.0), tau_plus_(16.8) // visual cortex data set
-      ,
-      tau_x_(101), tau_minus_(33.7) // visual cortex data set
-      ,
-      tau_y_(125), a2_plus_(1.0), a2_minus_(1.0), a3_plus_(1.0),
-      a3_minus_(1.0) {}
+: weight_(5.0), tau_plus_(16.8) // visual cortex data set
+,
+tau_x_(101), tau_minus_(33.7) // visual cortex data set
+,
+tau_y_(125), Aplus_(1.0), Aminus_(1.0), Aplus_triplet_(1.0),
+Aminus_triplet_(1.0) {}
 
-stdpmodule::STDPTripletNeuron::State_::State_(): r1_(0.0), r2_(0.0), o1_(0.0),
-    o2_(0.0) {}
-
-/* ----------------------------------------------------------------
- * Parameter and state extractions and manipulation functions
- * ---------------------------------------------------------------- */
 
 void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
   def<double_t>(d, names::weight, weight_);
@@ -67,10 +57,10 @@ void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
   def<double_t>(d, stdpnames::tau_plus_triplet, tau_x_);
   def<double_t>(d, stdpnames::tau_minus, tau_minus_);
   def<double_t>(d, stdpnames::tau_minus_triplet, tau_y_);
-  def<double_t>(d, "a2_plus", a2_plus_);
-  def<double_t>(d, "a2_minus", a2_minus_);
-  def<double_t>(d, "a3_plus", a3_plus_);
-  def<double_t>(d, "a3_minus", a3_minus_);
+  def<double_t>(d, stdpnames::Aplus, Aplus_);
+  def<double_t>(d, stdpnames::Aminus, Aminus_);
+  def<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
+  def<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
 }
 
 void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
@@ -80,10 +70,10 @@ void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
   updateValue<double_t>(d, stdpnames::tau_plus_triplet, tau_x_);
   updateValue<double_t>(d, stdpnames::tau_minus, tau_minus_);
   updateValue<double_t>(d, stdpnames::tau_minus_triplet, tau_y_);
-  updateValue<double_t>(d, "a2_plus", a2_plus_);
-  updateValue<double_t>(d, "a2_minus", a2_minus_);
-  updateValue<double_t>(d, "a3_plus", a3_plus_);
-  updateValue<double_t>(d, "a3_minus", a3_minus_);
+  updateValue<double_t>(d, stdpnames::Aplus, Aplus_);
+  updateValue<double_t>(d, stdpnames::Aminus, Aminus_);
+  updateValue<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
+  updateValue<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
 
   if (!(tau_x_ > tau_plus_)) {
     throw BadProperty("Potentiation time-constant for triplet (tau_x) must be "
@@ -96,36 +86,46 @@ void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
   }
 }
 
+/* ---------------------------------------------------------------- states */
+
+stdpmodule::STDPTripletNeuron::State_::State_(): Kplus_(0.0), Kplus_triplet_(0.0), Kminus_(0.0),
+Kminus_triplet_(0.0) {}
+
 void stdpmodule::STDPTripletNeuron::State_::get(DictionaryDatum &d,
                                                 const Parameters_ &p) const {
-  def<double_t>(d, "r1", r1_);
-  def<double_t>(d, "r2", r2_);
-  def<double_t>(d, "o1", o1_);
-  def<double_t>(d, "o2", o2_);
+  def<double_t>(d, stdpnames::Kplus, Kplus_);
+  def<double_t>(d, stdpnames::Kplus_triplet, Kplus_triplet_);
+  def<double_t>(d, stdpnames::Kminus, Kminus_);
+  def<double_t>(d, stdpnames::Kminus_triplet, Kminus_triplet_);
 }
 
 void stdpmodule::STDPTripletNeuron::State_::set(const DictionaryDatum &d) {
-  updateValue<double_t>(d, "r1", r1_);
-  updateValue<double_t>(d, "r2", r2_);
-  updateValue<double_t>(d, "o1", o1_);
-  updateValue<double_t>(d, "o2", o2_);
+  updateValue<double_t>(d, stdpnames::Kplus, Kplus_);
+  updateValue<double_t>(d, stdpnames::Kplus_triplet, Kplus_triplet_);
+  updateValue<double_t>(d, stdpnames::Kminus, Kminus_);
+  updateValue<double_t>(d, stdpnames::Kminus_triplet, Kminus_triplet_);
 
-  if (!(r1_ >= 0)) {
-    throw BadProperty("Variable r1 must be positive.");
+  if (!(Kplus_ >= 0)) {
+	  throw BadProperty("State Kplus must be positive.");
   }
 
-  if (!(r2_ >= 0)) {
-    throw BadProperty("Variable r2 must be positive.");
+  if (!(Kplus_triplet_ >= 0)) {
+	  throw BadProperty("State Kplus_triplet must be positive.");
   }
 
-  if (!(o1_ >= 0)) {
-    throw BadProperty("TVariable o1 must be positive.");
+  if (!(Kminus_ >= 0)) {
+	  throw BadProperty("State Kminus must be positive.");
   }
 
-  if (!(o2_ >= 0)) {
-    throw BadProperty("Variable o2 must be positive.");
+  if (!(Kminus_triplet_ >= 0)) {
+	  throw BadProperty("State Kminus_triplet must be positive.");
   }
 }
+
+/* ---------------------------------------------------------------- variables */
+
+
+/* ---------------------------------------------------------------- buffers */
 
 stdpmodule::STDPTripletNeuron::Buffers_::Buffers_(STDPTripletNeuron &n)
     : logger_(n) {}
@@ -134,9 +134,7 @@ stdpmodule::STDPTripletNeuron::Buffers_::Buffers_(const Buffers_ &,
                                                   STDPTripletNeuron &n)
     : logger_(n) {}
 
-/* ----------------------------------------------------------------
- * Default and copy constructor for node
- * ---------------------------------------------------------------- */
+/* ---------------------------------------------------------------- constructors */
 
 stdpmodule::STDPTripletNeuron::STDPTripletNeuron()
     : Archiving_Node(), P_(), S_(), B_(*this) {}
@@ -144,9 +142,8 @@ stdpmodule::STDPTripletNeuron::STDPTripletNeuron()
 stdpmodule::STDPTripletNeuron::STDPTripletNeuron(const STDPTripletNeuron &n)
     : Archiving_Node(n), P_(n.P_), S_(n.S_), B_(n.B_, *this) {}
 
-/* ----------------------------------------------------------------
- * Node initialization functions
- * ---------------------------------------------------------------- */
+/* ---------------------------------------------------------------- initialization */
+
 
 void stdpmodule::STDPTripletNeuron::init_state_(const Node &proto) {
   // TODO for what ?
@@ -162,9 +159,7 @@ void stdpmodule::STDPTripletNeuron::init_buffers_() {
 
 void stdpmodule::STDPTripletNeuron::calibrate() { B_.logger_.init(); }
 
-/* ----------------------------------------------------------------
- * Update and spike handling functions
- * ---------------------------------------------------------------- */
+/* ---------------------------------------------------------------- updates */
 
 void stdpmodule::STDPTripletNeuron::update(Time const &origin,
                                            const long_t from, const long_t to) {
@@ -184,18 +179,18 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
     std::cout << "Current post spike: " << current_post_spikes_n << std::endl;
 
     // model variables remaining delta update
-    S_.r1_ = S_.r1_ * std::exp(-1.0 / P_.tau_plus_);
-    S_.r2_ = S_.r2_ * std::exp(-1.0 / P_.tau_x_);
-    S_.o1_ = S_.o1_ * std::exp(-1.0 / P_.tau_minus_);
-    S_.o2_ = S_.o2_ * std::exp(-1.0 / P_.tau_y_);
+    S_.Kplus_ = S_.Kplus_ * std::exp(-1.0 / P_.tau_plus_);
+    S_.Kplus_triplet_ = S_.Kplus_triplet_ * std::exp(-1.0 / P_.tau_x_);
+    S_.Kminus_ = S_.Kminus_ * std::exp(-1.0 / P_.tau_minus_);
+    S_.Kminus_triplet_ = S_.Kminus_triplet_ * std::exp(-1.0 / P_.tau_y_);
 
     if (current_pre_spikes_n > 0) {
 
       // depress
       // t = t^pre
-      P_.weight_ = P_.weight_ - S_.o1_ * (P_.a2_minus_ + P_.a3_minus_ * S_.r2_);
-      S_.r1_ = S_.r1_ + 1;
-      S_.r2_ = S_.r2_ + 1;
+      P_.weight_ = P_.weight_ - S_.Kminus_ * (P_.Aminus_ + P_.Aminus_triplet_ * S_.Kplus_triplet_);
+      S_.Kplus_ = S_.Kplus_ + 1;
+      S_.Kplus_triplet_ = S_.Kplus_triplet_ + 1;
 
       SpikeEvent se;
       se.set_multiplicity(current_pre_spikes_n);
@@ -210,9 +205,9 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
 
       // potentiate
       // t = t^post
-      P_.weight_ = P_.weight_ + S_.r1_ * (P_.a2_plus_ + P_.a3_plus_ * S_.o2_);
-      S_.o1_ = S_.o1_ + 1;
-      S_.o2_ = S_.o2_ + 1;
+      P_.weight_ = P_.weight_ + S_.Kplus_ * (P_.Aplus_ + P_.Aplus_triplet_ * S_.Kminus_triplet_);
+      S_.Kminus_ = S_.Kminus_ + 1;
+      S_.Kminus_triplet_ = S_.Kminus_triplet_ + 1;
     }
   }
 }
@@ -245,6 +240,5 @@ void stdpmodule::STDPTripletNeuron::handle(SpikeEvent &e) {
 }
 
 void stdpmodule::STDPTripletNeuron::handle(DataLoggingRequest &e) {
-  B_.logger_.handle(e);
+	B_.logger_.handle(e);
 }
-

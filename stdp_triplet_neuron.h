@@ -28,7 +28,7 @@
 #include "event.h"
 #include "archiving_node.h"
 #include "ring_buffer.h"
-#include "connection.h"
+//#include "connection.h"
 #include "universal_data_logger.h"
 
 namespace stdpmodule {
@@ -63,10 +63,9 @@ private:
   void update(Time const &, const long_t, const long_t);
 
   friend class RecordablesMap<STDPTripletNeuron>;
-  //friend class UniversalDataLogger<STDPTripletNeuron>;
+  // friend class UniversalDataLogger<STDPTripletNeuron>;
 
   struct Parameters_ {
-    double_t weight_;
     double_t tau_plus_;
     double_t tau_plus_triplet_;
     double_t tau_minus_;
@@ -82,6 +81,8 @@ private:
   };
 
   struct State_ {
+    double_t weight_;
+
     double_t Kplus_;
     double_t Kplus_triplet_;
     double_t Kminus_;
@@ -105,6 +106,7 @@ private:
   // struct Variables_ {};
 
   // Access functions for UniversalDataLogger
+  double_t get_weight_() const { return S_.weight_; }
   double_t get_Kplus_() const { return S_.Kplus_; }
   double_t get_Kplus_triplet_() const { return S_.Kplus_triplet_; }
   double_t get_Kminus_() const { return S_.Kminus_; }
@@ -125,28 +127,28 @@ inline port STDPTripletNeuron::send_test_event(Node &target,
                                                bool) {
   SpikeEvent e;
   e.set_sender(*this);
-  //std::cout << "Send test spike event: " << receptor_type << std::endl;
+  // std::cout << "Send test spike event: " << receptor_type << std::endl;
   return target.handles_test_event(e, receptor_type);
 }
 
 inline port STDPTripletNeuron::handles_test_event(SpikeEvent &,
                                                   rport receptor_type) {
   // Allow connections to port 0 (pre-synaptic) and port 1 (post-synaptic)
-	//std::cout << "Handles test spike event: " << receptor_type << std::endl;
-  if (receptor_type == 0 or receptor_type == 1) {
-    return receptor_type;
-  } else {
+  // std::cout << "Handles test spike event: " << receptor_type << std::endl;
+  if (receptor_type != 0 and receptor_type != 1) {
     throw UnknownReceptorType(receptor_type, get_name());
   }
+  return receptor_type;
 }
 
 inline port STDPTripletNeuron::handles_test_event(DataLoggingRequest &dlr,
                                                   rport receptor_type) {
-	//std::cout << "Handles test data logging event: " << receptor_type << std::endl;
-	if (receptor_type != 0) {
+  // std::cout << "Handles test data logging event: " << receptor_type <<
+  // std::endl;
+  if (receptor_type != 0) {
     throw UnknownReceptorType(receptor_type, get_name());
-	}
-	return 0;// B_.logger_.connect_logging_device(dlr, recordablesMap_);
+  }
+  return 0; // B_.logger_.connect_logging_device(dlr, recordablesMap_);
 }
 
 inline void STDPTripletNeuron::get_status(DictionaryDatum &d) const {

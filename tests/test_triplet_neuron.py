@@ -111,7 +111,7 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         Kplus = self.status("Kplus")
         Kplus_triplet = self.status("Kplus_triplet")
 
-        nest.Simulate(20.0)
+        nest.Simulate(2.0 + self.dendritic_delay)
         self.assertAlmostEqualDetailed(Kplus + 1.0, self.status("Kplus"), "Kplus should have increased by 1")
         self.assertAlmostEqualDetailed(Kplus_triplet + 1.0, self.status("Kplus_triplet"),
                                        "Kplus_triplet should have increased by 1")
@@ -120,12 +120,11 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         """Check that post-synaptic variables (Kminus, Kminus_triplet) increase after each post-synaptic spike."""
 
         self.generateSpikes(self.post_neuron, [2.0])
-        self.generateSpikes(self.pre_neuron, [2.0 + self.dendritic_delay]) # trigger computation
 
         Kminus = self.status("Kminus")
         Kminus_triplet = self.status("Kminus_triplet")
 
-        nest.Simulate(20.0)
+        nest.Simulate(2.0 + self.dendritic_delay)
         self.assertAlmostEqualDetailed(Kminus + 1.0, self.status("Kminus"), "Kminus should have increased by 1")
         self.assertAlmostEqualDetailed(Kminus_triplet + 1.0, self.status("Kminus_triplet"),
                                        "Kminus_triplet should have increased by 1")
@@ -134,13 +133,10 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         """Check that pre-synaptic variables (Kplus, Kplus_triplet) decay after each pre-synaptic spike."""
 
         self.generateSpikes(self.pre_neuron, [2.0])
-        self.generateSpikes(self.pre_neuron, [2.0 + self.decay_duration]) # trigger computation
 
         (Kplus, Kplus_triplet, _, _) = self.decay(self.decay_duration, 1.0, 1.0, 0.0, 0.0)
-        Kplus += 1.0
-        Kplus_triplet += 1.0
 
-        nest.Simulate(20.0)
+        nest.Simulate(2.0 + self.decay_duration + self.dendritic_delay)
         self.assertAlmostEqualDetailed(Kplus, self.status("Kplus"), "Kplus should have decay")
         self.assertAlmostEqualDetailed(Kplus_triplet, self.status("Kplus_triplet"), "Kplus_triplet should have decay")
 
@@ -149,13 +145,10 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
 
         self.generateSpikes(self.pre_neuron, [2.0])
         self.generateSpikes(self.post_neuron, [3.0, 4.0])
-        self.generateSpikes(self.pre_neuron, [2.0 + self.decay_duration]) # trigger computation
 
         (Kplus, Kplus_triplet, _, _) = self.decay(self.decay_duration, 1.0, 1.0, 0.0, 0.0)
-        Kplus += 1.0
-        Kplus_triplet += 1.0
 
-        nest.Simulate(20.0)
+        nest.Simulate(2.0 + self.decay_duration + self.dendritic_delay)
         self.assertAlmostEqualDetailed(Kplus, self.status("Kplus"), "Kplus should have decay")
         self.assertAlmostEqualDetailed(Kplus_triplet, self.status("Kplus_triplet"), "Kplus_triplet should have decay")
 
@@ -163,11 +156,10 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         """Check that post-synaptic variables (Kminus, Kminus_triplet) decay after each pre-synaptic spike."""
 
         self.generateSpikes(self.post_neuron, [2.0])
-        self.generateSpikes(self.pre_neuron, [2.0 + self.dendritic_delay + self.decay_duration]) # trigger computation
 
         (_, _, Kminus, Kminus_triplet) = self.decay(self.decay_duration, 0.0, 0.0, 1.0, 1.0)
 
-        nest.Simulate(20.0)
+        nest.Simulate(2.0 + self.decay_duration + self.dendritic_delay)
         self.assertAlmostEqualDetailed(Kminus, self.status("Kminus"), "Kminus should have decay")
         self.assertAlmostEqualDetailed(Kminus_triplet, self.status("Kminus_triplet"),
                                        "Kminus_triplet should have decay")
@@ -176,7 +168,6 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         """Check that post-synaptic variables (Kminus, Kminus_triplet) decay after each post-synaptic spike."""
 
         self.generateSpikes(self.post_neuron, [2.0, 3.0, 4.0])
-        self.generateSpikes(self.pre_neuron, [2.0 + self.dendritic_delay + self.decay_duration]) # trigger computation
 
         (_, _, Kminus, Kminus_triplet) = self.decay(1.0, 0.0, 0.0, 1.0, 1.0)
         Kminus += 1.0
@@ -188,7 +179,7 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
 
         (_, _, Kminus, Kminus_triplet) = self.decay(self.decay_duration - 2.0, 0.0, 0.0, Kminus, Kminus_triplet)
 
-        nest.Simulate(20.0)
+        nest.Simulate(2.0 + self.decay_duration + self.dendritic_delay)
         self.assertAlmostEqualDetailed(Kminus, self.status("Kminus"), "Kminus should have decay")
         self.assertAlmostEqualDetailed(Kminus_triplet, self.status("Kminus_triplet"),
                                        "Kminus_triplet should have decay")
@@ -198,7 +189,6 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
 
         self.generateSpikes(self.pre_neuron, [2.0])
         self.generateSpikes(self.post_neuron, [4.0])
-        self.generateSpikes(self.pre_neuron, [6.0]) # trigger computation
 
         Kplus = self.status("Kplus")
         Kplus_triplet = self.status("Kplus_triplet")
@@ -211,15 +201,8 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         Kplus += 1.0
         Kplus_triplet += 1.0
 
-        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0 + self.dendritic_delay, Kplus, Kplus_triplet, 
-                                                                    Kminus, Kminus_triplet)
+        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0, Kplus, Kplus_triplet, Kminus, Kminus_triplet)
         weight = self.facilitate(weight, Kplus, Kminus_triplet)
-        Kminus += 1.0
-        Kminus_triplet += 1.0
-
-        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0 - self.dendritic_delay, Kplus, Kplus_triplet, 
-                                                                    Kminus, Kminus_triplet)
-        weight = self.depress(weight, Kminus, Kplus_triplet)
 
         nest.Simulate(20.0)
         self.assertAlmostEqualDetailed(weight, self.status("weight"), "weight should have decreased")
@@ -229,7 +212,6 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
 
         self.generateSpikes(self.pre_neuron, [2.0, 6.0])
         self.generateSpikes(self.post_neuron, [4.0])
-        self.generateSpikes(self.pre_neuron, [8.0]) # trigger computation
 
         Kplus = self.status("Kplus")
         Kplus_triplet = self.status("Kplus_triplet")
@@ -242,17 +224,10 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         Kplus += 1.0
         Kplus_triplet += 1.0
 
-        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0 + self.dendritic_delay, Kplus, Kplus_triplet, 
-                                                                    Kminus, Kminus_triplet)
+        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0, Kplus, Kplus_triplet, Kminus, Kminus_triplet)
         weight = self.facilitate(weight, Kplus, Kminus_triplet)
         Kminus += 1.0
         Kminus_triplet += 1.0
-
-        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0 - self.dendritic_delay, Kplus, Kplus_triplet,
-                                                                    Kminus, Kminus_triplet)
-        weight = self.depress(weight, Kminus, Kplus_triplet)
-        Kplus += 1.0
-        Kplus_triplet += 1.0
 
         (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0, Kplus, Kplus_triplet, Kminus, Kminus_triplet)
         weight = self.depress(weight, Kminus, Kplus_triplet)
@@ -261,7 +236,7 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         self.assertAlmostEqualDetailed(weight, self.status("weight"), "weight should have decreased")
 
 def suite():
-    suite1 = unittest.TestLoader().loadTestsFromTestCase(STDPTripletConnectionTestCase)
+    suite1 = unittest.TestLoader().loadTestsFromTestCase(STDPTripletNeuronTestCase)
     return unittest.TestSuite([suite1])
 
 def run():

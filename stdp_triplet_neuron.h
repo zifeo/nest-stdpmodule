@@ -68,9 +68,9 @@ private:
   struct Parameters_ {
     double_t weight_;
     double_t tau_plus_;
-    double_t tau_x_;
+    double_t tau_plus_triplet_;
     double_t tau_minus_;
-    double_t tau_y_;
+    double_t tau_minus_triplet_;
     double_t Aplus_;
     double_t Aminus_;
     double_t Aplus_triplet_;

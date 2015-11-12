@@ -40,8 +40,6 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         # setup basic circuit
         self.pre_neuron = nest.Create("parrot_neuron")
         self.post_neuron = nest.Create("parrot_neuron")
-        self.triplet_synapse = nest.Create("stdp_triplet_neuron", params = self.syn_spec)
-
         nest.Connect(self.pre_neuron, self.post_neuron, syn_spec = self.syn_spec)
 
     def generateSpikes(self, neuron, times):
@@ -209,13 +207,13 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         Kplus += 1.0
         Kplus_triplet += 1.0
 
-        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0 + self.dendritic_delay, Kplus, Kplus_triplet, 
+        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0 + self.dendritic_delay, Kplus, Kplus_triplet,
                                                                     Kminus, Kminus_triplet)
         weight = self.facilitate(weight, Kplus, Kminus_triplet)
         Kminus += 1.0
         Kminus_triplet += 1.0
 
-        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0 - self.dendritic_delay, Kplus, Kplus_triplet, 
+        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0 - self.dendritic_delay, Kplus, Kplus_triplet,
                                                                     Kminus, Kminus_triplet)
         weight = self.depress(weight, Kminus, Kplus_triplet)
 
@@ -240,7 +238,7 @@ class STDPTripletConnectionTestCase(unittest.TestCase):
         Kplus += 1.0
         Kplus_triplet += 1.0
 
-        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0 + self.dendritic_delay, Kplus, Kplus_triplet, 
+        (Kplus, Kplus_triplet, Kminus, Kminus_triplet) = self.decay(2.0 + self.dendritic_delay, Kplus, Kplus_triplet,
                                                                     Kminus, Kminus_triplet)
         weight = self.facilitate(weight, Kplus, Kminus_triplet)
         Kminus += 1.0

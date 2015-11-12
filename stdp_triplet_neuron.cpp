@@ -43,15 +43,15 @@ template <> void RecordablesMap<stdpmodule::STDPTripletNeuron>::create() {
 /* ----------------------------------------------------------- parameters */
 
 stdpmodule::STDPTripletNeuron::Parameters_::Parameters_()
-    : weight_(5.0), tau_plus_(16.8), tau_x_(101.0), tau_minus_(33.7), tau_y_(125),
+    : weight_(5.0), tau_plus_(16.8), tau_plus_triplet_(101.0), tau_minus_(33.7), tau_minus_triplet_(125),
       Aplus_(0.1), Aminus_(0.1), Aplus_triplet_(0.1), Aminus_triplet_(0.1) {}
 
 void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
   def<double_t>(d, names::weight, weight_);
   def<double_t>(d, stdpnames::tau_plus, tau_plus_);
-  def<double_t>(d, stdpnames::tau_plus_triplet, tau_x_);
+  def<double_t>(d, stdpnames::tau_plus_triplet, tau_plus_triplet_);
   def<double_t>(d, stdpnames::tau_minus, tau_minus_);
-  def<double_t>(d, stdpnames::tau_minus_triplet, tau_y_);
+  def<double_t>(d, stdpnames::tau_minus_triplet, tau_minus_triplet_);
   def<double_t>(d, stdpnames::Aplus, Aplus_);
   def<double_t>(d, stdpnames::Aminus, Aminus_);
   def<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
@@ -62,23 +62,25 @@ void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
 
   updateValue<double_t>(d, names::weight, weight_);
   updateValue<double_t>(d, stdpnames::tau_plus, tau_plus_);
-  updateValue<double_t>(d, stdpnames::tau_plus_triplet, tau_x_);
+  updateValue<double_t>(d, stdpnames::tau_plus_triplet, tau_plus_triplet_);
   updateValue<double_t>(d, stdpnames::tau_minus, tau_minus_);
-  updateValue<double_t>(d, stdpnames::tau_minus_triplet, tau_y_);
+  updateValue<double_t>(d, stdpnames::tau_minus_triplet, tau_minus_triplet_);
   updateValue<double_t>(d, stdpnames::Aplus, Aplus_);
   updateValue<double_t>(d, stdpnames::Aminus, Aminus_);
   updateValue<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
   updateValue<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
 
-  if (!(tau_x_ > tau_plus_)) {
-    throw BadProperty("Potentiation time-constant for triplet (tau_x) must be "
-                      "bigger than pair-based one (tau_plus).");
-  }
-
-  if (!(tau_y_ > tau_minus_)) {
-    throw BadProperty("Depression time-constant for triplet (tau_y) must be "
-                      "bigger than pair-based one (tau_minus).");
-  }
+	if (!(tau_plus_triplet_ > tau_plus_)) {
+		throw BadProperty("Parameter tau_plus_triplet (time-constant of long "
+						  "trace) must be larger than tau_plus "
+						  "(time-constant of short trace).");
+	}
+	
+	if (!(tau_minus_triplet_ > tau_minus_)) {
+		throw BadProperty("Parameter tau_minus_triplet (time-constant of long "
+						  "trace) must be larger than tau_minus "
+						  "(time-constant of short trace).");
+	}
 }
 
 /* ----------------------------------------------------------- states */
@@ -172,9 +174,9 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
 
     // model variables remaining delta update
     S_.Kplus_ = S_.Kplus_ * std::exp(-delta / P_.tau_plus_);
-    S_.Kplus_triplet_ = S_.Kplus_triplet_ * std::exp(-delta / P_.tau_x_);
+    S_.Kplus_triplet_ = S_.Kplus_triplet_ * std::exp(-delta / P_.tau_plus_triplet_);
     S_.Kminus_ = S_.Kminus_ * std::exp(-delta / P_.tau_minus_);
-    S_.Kminus_triplet_ = S_.Kminus_triplet_ * std::exp(-delta / P_.tau_y_);
+    S_.Kminus_triplet_ = S_.Kminus_triplet_ * std::exp(-delta / P_.tau_minus_triplet_);
 	  
 	  //std::cout << "Current lag: " << lag << std::endl;
 	  //std::cout << "Current pre spike: " << current_pre_spikes_n << std::endl;

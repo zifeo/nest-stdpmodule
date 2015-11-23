@@ -62,7 +62,7 @@ private:
   void update(Time const &, const long_t, const long_t);
 
   friend class RecordablesMap<STDPTripletNeuron>;
-  // friend class UniversalDataLogger<STDPTripletNeuron>;
+  friend class UniversalDataLogger<STDPTripletNeuron>;
 
   struct Parameters_ {
     double_t tau_plus_;
@@ -96,7 +96,7 @@ private:
     RingBuffer n_spikes_;
     RingBuffer n_pre_spikes_;
     RingBuffer n_post_spikes_;
-    // UniversalDataLogger<STDPTripletNeuron> logger_;
+    UniversalDataLogger<STDPTripletNeuron> logger_;
 
     Buffers_(STDPTripletNeuron &);
     Buffers_(const Buffers_ &, STDPTripletNeuron &);
@@ -148,7 +148,7 @@ inline port STDPTripletNeuron::handles_test_event(DataLoggingRequest &dlr,
   if (receptor_type != 0) {
     throw UnknownReceptorType(receptor_type, get_name());
   }
-  return 0; // B_.logger_.connect_logging_device(dlr, recordablesMap_);
+  return B_.logger_.connect_logging_device(dlr, recordablesMap_);
 }
 
 inline void STDPTripletNeuron::get_status(DictionaryDatum &d) const {

@@ -31,6 +31,8 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
             "Kplus_triplet": 0.0,
             "Kminus": 0.0,
             "Kminus_triplet": 0.0,
+            "delay": 1.0,
+            "nearest_spike": False,
         }
 
         # setup basic circuit

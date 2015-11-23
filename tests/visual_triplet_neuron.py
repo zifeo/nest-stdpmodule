@@ -29,6 +29,8 @@ syn_spec = {
     "Kplus_triplet": 0.0,
     "Kminus": 0.0,
     "Kminus_triplet": 0.0,
+    "delay": 1.0,
+    "nearest_spike": True,
 }
 simulation_duration = 1000.0
 times_pre = [500.0, 680.0]

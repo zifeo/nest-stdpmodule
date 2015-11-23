@@ -10,12 +10,12 @@
  Description:
  stdp_triplet_synapse is a modeled connection with spike time dependent
  plasticity accounting for spike triplet effects (as defined in [1]).
- 
+
  STDP examples:
  pair-based         Aplus_triplet = Aminus_triplet = 0.0
  triplet            Aplus_triplet = Aminus_triplet = 1.0
  nearest-spike      nearest_spile = True
- 
+
  Parameters:
  tau_plus           double: time constant of short presynaptic trace (tau_plus
  of [1])
@@ -26,29 +26,32 @@
  [1])
  Aminus             double: weight of pair depression rule (A_minus_2 of [1])
  Aminus_triplet     double: weight of triplet depression rule (A_minus_3 of [1])
- delay				double: delay from the pre to post-synaptic (minimum is twice the resolution)
- neareat_spike		bool: states saturate at 1 only taking into account neighboring spikes
- 
+ delay				double: delay from the pre to post-synaptic
+ (minimum is twice the resolution)
+ neareat_spike		bool: states saturate at 1 only taking into account
+ neighboring spikes
+
  States:
  Kplus              double: pre-synaptic trace (e.g. amount of glutamate
  bound...) (r_1 of [1])
  Kplus_triplet      double: triplet pre-synaptic trace (e.g. number of NMDA
  receptors...) (r_2 of [1])
- Kminus				double: post-synaptic trace (e.g. influx of calcium
+ Kminus				double: post-synaptic trace (e.g. influx of
+ calcium
  concentration...) (o_1 of [1])
  Kminus_triplet		double: triplet post-synaptic trace (e.g. number of
  secondary messengers...) (o_2 of [1])
- 
+
  Receives: SpikeEvent, DataLoggingRequest
- 
+
  Sends: SpikeEvent
- 
+
  References:
  [1] J.-P. Pfister & W. Gerstner (2006) Triplets of Spikes in a Model
  of Spike Timing-Dependent Plasticity.  The Journal of Neuroscience
  26(38):9673-9682; doi:10.1523/JNEUROSCI.1425-06.2006
  [2] stdp_triplet_connection.h
- 
+
  FirstVersion: Octo 2015
  Author: Alexander Seeholzer, Teo Stocco
  SeeAlso: synapsedict, stdp_synapse, static_synapse
@@ -106,8 +109,8 @@ private:
     double_t Aminus_;
     double_t Aplus_triplet_;
     double_t Aminus_triplet_;
-	  double_t delay_;
-	  bool nearest_spike_;
+    double_t delay_;
+    bool nearest_spike_;
 
     Parameters_();
     void get(DictionaryDatum &) const;

@@ -102,7 +102,12 @@ private:
     Buffers_(const Buffers_ &, STDPTripletNeuron &);
   };
 
-  // struct Variables_ {};
+  struct Variables_ {
+	  double_t Kplus_decay_;
+	  double_t Kplus_triplet_decay_;
+	  double_t Kminus_decay_;
+	  double_t Kminus_triplet_decay_;
+  };
 
   // Access functions for UniversalDataLogger
   double_t get_weight_() const { return S_.weight_; }
@@ -114,7 +119,7 @@ private:
   // Instances of private data structures for the different types
   Parameters_ P_;
   State_ S_;
-  // Variables_ V_;
+  Variables_ V_;
   Buffers_ B_;
 
   // Mapping of recordables names to access functions
@@ -126,14 +131,12 @@ inline port STDPTripletNeuron::send_test_event(Node &target,
                                                bool) {
   SpikeEvent e;
   e.set_sender(*this);
-   std::cout << "Send test spike event: " << receptor_type << std::endl;
   return target.handles_test_event(e, receptor_type);
 }
 
 inline port STDPTripletNeuron::handles_test_event(SpikeEvent &,
                                                   rport receptor_type) {
   // Allow connections to port 0 (pre-synaptic) and port 1 (post-synaptic)
-   std::cout << "Handles test spike event: " << receptor_type << std::endl;
   if (receptor_type != 0 and receptor_type != 1) {
     throw UnknownReceptorType(receptor_type, get_name());
   }
@@ -142,8 +145,6 @@ inline port STDPTripletNeuron::handles_test_event(SpikeEvent &,
 
 inline port STDPTripletNeuron::handles_test_event(DataLoggingRequest &dlr,
                                                   rport receptor_type) {
-   std::cout << "Handles test data logging event: " << receptor_type <<
-   std::endl;
   if (receptor_type != 0) {
     throw UnknownReceptorType(receptor_type, get_name());
   }

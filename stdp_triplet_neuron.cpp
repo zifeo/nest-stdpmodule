@@ -140,7 +140,15 @@ void stdpmodule::STDPTripletNeuron::init_buffers_() {
   Archiving_Node::clear_history();
 }
 
-void stdpmodule::STDPTripletNeuron::calibrate() { /*B_.logger_.init();*/
+void stdpmodule::STDPTripletNeuron::calibrate() {
+  // B_.logger_.init();
+
+  const double negative_delta = -Time::get_resolution().get_ms();
+
+  V_.Kplus_decay_ = std::exp(negative_delta / P_.tau_plus_);
+  V_.Kplus_triplet_decay_ = std::exp(negative_delta / P_.tau_plus_triplet_);
+  V_.Kminus_decay_ = std::exp(negative_delta / P_.tau_minus_);
+  V_.Kminus_triplet_decay_ = std::exp(negative_delta / P_.tau_minus_triplet_);
 }
 
 /* ----------------------------------------------------------- updates */
@@ -150,35 +158,22 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
   assert(to >= 0 && (delay)from < Scheduler::get_min_delay());
   assert(from < to);
 
-  // called each second
-
-	double delta = Time::get_resolution().get_ms();
-
-  // std::cout << "From: " << from << std::endl;
-  // std::cout << "To: " << to << std::endl;
+  double delta = Time::get_resolution().get_ms();
 
   for (long_t lag = from; lag < to; ++lag) {
-    // const ulong_t current_spikes_n = static_cast< ulong_t >(
-    // B_.n_spikes_.get_value( lag ) );
 
     const double_t current_pre_spikes_n = B_.n_pre_spikes_.get_value(lag);
     const double_t current_post_spikes_n = B_.n_post_spikes_.get_value(lag);
 
     // model variables remaining delta update
-    S_.Kplus_ *= std::exp(-delta / P_.tau_plus_);
-    S_.Kplus_triplet_ *= std::exp(-delta / P_.tau_plus_triplet_);
-    S_.Kminus_ *= std::exp(-delta / P_.tau_minus_);
-    S_.Kminus_triplet_ *= std::exp(-delta / P_.tau_minus_triplet_);
-
-    // std::cout << "Current lag: " << lag << std::endl;
-    // std::cout << "Current pre spike: " << current_pre_spikes_n << std::endl;
-    // std::cout << "Current post spike: " << current_post_spikes_n <<
-    // std::endl;
+	  S_.Kplus_ *= V_.Kplus_decay_;
+	  S_.Kplus_triplet_ *= V_.Kplus_triplet_decay_;
+	  S_.Kminus_ *= V_.Kminus_decay_;
+	  S_.Kminus_triplet_ *= V_.Kminus_triplet_decay_;
 
     if (current_pre_spikes_n > 0) {
 
-      // depress
-      // t = t^pre
+      // depress: t = t^pre
       S_.weight_ -=
           S_.Kminus_ * (P_.Aminus_ + P_.Aminus_triplet_ * S_.Kplus_triplet_);
       S_.Kplus_ = S_.Kplus_ + 1;
@@ -193,8 +188,7 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
     }
 
     if (current_post_spikes_n > 0) {
-      // potentiate
-      // t = t^post
+      // potentiate: t = t^post
       S_.weight_ +=
           S_.Kplus_ * (P_.Aplus_ + P_.Aplus_triplet_ * S_.Kminus_triplet_);
       S_.Kminus_ = S_.Kminus_ + 1;
@@ -213,11 +207,15 @@ void stdpmodule::STDPTripletNeuron::handle(SpikeEvent &e) {
 
   switch (e.get_rport()) {
   case 0: // PRE
-    B_.n_pre_spikes_.add_value(e.get_rel_delivery_steps(network()->get_slice_origin()), e.get_multiplicity());
+    B_.n_pre_spikes_.add_value(
+        e.get_rel_delivery_steps(network()->get_slice_origin()),
+        e.get_multiplicity());
     break;
 
   case 1: // POST
-    B_.n_post_spikes_.add_value(e.get_rel_delivery_steps(network()->get_slice_origin()), e.get_multiplicity());
+    B_.n_post_spikes_.add_value(
+        e.get_rel_delivery_steps(network()->get_slice_origin()),
+        e.get_multiplicity());
     break;
 
   default:

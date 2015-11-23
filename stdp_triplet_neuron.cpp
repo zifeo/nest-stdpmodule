@@ -36,7 +36,7 @@ template <> void RecordablesMap<stdpmodule::STDPTripletNeuron>::create() {
 stdpmodule::STDPTripletNeuron::Parameters_::Parameters_()
     : tau_plus_(16.8), tau_plus_triplet_(101.0), tau_minus_(33.7),
       tau_minus_triplet_(125), Aplus_(0.1), Aminus_(0.1), Aplus_triplet_(0.1),
-      Aminus_triplet_(0.1) {}
+      Aminus_triplet_(0.1), nearest_spike_(false), delay_(1) {}
 
 void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
   def<double_t>(d, stdpnames::tau_plus, tau_plus_);
@@ -47,6 +47,8 @@ void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
   def<double_t>(d, stdpnames::Aminus, Aminus_);
   def<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
   def<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
+	def<double_t>(d, names::delay, delay_);
+	def<bool>(d, stdpnames::nearest_spike, nearest_spike_);
 }
 
 void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
@@ -59,7 +61,13 @@ void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
   updateValue<double_t>(d, stdpnames::Aminus, Aminus_);
   updateValue<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
   updateValue<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
+	updateValue<double_t>(d, names::delay, delay_);
+	updateValue<bool>(d, stdpnames::nearest_spike, nearest_spike_);
 
+	if (!(delay_ >= 2 * Time::get_resolution().get_ms())) {
+		throw BadProperty("Parameter delay must be at least twice the resolution.");
+	}
+	
   if (!(tau_plus_triplet_ > tau_plus_)) {
     throw BadProperty("Parameter tau_plus_triplet (time-constant of long "
                       "trace) must be larger than tau_plus "
@@ -92,7 +100,7 @@ void stdpmodule::STDPTripletNeuron::State_::set(const DictionaryDatum &d) {
   updateValue<double_t>(d, stdpnames::Kplus, Kplus_);
   updateValue<double_t>(d, stdpnames::Kplus_triplet, Kplus_triplet_);
   updateValue<double_t>(d, stdpnames::Kminus, Kminus_);
-  updateValue<double_t>(d, stdpnames::Kminus_triplet, Kminus_triplet_);
+	updateValue<double_t>(d, stdpnames::Kminus_triplet, Kminus_triplet_);
 
   if (!(Kplus_ >= 0)) {
     throw BadProperty("State Kplus must be positive.");
@@ -177,8 +185,8 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
       // depress: t = t^pre
       S_.weight_ -=
           S_.Kminus_ * (P_.Aminus_ + P_.Aminus_triplet_ * S_.Kplus_triplet_);
-      S_.Kplus_ = S_.Kplus_ + 1;
-      S_.Kplus_triplet_ = S_.Kplus_triplet_ + 1;
+      S_.Kplus_ += 1;
+      S_.Kplus_triplet_ += 1;
 
       SpikeEvent se;
       se.set_multiplicity(current_pre_spikes_n);
@@ -192,8 +200,8 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
       // potentiate: t = t^post
       S_.weight_ +=
           S_.Kplus_ * (P_.Aplus_ + P_.Aplus_triplet_ * S_.Kminus_triplet_);
-      S_.Kminus_ = S_.Kminus_ + 1;
-      S_.Kminus_triplet_ = S_.Kminus_triplet_ + 1;
+      S_.Kminus_ += 1;
+      S_.Kminus_triplet_ += 1;
     }
 
     B_.logger_.record_data(origin.get_steps() + lag);

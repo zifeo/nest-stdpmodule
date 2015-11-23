@@ -221,8 +221,7 @@ inline void stdpmodule::STDPTripletConnection<targetidentifierT>::send(
     Kminus_ = Kminus_ * std::exp(-delta / tau_minus_);
     Kminus_triplet_ = Kminus_triplet_ * std::exp(-delta / tau_minus_triplet_);
 
-    // potentiate
-    // t = t^post
+    // potentiate: t = t^post
     weight_ = weight_ + Kplus_ * (Aplus_ + Aplus_triplet_ * Kminus_triplet_);
     Kminus_ = Kminus_ + 1;
     Kminus_triplet_ = Kminus_triplet_ + 1;
@@ -241,8 +240,7 @@ inline void stdpmodule::STDPTripletConnection<targetidentifierT>::send(
   Kminus_triplet_ =
       Kminus_triplet_ * std::exp(-remaing_delta_ / tau_minus_triplet_);
 
-  // depress
-  // t = t^pre
+  // depress: t = t^pre
   weight_ = weight_ - Kminus_ * (Aminus_ + Aminus_triplet_ * Kplus_triplet_);
   Kplus_ = Kplus_ + 1;
   Kplus_triplet_ = Kplus_triplet_ + 1;

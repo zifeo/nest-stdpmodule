@@ -23,6 +23,7 @@ namespace stdpnames
 	const Name Kplus_triplet( "Kplus_triplet" );
 	const Name Kminus( "Kminus" );
 	const Name Kminus_triplet( "Kminus_triplet" );
+	const Name nearest_spike("nearest_spike");
 }
 
 #endif /* stdpnames_h */

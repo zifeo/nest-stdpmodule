@@ -210,6 +210,8 @@ inline void stdpmodule::STDPTripletConnection<targetidentifierT>::send(
     ++start;
 
     if (delta == 0) {
+		Kminus_ = Kminus_ + 1;
+		Kminus_triplet_ = Kminus_triplet_ + 1;
       continue;
     }
 

@@ -28,7 +28,6 @@
 #include "event.h"
 #include "archiving_node.h"
 #include "ring_buffer.h"
-//#include "connection.h"
 #include "universal_data_logger.h"
 
 namespace stdpmodule {
@@ -127,14 +126,14 @@ inline port STDPTripletNeuron::send_test_event(Node &target,
                                                bool) {
   SpikeEvent e;
   e.set_sender(*this);
-  // std::cout << "Send test spike event: " << receptor_type << std::endl;
+   std::cout << "Send test spike event: " << receptor_type << std::endl;
   return target.handles_test_event(e, receptor_type);
 }
 
 inline port STDPTripletNeuron::handles_test_event(SpikeEvent &,
                                                   rport receptor_type) {
   // Allow connections to port 0 (pre-synaptic) and port 1 (post-synaptic)
-  // std::cout << "Handles test spike event: " << receptor_type << std::endl;
+   std::cout << "Handles test spike event: " << receptor_type << std::endl;
   if (receptor_type != 0 and receptor_type != 1) {
     throw UnknownReceptorType(receptor_type, get_name());
   }
@@ -143,8 +142,8 @@ inline port STDPTripletNeuron::handles_test_event(SpikeEvent &,
 
 inline port STDPTripletNeuron::handles_test_event(DataLoggingRequest &dlr,
                                                   rport receptor_type) {
-  // std::cout << "Handles test data logging event: " << receptor_type <<
-  // std::endl;
+   std::cout << "Handles test data logging event: " << receptor_type <<
+   std::endl;
   if (receptor_type != 0) {
     throw UnknownReceptorType(receptor_type, get_name());
   }

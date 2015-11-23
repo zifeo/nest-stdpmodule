@@ -9,15 +9,6 @@
 #include "stdpnames.h"
 #include "network.h"
 
-/*
-#include "dict.h"
-#include "integerdatum.h"
-#include "doubledatum.h"
-#include "dictutils.h"
-#include "numerics.h"
-#include <limits>
-*/
-
 using namespace nest;
 
 /* ----------------------------------------------------------- devices */
@@ -29,7 +20,6 @@ nest::RecordablesMap<stdpmodule::STDPTripletNeuron>
 // for each quantity to be recorded.
 namespace nest {
 template <> void RecordablesMap<stdpmodule::STDPTripletNeuron>::create() {
-  // use standard names whereever you can for consistency!
   insert_(names::weight, &stdpmodule::STDPTripletNeuron::get_weight_);
   insert_(stdpnames::Kplus, &stdpmodule::STDPTripletNeuron::get_Kplus_);
   insert_(stdpnames::Kplus_triplet,
@@ -162,12 +152,11 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
 
   // called each second
 
-  double delta = 1.0 / (to - from);
+	double delta = Time::get_resolution().get_ms();
 
   // std::cout << "From: " << from << std::endl;
   // std::cout << "To: " << to << std::endl;
 
-  // TODO : not efficient at all... ?
   for (long_t lag = from; lag < to; ++lag) {
     // const ulong_t current_spikes_n = static_cast< ulong_t >(
     // B_.n_spikes_.get_value( lag ) );
@@ -200,7 +189,6 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
       se.set_weight(S_.weight_);
       network()->send(*this, se, lag);
 
-      // TODO : others things to set for spike event ?
       set_spiketime(Time::step(origin.get_steps() + lag + 1));
     }
 
@@ -225,19 +213,14 @@ void stdpmodule::STDPTripletNeuron::handle(SpikeEvent &e) {
 
   switch (e.get_rport()) {
   case 0: // PRE
-    B_.n_pre_spikes_.add_value(
-        e.get_rel_delivery_steps(network()->get_slice_origin()),
-        /*e.get_weight() **/ e.get_multiplicity());
+    B_.n_pre_spikes_.add_value(e.get_rel_delivery_steps(network()->get_slice_origin()), e.get_multiplicity());
     break;
 
   case 1: // POST
-    B_.n_post_spikes_.add_value(
-        e.get_rel_delivery_steps(network()->get_slice_origin()),
-        /*e.get_weight() **/ e.get_multiplicity());
+    B_.n_post_spikes_.add_value(e.get_rel_delivery_steps(network()->get_slice_origin()), e.get_multiplicity());
     break;
 
   default:
-    std::cout << "Bad port" << std::endl;
     break;
   }
 }

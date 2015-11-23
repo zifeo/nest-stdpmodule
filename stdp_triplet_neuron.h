@@ -103,10 +103,10 @@ private:
   };
 
   struct Variables_ {
-	  double_t Kplus_decay_;
-	  double_t Kplus_triplet_decay_;
-	  double_t Kminus_decay_;
-	  double_t Kminus_triplet_decay_;
+    double_t Kplus_decay_;
+    double_t Kplus_triplet_decay_;
+    double_t Kminus_decay_;
+    double_t Kminus_triplet_decay_;
   };
 
   // Access functions for UniversalDataLogger

@@ -38,6 +38,13 @@ times_post = [400.0, 600.0]
 neuron_pre = nest.Create("parrot_neuron")
 neuron_post = nest.Create("parrot_neuron")
 triplet_synapse = nest.Create("stdp_triplet_neuron", params = syn_spec)
+multi = nest.Create("multimeter")
+nest.SetStatus(multi, params = {
+    "withtime": True,
+    "record_from": ["Kplus", "Kplus_triplet", "Kminus", "Kminus_triplet"],
+})
+
+nest.Connect(multi, triplet_synapse)
 
 detector_pre = nest.Create("spike_detector")
 detector_post = nest.Create("spike_detector")
@@ -54,29 +61,18 @@ nest.Connect(neuron_post, detector_post)
 
 # simulation
 current = 0
-time = [0.0]
+time_sim = [0.0]
+
 r1_decay_rate = math.exp(- 1.0 / syn_spec["tau_plus"])
 r2_decay_rate = math.exp(- 1.0 / syn_spec["tau_plus_triplet"])
 o1_decay_rate = math.exp(- 1.0 / syn_spec["tau_minus"])
 o2_decay_rate = math.exp(- 1.0 / syn_spec["tau_minus_triplet"])
-
-r1 = [0.0]
-r2 = [0.0]
-o1 = [0.0]
-o2 = [0.0]
 r1_sim = [0.0]
 r2_sim = [0.0]
 o1_sim = [0.0]
 o2_sim = [0.0]
 
 while current < simulation_duration:
-    vars = nest.GetStatus(triplet_synapse, ["Kplus", "Kplus_triplet", "Kminus", "Kminus_triplet"])[0]
-
-    # get variables from NEST
-    r1.append(vars[0])
-    r2.append(vars[1])
-    o1.append(vars[2])
-    o2.append(vars[3])
 
     # simulate variable behavior, -1 is for dendritic delay
     if (current - 1 in times_pre):
@@ -93,13 +89,16 @@ while current < simulation_duration:
         o1_sim.append(o1_sim[-1] * o1_decay_rate)
         o2_sim.append(o2_sim[-1] * o2_decay_rate)
 
-    time.append(current)
+    time_sim.append(current)
     current += 1
-    nest.Simulate(1)
+
+nest.Simulate(current + 1)
 
 # get spikes
 spiking_stats_pre = nest.GetStatus(detector_pre, keys = "events")[0]
 spiking_stats_post = nest.GetStatus(detector_post, keys = "events")[0]
+stats = nest.GetStatus(multi, keys = "events")[0]
+time = stats["times"]
 
 # plot
 plt.figure()
@@ -108,20 +107,20 @@ ylim = [-0.5, 2]
 
 p1 = plt.subplot(211)
 plt.title("Pre-synaptic spikes and variables")
-plt.plot(time, r1, "b")
-plt.plot(time, r2, "r")
-plt.plot(time, r1_sim, "b", ls ="--")
-plt.plot(time, r2_sim, "r", ls ="--")
+plt.plot(time, stats["Kplus"], "b")
+plt.plot(time, stats["Kplus_triplet"], "r")
+plt.plot(time_sim, r1_sim, "b", ls ="--")
+plt.plot(time_sim, r2_sim, "r", ls ="--")
 plt.legend(["r1", "r2", "r1 simulated", "r2 simulated"], loc = "upper left", frameon = False)
 plt.ylim(ylim)
 plt.eventplot(spiking_stats_pre["times"], orientation ="horizontal", colors ="k", linelengths = 5)
 
 plt.subplot(212, sharex = p1)
 plt.title("Post-synaptic spikes and variables")
-plt.plot(time, o1, "b")
-plt.plot(time, o2, "r")
-plt.plot(time, o1_sim, "b", ls ="--")
-plt.plot(time, o2_sim, "r", ls ="--")
+plt.plot(time, stats["Kminus"], "b")
+plt.plot(time, stats["Kminus_triplet"], "r")
+plt.plot(time_sim, o1_sim, "b", ls ="--")
+plt.plot(time_sim, o2_sim, "r", ls ="--")
 plt.legend(["o1", "o2", "o1 simulated", "o2 simulated"], loc = "upper left", frameon = False)
 plt.ylim(ylim)
 plt.eventplot(spiking_stats_post["times"], orientation ="horizontal", colors ="k", linelengths = 5)

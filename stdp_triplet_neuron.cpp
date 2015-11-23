@@ -111,21 +111,21 @@ void stdpmodule::STDPTripletNeuron::State_::set(const DictionaryDatum &d) {
   }
 }
 
-/* ----------------------------------------------------------- variables */
-
 /* ----------------------------------------------------------- buffers */
 
 stdpmodule::STDPTripletNeuron::Buffers_::Buffers_(STDPTripletNeuron &n)
-: logger_(n) {}
+    : logger_(n) {}
 
 stdpmodule::STDPTripletNeuron::Buffers_::Buffers_(const Buffers_ &,
                                                   STDPTripletNeuron &n)
-: logger_(n) {}
+    : logger_(n) {}
 
 /* ----------------------------------------------------------- constructors */
 
 stdpmodule::STDPTripletNeuron::STDPTripletNeuron()
-    : Archiving_Node(), P_(), S_(), B_(*this) {}
+    : Archiving_Node(), P_(), S_(), B_(*this) {
+  recordablesMap_.create();
+}
 
 stdpmodule::STDPTripletNeuron::STDPTripletNeuron(const STDPTripletNeuron &n)
     : Archiving_Node(n), P_(n.P_), S_(n.S_), B_(n.B_, *this) {}
@@ -133,10 +133,10 @@ stdpmodule::STDPTripletNeuron::STDPTripletNeuron(const STDPTripletNeuron &n)
 /* ----------------------------------------------------------- initialization */
 
 void stdpmodule::STDPTripletNeuron::init_buffers_() {
-  B_.n_spikes_.clear(); // includes resize
-  B_.n_pre_spikes_.clear(); // includes resize
+  B_.n_spikes_.clear();      // includes resize
+  B_.n_pre_spikes_.clear();  // includes resize
   B_.n_post_spikes_.clear(); // includes resize
-  B_.logger_.reset(); // includes resize
+  B_.logger_.reset();        // includes resize
   Archiving_Node::clear_history();
 }
 
@@ -145,7 +145,7 @@ void stdpmodule::STDPTripletNeuron::calibrate() {
 
   const double negative_delta = -Time::get_resolution().get_ms();
 
-	// precompute decays
+  // precompute decays
   V_.Kplus_decay_ = std::exp(negative_delta / P_.tau_plus_);
   V_.Kplus_triplet_decay_ = std::exp(negative_delta / P_.tau_plus_triplet_);
   V_.Kminus_decay_ = std::exp(negative_delta / P_.tau_minus_);
@@ -167,10 +167,10 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
     const double_t current_post_spikes_n = B_.n_post_spikes_.get_value(lag);
 
     // model states decay
-	  S_.Kplus_ *= V_.Kplus_decay_;
-	  S_.Kplus_triplet_ *= V_.Kplus_triplet_decay_;
-	  S_.Kminus_ *= V_.Kminus_decay_;
-	  S_.Kminus_triplet_ *= V_.Kminus_triplet_decay_;
+    S_.Kplus_ *= V_.Kplus_decay_;
+    S_.Kplus_triplet_ *= V_.Kplus_triplet_decay_;
+    S_.Kminus_ *= V_.Kminus_decay_;
+    S_.Kminus_triplet_ *= V_.Kminus_triplet_decay_;
 
     if (current_pre_spikes_n > 0) {
 
@@ -195,6 +195,8 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
       S_.Kminus_ = S_.Kminus_ + 1;
       S_.Kminus_triplet_ = S_.Kminus_triplet_ + 1;
     }
+
+    B_.logger_.record_data(origin.get_steps() + lag);
   }
 }
 

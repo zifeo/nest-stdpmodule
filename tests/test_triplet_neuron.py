@@ -237,6 +237,19 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         nest.Simulate(20.0)
         self.assertAlmostEqualDetailed(weight, self.status("weight"), "weight should have decreased")
 
+    def test_nearestSpike(self):
+        nest.SetStatus(self.triplet_synapse, params = { "nearest_spike": True })
+
+        self.generateSpikes(self.pre_neuron, [2.0, 3.0, 4.0])
+        self.generateSpikes(self.post_neuron, [2.0, 3.0, 4.0])
+
+        nest.Simulate(4.0)
+
+        self.assertAlmostEqualDetailed(1.0, self.status("Kplus"), "state should saturate")
+        self.assertAlmostEqualDetailed(1.0, self.status("Kplus_triplet"), "state should saturate")
+        self.assertAlmostEqualDetailed(1.0, self.status("Kminus"), "state should saturate")
+        self.assertAlmostEqualDetailed(1.0, self.status("Kminus_triplet"), "state should saturate")
+
 def suite():
     suite1 = unittest.TestLoader().loadTestsFromTestCase(STDPTripletNeuronTestCase)
     return unittest.TestSuite([suite1])

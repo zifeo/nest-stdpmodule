@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "Bootstrapping MyModule"
+echo "Bootstrapping STDP module"
 
 # Choose correct libtoolize executable
 if [ `uname -s` = Darwin ] ; then

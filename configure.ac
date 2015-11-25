@@ -198,7 +198,7 @@ eval eval eval LIBDIR_AS_CONFIGURED=$libdir
 echo
 echo "-------------------------------------------------------"
 echo
-echo "You can build and install MyModule now, using"
+echo "You can build and install STDP module now, using"
 echo "  make"
 echo "  make install"
 echo

@@ -184,7 +184,7 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
 
       // depress: t = t^pre
       S_.weight_ -=
-          S_.Kminus_ * (P_.Aminus_ + P_.Aminus_triplet_ * S_.Kplus_triplet_);
+		S_.Kminus_ * (P_.Aminus_ + P_.Aminus_triplet_ * S_.Kplus_triplet_);
       S_.Kplus_ += 1.0;
       S_.Kplus_triplet_ += 1.0;
 
@@ -202,6 +202,7 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
     }
 
     if (current_post_spikes_n > 0) {
+		
       // potentiate: t = t^post
       S_.weight_ +=
           S_.Kplus_ * (P_.Aplus_ + P_.Aplus_triplet_ * S_.Kminus_triplet_);

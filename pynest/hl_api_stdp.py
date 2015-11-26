@@ -13,6 +13,15 @@ def Install(module_name):
     return sr("(%s) Install" % module_name)
 """
 
-def hellostdp():
-    print "hihihi"
+import nest
 
+def helloSTDP():
+    nest.Install("stdpmodule")
+
+    nest_create = nest.Create
+
+    def _create(name):
+        print "create"
+        return nest_create(name)
+
+    nest.Create = _create

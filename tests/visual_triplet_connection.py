@@ -4,15 +4,13 @@ import pylab as plt
 
 nest.Install("stdpmodule")
 nest.set_verbosity("M_WARNING")
+nest.ResetKernel()
 
 def generateSpikes(neuron, times):
     """Trigger spike to given neuron at specified times."""
     delay = 1.0
     gen = nest.Create("spike_generator", 1, { "spike_times": [t-delay for t in times] })
     nest.Connect(gen, neuron, syn_spec = { "delay": delay })
-
-nest.set_verbosity('M_WARNING')
-nest.ResetKernel()
 
 # settings
 synapse_model = "stdp_triplet_all_in_one_synapse"

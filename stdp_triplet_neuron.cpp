@@ -68,17 +68,6 @@ void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
     throw BadProperty("Parameter delay must be at least twice the resolution.");
   }
 
-  if (!(tau_plus_triplet_ > tau_plus_)) {
-    throw BadProperty("Parameter tau_plus_triplet (time-constant of long "
-                      "trace) must be larger than tau_plus "
-                      "(time-constant of short trace).");
-  }
-
-  if (!(tau_minus_triplet_ > tau_minus_)) {
-    throw BadProperty("Parameter tau_minus_triplet (time-constant of long "
-                      "trace) must be larger than tau_minus "
-                      "(time-constant of short trace).");
-  }
 }
 
 /* ----------------------------------------------------------- states */

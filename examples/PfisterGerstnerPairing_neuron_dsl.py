@@ -30,13 +30,13 @@ all_to_all_syn_spec = {
 nearest_syn_spec = {
     "weight": 1.0,
     "tau_plus": 16.8,
-    "tau_plus_triplet": 946.0,
+    "tau_plus_triplet": 714.0,
     "tau_minus": 33.7,
-    "tau_minus_triplet": 27.0,
-    "Aplus": 6.1e-3,
-    "Aminus": 1.6e-3,
-    "Aplus_triplet": 6.7e-3,
-    "Aminus_triplet": 1.4e-3,
+    "tau_minus_triplet": 40.0,
+    "Aplus": 8.8e-11,
+    "Aminus": 6.6e-3,
+    "Aplus_triplet": 5.3e-2,
+    "Aminus_triplet": 3.1e-3,
     "Kplus": 0.0,
     "Kplus_triplet": 0.0,
     "Kminus": 0.0,
@@ -48,7 +48,7 @@ nearest_syn_spec = {
 n = 60 # pair of presynaptic and post synpatic spikes
 dt = 10 # ms shift pre/post
 start_spikes = dt + 20
-rhos = np.arange(1.0, 100.0) # hz spiking frequence
+rhos = np.arange(1.0, 100.0, 4.0) # hz spiking frequence
 weights_plus = []
 weights_minus = []
 weights_plus_nearest = []
@@ -57,7 +57,6 @@ weights_minus_nearest = []
 def evaluate(rho, dt, syn_spec):
     """Evaluate connection change of weight and returns it."""
     nest.ResetKernel()
-    nest.SetKernelStatus({"local_num_threads" : 1, "resolution" : 0.1, "print_time": False})
 
     step = 1000.0 / rho
     simulation_duration = np.ceil(n * step)

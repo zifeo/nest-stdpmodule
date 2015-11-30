@@ -23,14 +23,14 @@ def helloSTDP():
     # save old functions
     nest_connect = nest.Connect
 
-    def _connect(pre, post, conn_spec = None, syn_spec = None, model = None):
+    def _connect(pre, post, conn_spec = None, syn_spec = None, model = None, pre_syn_spec = None, syn_post_spec = None):
         """Wrap nest connect and allow to create fake neuron-synapse."""
 
         if (model == "stdp_triplet_neuron"):
 
             synapse = nest.Create("stdp_triplet_neuron", params = syn_spec)
-            nest_connect(pre, synapse)
-            nest_connect(synapse, post)
+            nest_connect(pre, synapse, syn_spec = pre_syn_spec)
+            nest_connect(synapse, post, syn_spec = syn_post_spec)
             nest_connect(post, synapse, syn_spec = { "receptor_type": 1 }) # differentiate post-synaptic feedback
             return synapse
 

@@ -28,9 +28,9 @@ template <> void RecordablesMap<stdpmodule::STDPLongNeuron>::create() {
 /* ----------------------------------------------------------- parameters */
 
 stdpmodule::STDPLongNeuron::Parameters_::Parameters_()
-    : tau_plus_(1.0), tau_slow_(1.0), tau_minus_(1.0),
-      tau_ht_(100), tau_hom_(20 * 60 * 1000), tau_const_(20 * 60 * 1000), A_(1.0),
-      P_(1.0), WP_(0.5), beta_(1.0), delta_(1.0), nearest_spike_(false) {}
+    : tau_plus_(200e-3), tau_slow_(100e-3), tau_minus_(200e-3),
+      tau_ht_(3600), tau_hom_(1200), tau_const_(1200), A_(0.1),
+      P_(1.0), WP_(0.5), beta_(5.0e-2), delta_(2.0e-2), nearest_spike_(false) {}
 
 void stdpmodule::STDPLongNeuron::Parameters_::get(DictionaryDatum &d) const {
 	def<double_t>(d, stdpnames::tau_plus, tau_plus_);

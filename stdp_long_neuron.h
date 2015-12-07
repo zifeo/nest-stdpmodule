@@ -55,7 +55,6 @@ private:
 	  double_t tau_hom_;
 	  double_t tau_const_;
 
-
 	  double_t A_;
 	  double_t P_;
 	  double_t WP_;

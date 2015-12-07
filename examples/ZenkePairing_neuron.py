@@ -20,23 +20,10 @@ def create(model, number):
     return map(lambda x: (x,), nest.Create(model, number))
 
 syn_spec = {
-    "weight": 1.0,
-    "tau_plus": 16.8,
-    "tau_plus_triplet": 101.0,
-    "tau_minus": 33.7,
-    "tau_minus_triplet": 125.0,
-    "Aplus": 5e-10,
-    "Aminus": 7e-3,
-    "Aplus_triplet": 6.2e-3,
-    "Aminus_triplet": 2.3e-4,
-    "Kplus": 0.0,
-    "Kplus_triplet": 0.0,
-    "Kminus": 0.0,
-    "Kminus_triplet": 0.0,
-    "nearest_spike": True,
+
 }
 
-n = 60 # pair of presynaptic and post synpatic spikes
+n = 75 # pair of presynaptic and post synpatic spikes
 dt = 10 # ms shift pre/post
 start_spikes = dt + 20
 rhos = np.arange(1.0, 55.0, 5.0) # hz spiking frequence
@@ -60,7 +47,7 @@ def evaluate(rho, dt, nearest):
     local_spec.update({ "nearest_spike": nearest })
     neuron_pre = nest.Create("parrot_neuron")
     neuron_post = nest.Create("parrot_neuron")
-    triplet_synapse = nest.Create("stdp_triplet_neuron", params = local_spec)
+    triplet_synapse = nest.Create("stdp_long_neuron", params = local_spec)
 
     # Connections
     generateSpikes(neuron_pre, times_pre)
@@ -80,18 +67,18 @@ def evaluate(rho, dt, nearest):
 for rho in rhos:
     weights_plus.append(evaluate(rho, dt, False))
     weights_minus.append(evaluate(rho, -dt, False))
-    weights_plus_nearest.append(evaluate(rho, dt, True))
-    weights_minus_nearest.append(evaluate(rho, -dt, True))
+    #weights_plus_nearest.append(evaluate(rho, dt, True))
+    #weights_minus_nearest.append(evaluate(rho, -dt, True))
 
 plt.figure()
-plt.title('Pairing experiment (Pfister-Gerstner 2006)')
+plt.title('Pairing experiment (Zenke 2015)')
 plt.xlabel("rho (Hz)")
 plt.ylabel("weight delta")
 plt.plot(rhos, weights_plus, "b")
 plt.plot(rhos, weights_minus, "b", ls = "--")
-plt.plot(rhos, weights_plus_nearest, "r")
-plt.plot(rhos, weights_minus_nearest, "r", ls = "--")
+#plt.plot(rhos, weights_plus_nearest, "r")
+#plt.plot(rhos, weights_minus_nearest, "r", ls = "--")
 plt.legend(["dt +10 ms", "dt -10 ms", "dt +10 ms nearest", "dt -10 ms nearest"], loc = "upper left", frameon = False)
-plt.xlim([0, 50])
-plt.ylim([-0.6, 0.8])
+#plt.xlim([0, 50])
+#plt.ylim([-0.6, 0.8])
 plt.show()

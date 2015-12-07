@@ -35,8 +35,8 @@ template <> void RecordablesMap<stdpmodule::STDPTripletNeuron>::create() {
 
 stdpmodule::STDPTripletNeuron::Parameters_::Parameters_()
     : tau_plus_(16.8), tau_plus_triplet_(101.0), tau_minus_(33.7),
-      tau_minus_triplet_(125), Aplus_(0.1), Aminus_(0.1), Aplus_triplet_(0.1),
-      Aminus_triplet_(0.1), nearest_spike_(false) {}
+      tau_minus_triplet_(125), Aplus_(0.1), Aminus_(7e-3), Aplus_triplet_(6.2e-3),
+      Aminus_triplet_(2.3e-4), nearest_spike_(false) {}
 
 void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
   def<double_t>(d, stdpnames::tau_plus, tau_plus_);

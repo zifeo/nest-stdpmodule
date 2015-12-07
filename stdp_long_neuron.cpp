@@ -21,16 +21,23 @@ nest::RecordablesMap<stdpmodule::STDPLongNeuron>
 // for each quantity to be recorded.
 namespace nest {
 template <> void RecordablesMap<stdpmodule::STDPLongNeuron>::create() {
-  insert_(names::weight, &stdpmodule::STDPLongNeuron::get_weight_);
+	insert_(names::weight, &stdpmodule::STDPLongNeuron::get_weight_);
+	insert_(stdpnames::weight_ref, &stdpmodule::STDPLongNeuron::get_weight_ref_);
+	insert_(stdpnames::B, &stdpmodule::STDPLongNeuron::get_B_);
+	insert_(stdpnames::C, &stdpmodule::STDPLongNeuron::get_C_);
+	insert_(stdpnames::Zplus, &stdpmodule::STDPLongNeuron::get_Zplus_);
+	insert_(stdpnames::Zslow, &stdpmodule::STDPLongNeuron::get_Zslow_);
+	insert_(stdpnames::Zminus, &stdpmodule::STDPLongNeuron::get_Zminus_);
+	insert_(stdpnames::Zht, &stdpmodule::STDPLongNeuron::get_Zht_);
 }
 }
 
 /* ----------------------------------------------------------- parameters */
 
 stdpmodule::STDPLongNeuron::Parameters_::Parameters_()
-    : tau_plus_(200e-3), tau_slow_(100e-3), tau_minus_(200e-3), tau_ht_(3600),
-      tau_hom_(1200), tau_const_(1200), A_(0.1), P_(1.0), WP_(0.5),
-      beta_(5.0e-2), delta_(2.0e-2), nearest_spike_(false) {}
+    : tau_plus_(20), tau_slow_(100), tau_minus_(20), tau_ht_(100),
+      tau_hom_(20 * 60 * 1000), tau_const_(20 * 60 * 1000), A_(1e-3), P_(20), WP_(0.5),
+      beta_(0.05), delta_(2e-5), nearest_spike_(false) {}
 
 void stdpmodule::STDPLongNeuron::Parameters_::get(DictionaryDatum &d) const {
   def<double_t>(d, stdpnames::tau_plus, tau_plus_);
@@ -66,7 +73,7 @@ void stdpmodule::STDPLongNeuron::Parameters_::set(const DictionaryDatum &d) {
 /* ----------------------------------------------------------- states */
 
 stdpmodule::STDPLongNeuron::State_::State_()
-    : weight_(0.1), weight_ref_(0.1), B_(0.0), C_(0.0), Zplus_(0.0),
+    : weight_(1.0), weight_ref_(0.5), B_(1e-3), C_(0.0), Zplus_(0.0),
       Zslow_(0.0), Zminus_(0.0), Zht_(0.0) {}
 
 void stdpmodule::STDPLongNeuron::State_::get(DictionaryDatum &d) const {
@@ -137,8 +144,8 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
                                         const long_t to) {
   assert(to >= 0 && (delay)from < Scheduler::get_min_delay());
   assert(from < to);
-
-  double delta = Time::get_resolution().get_ms();
+	
+	const double delta = Time::get_resolution().get_ms();
 
   for (long_t lag = from; lag < to; ++lag) {
 
@@ -156,15 +163,15 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
         (S_.weight_ - S_.weight_ref_ -
          P_.P_ * S_.weight_ref_ * (P_.WP_ / 2.0 - S_.weight_ref_) *
              (P_.WP_ - S_.weight_ref_)) /
-        P_.tau_const_;                                // (16)
-    S_.C_ -= S_.C_ / P_.tau_hom_ + S_.Zht_ * S_.Zht_; // (18)
-	  S_.B_ = P_.A_ ;//* std::min(S_.C_, 1.0);             // (17)
+        P_.tau_const_ * delta; // (16)
+    S_.C_ += (- S_.C_ / P_.tau_hom_ + S_.Zht_ * S_.Zht_ / 1000.0) * delta; // (18)
+	  S_.B_ = P_.A_ * std::min(S_.C_, 1.0); // (17)
 
     if (current_pre_spikes_n > 0) {
 
       // depress: t = t^pre
       S_.weight_ -= S_.B_ * S_.Zminus_; // doublet LTD (12)
-      S_.weight_ += P_.delta_;          // transmitter - induced (14)
+      //S_.weight_ += P_.delta_; // transmitter - induced (14)
 
       S_.Zplus_ += 1.0;
 
@@ -176,14 +183,14 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
       se.set_weight(S_.weight_);
       network()->send(*this, se, lag);
 
-      set_spiketime(Time::step(origin.get_steps() + lag + 1));
+      //set_spiketime(Time::step(origin.get_steps() + lag + 1));
     }
 
     if (current_post_spikes_n > 0) {
 
       // potentiate: t = t^post
       S_.weight_ += P_.A_ * S_.Zplus_ * S_.Zslow_; // triplet LTP (11)
-      S_.weight_ -= P_.beta_ * (S_.weight_ - S_.weight_ref_) * S_.Zminus_ *
+	  //S_.weight_ -= P_.beta_ * (S_.weight_ - S_.weight_ref_) * S_.Zminus_ *
                     S_.Zminus_ * S_.Zminus_; // heterosynpatic (13)
 
       S_.Zslow_ += 1.0;

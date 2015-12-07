@@ -148,8 +148,6 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
   assert(to >= 0 && (delay)from < Scheduler::get_min_delay());
   assert(from < to);
 
-  double delta = Time::get_resolution().get_ms();
-
   for (long_t lag = from; lag < to; ++lag) {
 
     const double_t current_pre_spikes_n = B_.n_pre_spikes_.get_value(lag);
@@ -178,8 +176,6 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
       se.set_multiplicity(current_pre_spikes_n);
       se.set_weight(S_.weight_);
       network()->send(*this, se, lag);
-
-      set_spiketime(Time::step(origin.get_steps() + lag + 1));
     }
 
     if (current_post_spikes_n > 0) {

@@ -26,7 +26,7 @@ syn_spec = {
 n = 75 # pair of presynaptic and post synpatic spikes
 dt = 10 # ms shift pre/post
 start_spikes = dt + 20
-rhos = np.arange(1.0, 200.0, 50.0) # hz spiking frequence
+rhos = np.arange(1.0, 55.0, 10.0) # hz spiking frequence
 weights_plus = []
 weights_minus = []
 weights_plus_nearest = []
@@ -53,7 +53,7 @@ def evaluate(rho, dt, nearest):
     nest.SetStatus(multi, params = {
         "withtime": True,
         "interval": nest.GetKernelStatus()["resolution"],
-        "record_from": ["weight"],
+        "record_from": ["weight", "weight_ref", "B", "C", "Zplus", "Zslow", "Zminus", "Zht"],
     })
     nest.Connect(multi, triplet_synapse)
 
@@ -71,9 +71,22 @@ def evaluate(rho, dt, nearest):
 
 
     stats = nest.GetStatus(multi, keys = "events")[0]
-    plt.figure()
-    plt.plot(stats["times"], stats["weight"])
-    plt.show()
+    # plt.figure()
+    #
+    # plt.subplot(211)
+    # plt.title(str(rho))
+    # plt.plot(stats["times"], stats["weight"])
+    # plt.plot(stats["times"], stats["weight_ref"])
+    # plt.plot(stats["times"], stats["B"])
+    # plt.plot(stats["times"], stats["Zplus"])
+    # plt.plot(stats["times"], stats["Zslow"])
+    # plt.plot(stats["times"], stats["Zminus"])
+    # plt.legend(["weight", "weight_ref", "B", "Zplus", "Zslow", "Zminus"], loc = "upper left", frameon = False)
+    # plt.ylim([-10, 10])
+    # plt.subplot(212)
+    # plt.plot(stats["times"], stats["C"])
+    # plt.plot(stats["times"], stats["Zht"])
+    # plt.legend(["C", "Zht"], loc = "upper left", frameon = False)
 
     # Results
     end_weight = nest.GetStatus(triplet_synapse, keys = "weight")[0]
@@ -89,8 +102,8 @@ plt.figure()
 plt.title('Pairing experiment (Zenke 2015)')
 plt.xlabel("rho (Hz)")
 plt.ylabel("weight delta")
-plt.plot(rhos, weights_plus, "b")
-plt.plot(rhos, weights_minus, "b", ls = "--")
+plt.plot(rhos, weights_plus, "r", ls = "--")
+plt.plot(rhos, weights_minus, "r")
 #plt.plot(rhos, weights_plus_nearest, "r")
 #plt.plot(rhos, weights_minus_nearest, "r", ls = "--")
 plt.legend(["dt +10 ms", "dt -10 ms", "dt +10 ms nearest", "dt -10 ms nearest"], loc = "upper left", frameon = False)

@@ -28,10 +28,12 @@
  Aminus_triplet     double: weight of triplet depression rule (A_minus_3 of [1])
  neareat_spike		bool: states saturate at 1 only taking into account
  neighboring spikes
- 
+
  Notes about delay:
- This model does not have any delay parameter as both axonal and dendritic delays
- are repectively taken into account by pre-synpatic and post-synaptic connections.
+ This model does not have any delay parameter as both axonal and dendritic
+ delays
+ are repectively taken into account by pre-synpatic and post-synaptic
+ connections.
  Any parameter tuning should be done at creation time on pynest.
 
  States:

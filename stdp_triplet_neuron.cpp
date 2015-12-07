@@ -61,7 +61,6 @@ void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
   updateValue<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
   updateValue<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
   updateValue<bool>(d, stdpnames::nearest_spike, nearest_spike_);
-
 }
 
 /* ----------------------------------------------------------- states */
@@ -133,14 +132,13 @@ void stdpmodule::STDPTripletNeuron::init_buffers_() {
 void stdpmodule::STDPTripletNeuron::calibrate() {
   B_.logger_.init();
 
-	const double delta = Time::get_resolution().get_ms();
+  const double delta = Time::get_resolution().get_ms();
 
   // precompute decays
-  V_.Kplus_decay_ = std::exp(- delta / P_.tau_plus_);
-  V_.Kplus_triplet_decay_ = std::exp(- delta / P_.tau_plus_triplet_);
-  V_.Kminus_decay_ = std::exp(- delta / P_.tau_minus_);
-  V_.Kminus_triplet_decay_ = std::exp(- delta / P_.tau_minus_triplet_);
-	
+  V_.Kplus_decay_ = std::exp(-delta / P_.tau_plus_);
+  V_.Kplus_triplet_decay_ = std::exp(-delta / P_.tau_plus_triplet_);
+  V_.Kminus_decay_ = std::exp(-delta / P_.tau_minus_);
+  V_.Kminus_triplet_decay_ = std::exp(-delta / P_.tau_minus_triplet_);
 }
 
 /* ----------------------------------------------------------- updates */
@@ -167,7 +165,7 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
 
       // depress: t = t^pre
       S_.weight_ -=
-		S_.Kminus_ * (P_.Aminus_ + P_.Aminus_triplet_ * S_.Kplus_triplet_);
+          S_.Kminus_ * (P_.Aminus_ + P_.Aminus_triplet_ * S_.Kplus_triplet_);
       S_.Kplus_ += 1.0;
       S_.Kplus_triplet_ += 1.0;
 
@@ -180,12 +178,12 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
       se.set_multiplicity(current_pre_spikes_n);
       se.set_weight(S_.weight_);
       network()->send(*this, se, lag);
-		
+
       set_spiketime(Time::step(origin.get_steps() + lag + 1));
     }
 
     if (current_post_spikes_n > 0) {
-		
+
       // potentiate: t = t^post
       S_.weight_ +=
           S_.Kplus_ * (P_.Aplus_ + P_.Aplus_triplet_ * S_.Kminus_triplet_);

@@ -26,17 +26,14 @@
 #include "slimodule.h"
 #include "slifunction.h"
 
-
 // Put your stuff into your own namespace.
-namespace stdpmodule
-{
+namespace stdpmodule {
 
 /**
  * Class defining your model.
  * @note For each model, you must define one such class, with a unique name.
  */
-class STDPModule : public SLIModule
-{
+class STDPModule : public SLIModule {
 public:
   // Interface functions ------------------------------------------
 
@@ -55,20 +52,19 @@ public:
    * Initialize module by registering models with the network.
    * @param SLIInterpreter* SLI interpreter
    */
-  void init( SLIInterpreter* );
+  void init(SLIInterpreter *);
 
   /**
    * Return the name of your model.
    */
-  const std::string name( void ) const;
+  const std::string name(void) const;
 
   /**
    * Return the name of a sli file to execute when mymodule is loaded.
    * This mechanism can be used to define SLI commands associated with your
    * module, in particular, set up type tries for functions you have defined.
    */
-  const std::string commandstring( void ) const;
-	
+  const std::string commandstring(void) const;
 };
 } // namespace stdpmodule
 

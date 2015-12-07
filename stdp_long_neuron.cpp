@@ -83,22 +83,6 @@ void stdpmodule::STDPLongNeuron::State_::set(const DictionaryDatum &d) {
   updateValue<double_t>(d, stdpnames::Kplus_triplet, Kplus_triplet_);
   updateValue<double_t>(d, stdpnames::Kminus, Kminus_);
   updateValue<double_t>(d, stdpnames::Kminus_triplet, Kminus_triplet_);
-
-  if (!(Kplus_ >= 0)) {
-    throw BadProperty("State Kplus must be positive.");
-  }
-
-  if (!(Kplus_triplet_ >= 0)) {
-    throw BadProperty("State Kplus_triplet must be positive.");
-  }
-
-  if (!(Kminus_ >= 0)) {
-    throw BadProperty("State Kminus must be positive.");
-  }
-
-  if (!(Kminus_triplet_ >= 0)) {
-    throw BadProperty("State Kminus_triplet must be positive.");
-  }
 }
 
 /* ----------------------------------------------------------- buffers */
@@ -132,13 +116,13 @@ void stdpmodule::STDPLongNeuron::init_buffers_() {
 void stdpmodule::STDPLongNeuron::calibrate() {
   B_.logger_.init();
 
-  const double delta = Time::get_resolution().get_ms();
+  const double negative_delta = - Time::get_resolution().get_ms();
 
   // precompute decays
-  V_.Kplus_decay_ = std::exp(-delta / P_.tau_plus_);
-  V_.Kplus_triplet_decay_ = std::exp(-delta / P_.tau_plus_triplet_);
-  V_.Kminus_decay_ = std::exp(-delta / P_.tau_minus_);
-  V_.Kminus_triplet_decay_ = std::exp(-delta / P_.tau_minus_triplet_);
+  V_.Zplus_decay_ = std::exp(negative_delta / P_.tau_plus_);
+  V_.Zslow_decay_ = std::exp(negative_delta / P_.tau_slow_);
+  V_.Zminus_decay_ = std::exp(negative_delta / P_.tau_minus_);
+  V_.Zht_decay_ = std::exp(negative_delta / P_.tau_ht_);
 }
 
 /* ----------------------------------------------------------- updates */
@@ -156,23 +140,27 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
     const double_t current_post_spikes_n = B_.n_post_spikes_.get_value(lag);
 
     // model states decay
-    S_.Kplus_ *= V_.Kplus_decay_;
-    S_.Kplus_triplet_ *= V_.Kplus_triplet_decay_;
-    S_.Kminus_ *= V_.Kminus_decay_;
-    S_.Kminus_triplet_ *= V_.Kminus_triplet_decay_;
-
+    S_.Zplus_ *= V_.Zplus_decay_;
+    S_.Zslow_ *= V_.Zslow_decay_;
+    S_.Zminus_ *= V_.Zminus_decay_;
+    S_.Zht_ *= V_.Zht_decay_;
+	  
+	  // others states variables
+	  S_.weight_ref_ +=  (S_.weight_ - S_.weight_ref_ - P_.P_ * S.weight_ref_ * ( P_.WP_ / 2.0 - S_.weight_ref_ ) * ( P_.WP_ - S.weight_ref_)) / P_.tau_const_  // (16)
+	  S_.C_ -= S_.C_ / P_.tau_hom_ + S_.Zht_ * S_.Zht_; // (18)
+	  S_.B_ = P_.A_ * std::min(S_.C_, 1.0); // (17)
+	  
     if (current_pre_spikes_n > 0) {
 
       // depress: t = t^pre
-      S_.weight_ -=
-          S_.Kminus_ * (P_.Aminus_ + P_.Aminus_triplet_ * S_.Kplus_triplet_);
-      S_.Kplus_ += 1.0;
-      S_.Kplus_triplet_ += 1.0;
-
+		S_.weight_ -= S_.B_ * S_.Zminus_; // doublet LTD (12)
+		S_.weight_ += delta_; // transmitter - induced (14)
+		
+		
+		
       if (P_.nearest_spike_) {
-        S_.Kplus_ = std::min(S_.Kplus_, 1.0);
-        S_.Kplus_triplet_ = std::min(S_.Kplus_triplet_, 1.0);
-      }
+
+	  }
 
       SpikeEvent se;
       se.set_multiplicity(current_pre_spikes_n);
@@ -185,15 +173,20 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
     if (current_post_spikes_n > 0) {
 
       // potentiate: t = t^post
-      S_.weight_ +=
-          S_.Kplus_ * (P_.Aplus_ + P_.Aplus_triplet_ * S_.Kminus_triplet_);
-      S_.Kminus_ += 1.0;
-      S_.Kminus_triplet_ += 1.0;
+		
+		S_.weight_ += P_.A_ * S_.Zplus_ * S_.Zslow_; // triplet LTP (11)
+		
+		S_.weight_ -= P_.beta_ * (S_.weight_ - S_.weight_ref_) * S_.Zminus_ * S_.Zminus_ * S_.Zminus_; // heterosynpatic (13)
+		
+		S_.Zplus_ += 1.0;
+		S_.Zslow_ += 1.0;
+		S_.Zminus_ += 1.0;
+		S_.Zht_ += 1.0;
 
       if (P_.nearest_spike_) {
-        S_.Kminus_ = std::min(S_.Kminus_, 1.0);
-        S_.Kminus_triplet_ = std::min(S_.Kminus_triplet_, 1.0);
-      }
+
+	  }
+		
     }
 
     B_.logger_.record_data(origin.get_steps() + lag);

@@ -49,27 +49,35 @@ private:
 
   struct Parameters_ {
     double_t tau_plus_;
-    double_t tau_plus_triplet_;
-    double_t tau_minus_;
-    double_t tau_minus_triplet_;
-    double_t Aplus_;
-    double_t Aminus_;
-    double_t Aplus_triplet_;
-    double_t Aminus_triplet_;
-    bool nearest_spike_;
+    double_t tau_slow_;
+	  double_t tau_minus_;
+	  double_t tau_ht_;
+	  double_t tau_hom_;
+	  double_t tau_const_;
 
+	  double_t P_;
+	  double_t WP_;
+	  double_t A_;
+	  double_t beta_;
+	  double_t delta_;
+
+	  bool nearest_spike_;
+	  
     Parameters_();
     void get(DictionaryDatum &) const;
     void set(const DictionaryDatum &);
   };
 
   struct State_ {
-    double_t weight_;
-
-    double_t Kplus_;
-    double_t Kplus_triplet_;
-    double_t Kminus_;
-    double_t Kminus_triplet_;
+	  double_t weight_;
+	  double_t weight_ref_;
+	  
+	  double_t B_;
+	  double_t C_;
+	  double_t Zplus_;
+	  double_t Zslow_;
+	  double_t Zminus_;
+	  double_t Zht_;
 
     State_();
     void get(DictionaryDatum &) const;
@@ -86,10 +94,10 @@ private:
   };
 
   struct Variables_ {
-    double_t Kplus_decay_;
-    double_t Kplus_triplet_decay_;
-    double_t Kminus_decay_;
-    double_t Kminus_triplet_decay_;
+    double_t Zplus_decay_;
+    double_t Zslow_decay_;
+    double_t Zminus_decay_;
+	double_t Zht_decay_;
   };
 
   // Access functions for UniversalDataLogger

@@ -132,13 +132,13 @@ void stdpmodule::STDPTripletNeuron::init_buffers_() {
 void stdpmodule::STDPTripletNeuron::calibrate() {
   B_.logger_.init();
 
-  const double delta = Time::get_resolution().get_ms();
+  const double negative_delta = - Time::get_resolution().get_ms();
 
   // precompute decays
-  V_.Kplus_decay_ = std::exp(-delta / P_.tau_plus_);
-  V_.Kplus_triplet_decay_ = std::exp(-delta / P_.tau_plus_triplet_);
-  V_.Kminus_decay_ = std::exp(-delta / P_.tau_minus_);
-  V_.Kminus_triplet_decay_ = std::exp(-delta / P_.tau_minus_triplet_);
+  V_.Kplus_decay_ = std::exp(negative_delta / P_.tau_plus_);
+  V_.Kplus_triplet_decay_ = std::exp(negative_delta / P_.tau_plus_triplet_);
+  V_.Kminus_decay_ = std::exp(negative_delta / P_.tau_minus_);
+  V_.Kminus_triplet_decay_ = std::exp(negative_delta / P_.tau_minus_triplet_);
 }
 
 /* ----------------------------------------------------------- updates */

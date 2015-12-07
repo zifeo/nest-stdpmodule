@@ -26,7 +26,7 @@ syn_spec = {
 n = 75 # pair of presynaptic and post synpatic spikes
 dt = 10 # ms shift pre/post
 start_spikes = dt + 20
-rhos = np.arange(1.0, 55.0, 5.0) # hz spiking frequence
+rhos = np.arange(1.0, 200.0, 50.0) # hz spiking frequence
 weights_plus = []
 weights_minus = []
 weights_plus_nearest = []
@@ -49,6 +49,15 @@ def evaluate(rho, dt, nearest):
     neuron_post = nest.Create("parrot_neuron")
     triplet_synapse = nest.Create("stdp_long_neuron", params = local_spec)
 
+    multi = nest.Create("multimeter")
+    nest.SetStatus(multi, params = {
+        "withtime": True,
+        "interval": nest.GetKernelStatus()["resolution"],
+        "record_from": ["weight"],
+    })
+    nest.Connect(multi, triplet_synapse)
+
+
     # Connections
     generateSpikes(neuron_pre, times_pre)
     generateSpikes(neuron_post, times_post)
@@ -59,6 +68,12 @@ def evaluate(rho, dt, nearest):
     # Simulation
     current_weight = nest.GetStatus(triplet_synapse, keys = "weight")[0]
     nest.Simulate(start_spikes + simulation_duration)
+
+
+    stats = nest.GetStatus(multi, keys = "events")[0]
+    plt.figure()
+    plt.plot(stats["times"], stats["weight"])
+    plt.show()
 
     # Results
     end_weight = nest.GetStatus(triplet_synapse, keys = "weight")[0]

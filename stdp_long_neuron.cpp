@@ -66,7 +66,7 @@ void stdpmodule::STDPLongNeuron::Parameters_::set(const DictionaryDatum &d) {
 /* ----------------------------------------------------------- states */
 
 stdpmodule::STDPLongNeuron::State_::State_()
-    : weight_(1.0), weight_ref_(1.0), B_(0.0), C_(0.0), Zplus_(0.0),
+    : weight_(0.1), weight_ref_(0.1), B_(0.0), C_(0.0), Zplus_(0.0),
       Zslow_(0.0), Zminus_(0.0), Zht_(0.0) {}
 
 void stdpmodule::STDPLongNeuron::State_::get(DictionaryDatum &d) const {
@@ -158,7 +158,7 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
              (P_.WP_ - S_.weight_ref_)) /
         P_.tau_const_;                                // (16)
     S_.C_ -= S_.C_ / P_.tau_hom_ + S_.Zht_ * S_.Zht_; // (18)
-    S_.B_ = P_.A_ * std::min(S_.C_, 1.0);             // (17)
+	  S_.B_ = P_.A_ ;//* std::min(S_.C_, 1.0);             // (17)
 
     if (current_pre_spikes_n > 0) {
 

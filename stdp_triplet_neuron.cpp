@@ -36,7 +36,7 @@ template <> void RecordablesMap<stdpmodule::STDPTripletNeuron>::create() {
 stdpmodule::STDPTripletNeuron::Parameters_::Parameters_()
     : tau_plus_(16.8), tau_plus_triplet_(101.0), tau_minus_(33.7),
       tau_minus_triplet_(125), Aplus_(0.1), Aminus_(0.1), Aplus_triplet_(0.1),
-      Aminus_triplet_(0.1), nearest_spike_(false), delay_(1) {}
+      Aminus_triplet_(0.1), nearest_spike_(false) {}
 
 void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
   def<double_t>(d, stdpnames::tau_plus, tau_plus_);
@@ -47,7 +47,6 @@ void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
   def<double_t>(d, stdpnames::Aminus, Aminus_);
   def<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
   def<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
-  def<double_t>(d, names::delay, delay_);
   def<bool>(d, stdpnames::nearest_spike, nearest_spike_);
 }
 
@@ -61,12 +60,7 @@ void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
   updateValue<double_t>(d, stdpnames::Aminus, Aminus_);
   updateValue<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
   updateValue<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
-  updateValue<double_t>(d, names::delay, delay_);
   updateValue<bool>(d, stdpnames::nearest_spike, nearest_spike_);
-
-  if (!(delay_ >= 2 * Time::get_resolution().get_ms())) {
-    throw BadProperty("Parameter delay must be at least twice the resolution.");
-  }
 
 }
 
@@ -130,23 +124,23 @@ stdpmodule::STDPTripletNeuron::STDPTripletNeuron(const STDPTripletNeuron &n)
 /* ----------------------------------------------------------- initialization */
 
 void stdpmodule::STDPTripletNeuron::init_buffers_() {
-  B_.n_spikes_.clear();      // includes resize
-  B_.n_pre_spikes_.clear();  // includes resize
-  B_.n_post_spikes_.clear(); // includes resize
-  B_.logger_.reset();        // includes resize
+  B_.n_pre_spikes_.clear();
+  B_.n_post_spikes_.clear();
+  B_.logger_.reset();
   Archiving_Node::clear_history();
 }
 
 void stdpmodule::STDPTripletNeuron::calibrate() {
   B_.logger_.init();
 
-  const double negative_delta = -Time::get_resolution().get_ms();
+	const double delta = Time::get_resolution().get_ms();
 
   // precompute decays
-  V_.Kplus_decay_ = std::exp(negative_delta / P_.tau_plus_);
-  V_.Kplus_triplet_decay_ = std::exp(negative_delta / P_.tau_plus_triplet_);
-  V_.Kminus_decay_ = std::exp(negative_delta / P_.tau_minus_);
-  V_.Kminus_triplet_decay_ = std::exp(negative_delta / P_.tau_minus_triplet_);
+  V_.Kplus_decay_ = std::exp(- delta / P_.tau_plus_);
+  V_.Kplus_triplet_decay_ = std::exp(- delta / P_.tau_plus_triplet_);
+  V_.Kminus_decay_ = std::exp(- delta / P_.tau_minus_);
+  V_.Kminus_triplet_decay_ = std::exp(- delta / P_.tau_minus_triplet_);
+	
 }
 
 /* ----------------------------------------------------------- updates */
@@ -186,7 +180,7 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
       se.set_multiplicity(current_pre_spikes_n);
       se.set_weight(S_.weight_);
       network()->send(*this, se, lag);
-
+		
       set_spiketime(Time::step(origin.get_steps() + lag + 1));
     }
 
@@ -211,10 +205,6 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
 void stdpmodule::STDPTripletNeuron::handle(SpikeEvent &e) {
 
   assert(e.get_delay() > 0);
-
-  B_.n_spikes_.add_value(
-      e.get_rel_delivery_steps(network()->get_slice_origin()),
-      static_cast<double_t>(e.get_multiplicity()));
 
   switch (e.get_rport()) {
   case 0: // PRE

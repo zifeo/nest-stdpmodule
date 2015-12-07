@@ -26,10 +26,13 @@
  [1])
  Aminus             double: weight of pair depression rule (A_minus_2 of [1])
  Aminus_triplet     double: weight of triplet depression rule (A_minus_3 of [1])
- delay				double: delay from the pre to post-synaptic
- (minimum is twice the resolution)
  neareat_spike		bool: states saturate at 1 only taking into account
  neighboring spikes
+ 
+ Notes about delay:
+ This model does not have any delay parameter as both axonal and dendritic delays
+ are repectively taken into account by pre-synpatic and post-synaptic connections.
+ Any parameter tuning should be done at creation time on pynest.
 
  States:
  Kplus              double: pre-synaptic trace (e.g. amount of glutamate
@@ -109,7 +112,6 @@ private:
     double_t Aminus_;
     double_t Aplus_triplet_;
     double_t Aminus_triplet_;
-    double_t delay_;
     bool nearest_spike_;
 
     Parameters_();
@@ -131,7 +133,6 @@ private:
   };
 
   struct Buffers_ {
-    RingBuffer n_spikes_;
     RingBuffer n_pre_spikes_;
     RingBuffer n_post_spikes_;
     UniversalDataLogger<STDPTripletNeuron> logger_;
@@ -154,13 +155,11 @@ private:
   double_t get_Kminus_() const { return S_.Kminus_; }
   double_t get_Kminus_triplet_() const { return S_.Kminus_triplet_; }
 
-  // Instances of private data structures for the different types
   Parameters_ P_;
   State_ S_;
   Variables_ V_;
   Buffers_ B_;
 
-  // Mapping of recordables names to access functions
   static RecordablesMap<STDPTripletNeuron> recordablesMap_;
 };
 

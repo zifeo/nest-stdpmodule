@@ -28,10 +28,25 @@ def helloSTDP():
 
         if (model == "stdp_triplet_neuron"):
 
+            pre_syn_spec = {} if pre_syn_spec is None else pre_syn_spec.copy()
+            syn_post_spec = {} if syn_post_spec is None else syn_post_spec.copy()
+            syn_spec = {} if syn_spec is None else syn_spec.copy()
+
+            resolution = nest.GetKernelStatus()["resolution"]
+            axonal_delay = syn_spec.pop("axonal_delay", resolution)
+            dendritic_delay = syn_spec.pop("dendritic_delay", resolution)
+
+            pre_syn_spec.update({ "delay": axonal_delay })
+            syn_post_spec.update({ "delay": dendritic_delay })
+            post_syn_spec = {
+                "delay": dendritic_delay,
+                "receptor_type": 1 # differentiate post-synaptic feedback
+            }
+
             synapse = nest.Create("stdp_triplet_neuron", params = syn_spec)
             nest_connect(pre, synapse, syn_spec = pre_syn_spec)
             nest_connect(synapse, post, syn_spec = syn_post_spec)
-            nest_connect(post, synapse, syn_spec = { "receptor_type": 1 }) # differentiate post-synaptic feedback
+            nest_connect(post, synapse, syn_spec = post_syn_spec)
             return synapse
 
         else:

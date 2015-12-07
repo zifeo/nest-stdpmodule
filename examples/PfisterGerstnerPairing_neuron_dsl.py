@@ -23,7 +23,8 @@ all_to_all_syn_spec = {
     "Kplus_triplet": 0.0,
     "Kminus": 0.0,
     "Kminus_triplet": 0.0,
-    "delay": 1.0,
+    "axonal_delay": 0.1,
+    "dendritic_delay": 0.9,
     "nearest_spike": False,
 }
 
@@ -41,7 +42,8 @@ nearest_syn_spec = {
     "Kplus_triplet": 0.0,
     "Kminus": 0.0,
     "Kminus_triplet": 0.0,
-    "delay": 1.0,
+    "axonal_delay": 0.1,
+    "dendritic_delay": 0.9,
     "nearest_spike": True,
 }
 

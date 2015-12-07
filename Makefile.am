@@ -50,8 +50,5 @@ install-data-hook: install-exec install-slidoc install-py
 
 EXTRA_DIST= sli
 
-# install python bindings
-
 install-py:
-	cp $(VPATH)/pynest/* $(DESTDIR)$(NEST_PREFIX)/pynest/build/lib/nest/lib/
-	cd $(DESTDIR)$(NEST_PREFIX)/pynest && make install
+	find $(NEST_PREFIX)/lib -type d -name 'site-packages' -exec cp $(VPATH)/pynest/* "{}/nest/lib" \;

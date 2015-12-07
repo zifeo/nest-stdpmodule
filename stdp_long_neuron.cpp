@@ -22,67 +22,72 @@ nest::RecordablesMap<stdpmodule::STDPLongNeuron>
 namespace nest {
 template <> void RecordablesMap<stdpmodule::STDPLongNeuron>::create() {
   insert_(names::weight, &stdpmodule::STDPLongNeuron::get_weight_);
-  insert_(stdpnames::Kplus, &stdpmodule::STDPLongNeuron::get_Kplus_);
-  insert_(stdpnames::Kplus_triplet,
-          &stdpmodule::STDPLongNeuron::get_Kplus_triplet_);
-  insert_(stdpnames::Kminus, &stdpmodule::STDPLongNeuron::get_Kminus_);
-  insert_(stdpnames::Kminus_triplet,
-          &stdpmodule::STDPLongNeuron::get_Kminus_triplet_);
 }
 }
 
 /* ----------------------------------------------------------- parameters */
 
 stdpmodule::STDPLongNeuron::Parameters_::Parameters_()
-    : tau_plus_(16.8), tau_plus_triplet_(101.0), tau_minus_(33.7),
-      tau_minus_triplet_(125), Aplus_(0.1), Aminus_(0.1), Aplus_triplet_(0.1),
-      Aminus_triplet_(0.1), nearest_spike_(false) {}
+    : tau_plus_(1.0), tau_slow_(1.0), tau_minus_(1.0),
+      tau_ht_(100), tau_hom_(20 * 60 * 1000), tau_const_(20 * 60 * 1000), A_(1.0),
+      P_(1.0), WP_(0.5), beta_(1.0), delta_(1.0), nearest_spike_(false) {}
 
 void stdpmodule::STDPLongNeuron::Parameters_::get(DictionaryDatum &d) const {
-  def<double_t>(d, stdpnames::tau_plus, tau_plus_);
-  def<double_t>(d, stdpnames::tau_plus_triplet, tau_plus_triplet_);
-  def<double_t>(d, stdpnames::tau_minus, tau_minus_);
-  def<double_t>(d, stdpnames::tau_minus_triplet, tau_minus_triplet_);
-  def<double_t>(d, stdpnames::Aplus, Aplus_);
-  def<double_t>(d, stdpnames::Aminus, Aminus_);
-  def<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
-  def<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
-  def<bool>(d, stdpnames::nearest_spike, nearest_spike_);
+	def<double_t>(d, stdpnames::tau_plus, tau_plus_);
+	def<double_t>(d, stdpnames::tau_slow, tau_slow_);
+	def<double_t>(d, stdpnames::tau_minus, tau_minus_);
+	def<double_t>(d, stdpnames::tau_ht, tau_ht_);
+	def<double_t>(d, stdpnames::tau_hom, tau_hom_);
+	def<double_t>(d, stdpnames::tau_const, tau_const_);
+	def<double_t>(d, stdpnames::A, A_);
+	def<double_t>(d, stdpnames::P, P_);
+	def<double_t>(d, stdpnames::WP, WP_);
+	def<double_t>(d, stdpnames::beta, beta_);
+	def<double_t>(d, stdpnames::delta, delta_);
+	def<bool>(d, stdpnames::nearest_spike, nearest_spike_);
 }
 
 void stdpmodule::STDPLongNeuron::Parameters_::set(const DictionaryDatum &d) {
 
   updateValue<double_t>(d, stdpnames::tau_plus, tau_plus_);
-  updateValue<double_t>(d, stdpnames::tau_plus_triplet, tau_plus_triplet_);
+  updateValue<double_t>(d, stdpnames::tau_slow, tau_slow_);
   updateValue<double_t>(d, stdpnames::tau_minus, tau_minus_);
-  updateValue<double_t>(d, stdpnames::tau_minus_triplet, tau_minus_triplet_);
-  updateValue<double_t>(d, stdpnames::Aplus, Aplus_);
-  updateValue<double_t>(d, stdpnames::Aminus, Aminus_);
-  updateValue<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
-  updateValue<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
+  updateValue<double_t>(d, stdpnames::tau_ht, tau_ht_);
+  updateValue<double_t>(d, stdpnames::tau_hom, tau_hom_);
+  updateValue<double_t>(d, stdpnames::tau_const, tau_const_);
+	updateValue<double_t>(d, stdpnames::A, A_);
+	updateValue<double_t>(d, stdpnames::P, P_);
+	updateValue<double_t>(d, stdpnames::WP, WP_);
+	updateValue<double_t>(d, stdpnames::beta, beta_);
+	updateValue<double_t>(d, stdpnames::delta, delta_);
   updateValue<bool>(d, stdpnames::nearest_spike, nearest_spike_);
 }
 
 /* ----------------------------------------------------------- states */
 
 stdpmodule::STDPLongNeuron::State_::State_()
-    : weight_(5.0), Kplus_(0.0), Kplus_triplet_(0.0), Kminus_(0.0),
-      Kminus_triplet_(0.0) {}
+    : weight_(1.0), weight_ref_(1.0), B_(0.0), C_(0.0), Zplus_(0.0), Zslow_(0.0), Zminus_(0.0), Zht_(0.0) {}
 
 void stdpmodule::STDPLongNeuron::State_::get(DictionaryDatum &d) const {
-  def<double_t>(d, names::weight, weight_);
-  def<double_t>(d, stdpnames::Kplus, Kplus_);
-  def<double_t>(d, stdpnames::Kplus_triplet, Kplus_triplet_);
-  def<double_t>(d, stdpnames::Kminus, Kminus_);
-  def<double_t>(d, stdpnames::Kminus_triplet, Kminus_triplet_);
+	def<double_t>(d, names::weight, weight_);
+	def<double_t>(d, stdpnames::weight_ref, weight_ref_);
+	def<double_t>(d, stdpnames::B, B_);
+	def<double_t>(d, stdpnames::C, C_);
+	def<double_t>(d, stdpnames::Zplus, Zplus_);
+	def<double_t>(d, stdpnames::Zslow, Zslow_);
+	def<double_t>(d, stdpnames::Zminus, Zminus_);
+	def<double_t>(d, stdpnames::Zht, Zht_);
 }
 
 void stdpmodule::STDPLongNeuron::State_::set(const DictionaryDatum &d) {
-  updateValue<double_t>(d, names::weight, weight_);
-  updateValue<double_t>(d, stdpnames::Kplus, Kplus_);
-  updateValue<double_t>(d, stdpnames::Kplus_triplet, Kplus_triplet_);
-  updateValue<double_t>(d, stdpnames::Kminus, Kminus_);
-  updateValue<double_t>(d, stdpnames::Kminus_triplet, Kminus_triplet_);
+	updateValue<double_t>(d, names::weight, weight_);
+	updateValue<double_t>(d, stdpnames::weight_ref, weight_ref_);
+	updateValue<double_t>(d, stdpnames::B, B_);
+	updateValue<double_t>(d, stdpnames::C, C_);
+	updateValue<double_t>(d, stdpnames::Zplus, Zplus_);
+  updateValue<double_t>(d, stdpnames::Zslow, Zslow_);
+  updateValue<double_t>(d, stdpnames::Zminus, Zminus_);
+  updateValue<double_t>(d, stdpnames::Zht, Zht_);
 }
 
 /* ----------------------------------------------------------- buffers */
@@ -146,7 +151,7 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
     S_.Zht_ *= V_.Zht_decay_;
 	  
 	  // others states variables
-	  S_.weight_ref_ +=  (S_.weight_ - S_.weight_ref_ - P_.P_ * S.weight_ref_ * ( P_.WP_ / 2.0 - S_.weight_ref_ ) * ( P_.WP_ - S.weight_ref_)) / P_.tau_const_  // (16)
+	  S_.weight_ref_ +=  (S_.weight_ - S_.weight_ref_ - P_.P_ * S_.weight_ref_ * ( P_.WP_ / 2.0 - S_.weight_ref_ ) * ( P_.WP_ - S_.weight_ref_)) / P_.tau_const_;  // (16)
 	  S_.C_ -= S_.C_ / P_.tau_hom_ + S_.Zht_ * S_.Zht_; // (18)
 	  S_.B_ = P_.A_ * std::min(S_.C_, 1.0); // (17)
 	  
@@ -154,9 +159,9 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
 
       // depress: t = t^pre
 		S_.weight_ -= S_.B_ * S_.Zminus_; // doublet LTD (12)
-		S_.weight_ += delta_; // transmitter - induced (14)
+		S_.weight_ += P_.delta_; // transmitter - induced (14)
 		
-		
+		S_.Zplus_ += 1.0;
 		
       if (P_.nearest_spike_) {
 
@@ -173,12 +178,9 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
     if (current_post_spikes_n > 0) {
 
       // potentiate: t = t^post
-		
 		S_.weight_ += P_.A_ * S_.Zplus_ * S_.Zslow_; // triplet LTP (11)
-		
 		S_.weight_ -= P_.beta_ * (S_.weight_ - S_.weight_ref_) * S_.Zminus_ * S_.Zminus_ * S_.Zminus_; // heterosynpatic (13)
 		
-		S_.Zplus_ += 1.0;
 		S_.Zslow_ += 1.0;
 		S_.Zminus_ += 1.0;
 		S_.Zht_ += 1.0;

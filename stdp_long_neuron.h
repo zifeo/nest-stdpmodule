@@ -55,9 +55,10 @@ private:
 	  double_t tau_hom_;
 	  double_t tau_const_;
 
+
+	  double_t A_;
 	  double_t P_;
 	  double_t WP_;
-	  double_t A_;
 	  double_t beta_;
 	  double_t delta_;
 
@@ -102,10 +103,6 @@ private:
 
   // Access functions for UniversalDataLogger
   double_t get_weight_() const { return S_.weight_; }
-  double_t get_Kplus_() const { return S_.Kplus_; }
-  double_t get_Kplus_triplet_() const { return S_.Kplus_triplet_; }
-  double_t get_Kminus_() const { return S_.Kminus_; }
-  double_t get_Kminus_triplet_() const { return S_.Kminus_triplet_; }
 
   Parameters_ P_;
   State_ S_;

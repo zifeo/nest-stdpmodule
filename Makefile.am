@@ -17,7 +17,8 @@ include_HEADERS = stdpmodule.h
 # All other source files
 source_files=	stdpnames.h stdpmodule.cpp \
 				stdp_triplet_connection.h \
-				stdp_triplet_neuron.h stdp_triplet_neuron.cpp
+				stdp_triplet_neuron.h stdp_triplet_neuron.cpp \
+				stdp_long_neuron.h stdp_long_neuron.cpp
 
 if BUILD_DYNAMIC_USER_MODULES
   lib_LTLIBRARIES= libstdpmodule.la stdpmodule.la

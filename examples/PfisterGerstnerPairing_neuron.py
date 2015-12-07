@@ -33,14 +33,13 @@ syn_spec = {
     "Kplus_triplet": 0.0,
     "Kminus": 0.0,
     "Kminus_triplet": 0.0,
-    "delay": 1.0,
     "nearest_spike": True,
 }
 
 n = 60 # pair of presynaptic and post synpatic spikes
 dt = 10 # ms shift pre/post
 start_spikes = dt + 20
-rhos = np.arange(1., 100.) # hz spiking frequence
+rhos = np.arange(1.0, 100.0, 5.0) # hz spiking frequence
 weights_plus = []
 weights_minus = []
 weights_plus_nearest = []

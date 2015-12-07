@@ -39,6 +39,7 @@
 #include "stdpmodule.h"
 #include "stdp_triplet_connection.h"
 #include "stdp_triplet_neuron.h"
+#include "stdp_long_neuron.h"
 
 // -- Interface to dynamic module loader ---------------------------------------
 
@@ -94,6 +95,7 @@ stdpmodule::STDPModule::init( SLIInterpreter* i )
 	 */
 	
 	nest::register_model< STDPTripletNeuron >( nest::NestModule::get_network(), "stdp_triplet_neuron" );
+	nest::register_model< STDPLongNeuron >( nest::NestModule::get_network(), "stdp_long_neuron" );
 	
 	/* Register a synapse type.
 	 Give synapse type as template argument and the name as second argument.

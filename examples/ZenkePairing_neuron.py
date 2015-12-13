@@ -20,7 +20,8 @@ def create(model, number):
     return map(lambda x: (x,), nest.Create(model, number))
 
 syn_spec = {
-
+    "A": 0.005,
+    "beta": 0.005, #
 }
 
 n = 75 # pair of presynaptic and post synpatic spikes
@@ -107,6 +108,6 @@ plt.plot(rhos, weights_minus, "r")
 #plt.plot(rhos, weights_plus_nearest, "r")
 #plt.plot(rhos, weights_minus_nearest, "r", ls = "--")
 plt.legend(["dt +10 ms", "dt -10 ms", "dt +10 ms nearest", "dt -10 ms nearest"], loc = "upper left", frameon = False)
-#plt.xlim([0, 50])
-#plt.ylim([-0.6, 0.8])
+plt.xlim([0, 50])
+plt.ylim([-0.3, 0.9])
 plt.show()

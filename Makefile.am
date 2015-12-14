@@ -52,4 +52,4 @@ install-data-hook: install-exec install-slidoc install-py
 EXTRA_DIST= sli
 
 install-py:
-	find $(NEST_PREFIX)/lib -type d -name 'site-packages' -exec cp $(top_srcdir)/pynest/* "{}/nest/lib" \;
+	find $(NEST_PREFIX)/lib -type d -name 'site-packages' -exec cp $(top_srcdir)/pynest/* "{}/nest/lib/" \;

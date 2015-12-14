@@ -8,6 +8,7 @@
 
 #include "stdpnames.h"
 #include "network.h"
+#include "namedatum.h"
 #include "universal_data_logger_impl.h"
 
 using namespace nest;

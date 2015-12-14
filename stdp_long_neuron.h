@@ -11,6 +11,7 @@
 #include "event.h"
 #include "archiving_node.h"
 #include "ring_buffer.h"
+#include "namedatum.h"
 #include "universal_data_logger.h"
 
 namespace stdpmodule {

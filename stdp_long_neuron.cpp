@@ -37,7 +37,7 @@ template <> void RecordablesMap<stdpmodule::STDPLongNeuron>::create() {
 
 stdpmodule::STDPLongNeuron::Parameters_::Parameters_()
     : tau_plus_(20), tau_slow_(100), tau_minus_(20), tau_ht_(100),
-      tau_hom_(20 * 60 * 1000), tau_const_(20 * 60 * 1000), A_(1e-3), P_(20),
+      tau_hom_(20 * 60 * 1000), tau_const_(20 * 60 * 1000), A_(5e-3), P_(20),
       WP_(0.5), beta_(0.05), delta_(2e-5), nearest_spike_(false) {}
 
 void stdpmodule::STDPLongNeuron::Parameters_::get(DictionaryDatum &d) const {
@@ -74,7 +74,7 @@ void stdpmodule::STDPLongNeuron::Parameters_::set(const DictionaryDatum &d) {
 /* ----------------------------------------------------------- states */
 
 stdpmodule::STDPLongNeuron::State_::State_()
-    : weight_(1.0), weight_ref_(1.0), B_(1e-3), C_(0.0), Zplus_(0.0),
+    : weight_(1.0), weight_ref_(1.0), B_(5e-3), C_(0.0), Zplus_(0.0),
       Zslow_(0.0), Zminus_(0.0), Zht_(0.0) {}
 
 void stdpmodule::STDPLongNeuron::State_::get(DictionaryDatum &d) const {
@@ -167,13 +167,13 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
         P_.tau_const_ * delta; // (16)
     S_.C_ +=
         (-S_.C_ / P_.tau_hom_ + S_.Zht_ * S_.Zht_ / 1000.0) * delta; // (18)
-    S_.B_ = P_.A_ * std::min(S_.C_, 1.0);                            // (17)
+    //S_.B_ = P_.A_ * std::min(S_.C_, 1.0);                            // (17)
 
     if (current_pre_spikes_n > 0) {
 
       // depress: t = t^pre
       S_.weight_ -= S_.B_ * S_.Zminus_; // doublet LTD (12)
-      S_.weight_ += P_.delta_;          // transmitter - induced (14)
+      //S_.weight_ += P_.delta_;          // transmitter - induced (14)
 
       S_.Zplus_ += 1.0;
 
@@ -189,8 +189,8 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
     if (current_post_spikes_n > 0) {
 
       // potentiate: t = t^post
-      S_.weight_ += P_.A_ * S_.Zplus_ * S_.Zslow_; // triplet LTP (11)
-      S_.weight_ -= P_.beta_ * (S_.weight_ - 1.0) * S_.Zminus_ * S_.Zminus_ *
+      S_.weight_ += P_.A_ * S_.Zplus_ * S_.Zslow_ // triplet LTP (11)
+				- P_.beta_ * (S_.weight_ - 1.0) * S_.Zminus_ * S_.Zminus_ *
                     S_.Zminus_; // heterosynpatic (13)
 
       S_.Zslow_ += 1.0;

@@ -3,7 +3,7 @@ import pylab as plt
 import numpy as np
 
 """
-Reproduce result of the pairing experiment from Pfister-Gerstner (2006) with the triplet model.
+Reproduce result of the pairing experiment from Zenke (2015).
 """
 
 nest.Install("stdpmodule")
@@ -20,8 +20,7 @@ def create(model, number):
     return map(lambda x: (x,), nest.Create(model, number))
 
 syn_spec = {
-    "A": 0.005,
-    "beta": 0.005, #
+
 }
 
 n = 75 # pair of presynaptic and post synpatic spikes
@@ -109,5 +108,5 @@ plt.plot(rhos, weights_minus, "r")
 #plt.plot(rhos, weights_minus_nearest, "r", ls = "--")
 plt.legend(["dt +10 ms", "dt -10 ms", "dt +10 ms nearest", "dt -10 ms nearest"], loc = "upper left", frameon = False)
 plt.xlim([0, 50])
-plt.ylim([-0.3, 0.9])
+#plt.ylim([-0.3, 0.9])
 plt.show()

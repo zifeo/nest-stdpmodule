@@ -19,6 +19,7 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         self.decay_duration = 5.0
         self.syn_spec = {
             "weight": 5.0,
+            "Wmax": 100.0,
             "tau_plus": 16.8,
             "tau_plus_triplet": 101.0,
             "tau_minus": 33.7,
@@ -247,19 +248,17 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         self.assertAlmostEqualDetailed(1.0, self.status("Kminus"), "state should saturate")
         self.assertAlmostEqualDetailed(1.0, self.status("Kminus_triplet"), "state should saturate")
 
-#def test_maxWeightStaturatesWeight(self):
-#	"""Check that setting maximum weight property keep weight limited."""
-	
-	#	limited_weight = self.status("weight") + 1e-10
-	#	limited_syn_spec = self.syn_spec.copy()
-	#	limited_syn_spec.update({"Wmax": limited_weight })
-	#	nest.Connect(self.pre_neuron, self.post_neuron, syn_spec=limited_syn_spec)
-	
-	#self.generateSpikes(self.pre_neuron, [2.0])
-	#self.generateSpikes(self.pre_neuron, [3.0])  # trigger computation
-	
-	#nest.Simulate(20.0)
-#self.assertAlmostEqualDetailed(limited_weight, self.status("weight"), "weight should have been limited")
+    def test_maxWeightStaturatesWeight(self):
+        """Check that setting maximum weight property keep weight limited."""
+
+        limited_weight = self.status("weight") + 1e-10
+        nest.SetStatus(self.triplet_synapse, params = { "Wmax": limited_weight })
+
+        self.generateSpikes(self.pre_neuron, [2.0])
+        self.generateSpikes(self.pre_neuron, [3.0])  # trigger computation
+
+        nest.Simulate(3.0)
+        self.assertAlmostEqualDetailed(limited_weight, self.status("weight"), "weight should have been limited")
 
 def suite():
     suite1 = unittest.TestLoader().loadTestsFromTestCase(STDPTripletNeuronTestCase)

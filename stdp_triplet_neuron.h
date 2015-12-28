@@ -17,26 +17,32 @@
  nearest-spike      nearest_spile = True
 
  Parameters:
+ Wmax               double: maximum allowed weight
+ neareat_spike		bool: states saturate at 1 only taking into account
+ neighboring spikes
+ 
  tau_plus           double: time constant of short presynaptic trace (tau_plus
  of [1])
  tau_plus_triplet   double: time constant of long presynaptic trace (tau_x of
  [1])
+ tau_minus          double: time constant of short postsynaptic trace (tau_minus
+ of [1])
+ tau_minus_triplet  double: time constant of long postsynaptic trace (tau_y of
+ [1])
+ 
  Aplus              double: weight of pair potentiation rule (A_plus_2 of [1])
  Aplus_triplet      double: weight of triplet potentiation rule (A_plus_3 of
  [1])
  Aminus             double: weight of pair depression rule (A_minus_2 of [1])
  Aminus_triplet     double: weight of triplet depression rule (A_minus_3 of [1])
- neareat_spike		bool: states saturate at 1 only taking into account
- neighboring spikes
 
  Notes about delay:
  This model does not have any delay parameter as both axonal and dendritic
- delays
- are repectively taken into account by pre-synpatic and post-synaptic
- connections.
- Any parameter tuning should be done at creation time on pynest.
+ delays are repectively taken into account by pre-synpatic and post-synaptic
+ connections. Any parameter tuning should be done at creation time on pynest.
 
  States:
+ weight				double: synaptic weight
  Kplus              double: pre-synaptic trace (e.g. amount of glutamate
  bound...) (r_1 of [1])
  Kplus_triplet      double: triplet pre-synaptic trace (e.g. number of NMDA
@@ -107,15 +113,18 @@ private:
   friend class UniversalDataLogger<STDPTripletNeuron>;
 
   struct Parameters_ {
+	  double_t Wmax_;
+	  bool nearest_spike_;
+	  
     double_t tau_plus_;
     double_t tau_plus_triplet_;
     double_t tau_minus_;
     double_t tau_minus_triplet_;
+	  
     double_t Aplus_;
     double_t Aminus_;
     double_t Aplus_triplet_;
     double_t Aminus_triplet_;
-    bool nearest_spike_;
 
     Parameters_();
     void get(DictionaryDatum &) const;

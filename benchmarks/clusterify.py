@@ -78,7 +78,7 @@ def distribute_file(file, droplets = None):
 
 def show_help():
     print 'Usage: %s command [args]' % argv[0]
-    print 'Only droplet prefixed with \'%s\' are affected by this script.'
+    print 'Only droplet prefixed with \'%s\' are affected by this script.' % droplet_prefix
     print 'Commands:'
     print '- key [token]: setup Digital Ocean token (empty for removing it).'
     print '- list: list current cluster.'
@@ -99,12 +99,18 @@ def setup_key(key):
 
 def list_droplets():
     hourly_price = 0.0
+    vcpus = 0
+    memo = 0
     for drop in require_droplets():
         hourly_price += drop.size['price_hourly']
+        vcpus += drop.size['vcpus']
+        memo += int(drop.size['slug'][:-2])
         print '%s:\t%svcpu(s)\t%s\t%s\t(private %s)' \
               % (drop.name, drop.size['vcpus'], drop.size['slug'], drop.ip_address, drop.private_ip_address)
 
-    print 'Cluster hourly price: %f$' % hourly_price
+    print 'Cluster hourly price ($): %f' % hourly_price
+    print 'Cluster total vcpus: %d' % vcpus
+    print 'Cluster total memory: %d' % memo
 
 def create_cluster(number, type):
 
@@ -185,7 +191,7 @@ def install_cluster(script):
     for drop in droplets:
         assert os.system('ssh -t -t root@' + drop.ip_address + ' \'' +
                          'nohup bash ' + script_name + ' > ' + script_name+ '.log' +
-                         '\' > /dev/null 2>&1 &') == 0
+                         '\' > /dev/null &') == 0
 
     for drop in droplets:
         while os.system('ssh root@' + drop.ip_address + ' \'' +
@@ -196,9 +202,9 @@ def install_cluster(script):
 
     print 'Install script terminated.'
 
-def run_cluster(processesCount, program):
+def run_cluster(pcount, program):
 
-    if processesCount < 1:
+    if pcount < 1:
         print 'Number of process must be positive non-null.'
         exit()
 
@@ -208,8 +214,9 @@ def run_cluster(processesCount, program):
     distribute_file(program, droplets)
 
     print 'Running from master'
-    status = os.system('ssh root@' + drop.ip_address + ' \'' +
-                       'mpirun -np ' + processesCount + ' --hostfile mpiconfig' + program_name +
+    status = os.system('ssh -t -t root@' + master.ip_address + ' \'' +
+                       'source ~/.profile; mpirun -np ' + str(pcount) + ' --mca btl_tcp_if_include eth1 ' +
+                       '--hostfile cluster.mpi -x PYTHONPATH python ' + program_name +
                        '\'')
     print 'Success' if status == 0 else 'Failure (status: %d)' % status
 

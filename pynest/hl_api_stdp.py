@@ -28,6 +28,9 @@ def helloSTDP():
 
         if (model == "stdp_triplet_neuron"):
 
+            if conn_spec != None and conn_spec != 'all_to_all' and conn_spec != 'one_to_one':
+                raise nest.NESTError('Unsupported conn_spec for stdp dsl: %s' % conn_spec)
+
             pre_syn_spec = {} if pre_syn_spec is None else pre_syn_spec.copy()
             syn_post_spec = {} if syn_post_spec is None else syn_post_spec.copy()
             syn_spec = {} if syn_spec is None else syn_spec.copy()
@@ -43,21 +46,23 @@ def helloSTDP():
                 "receptor_type": 1 # differentiate post-synaptic feedback
             }
 
-            synapse = nest.Create("stdp_triplet_neuron", params = syn_spec)
-            nest_connect(pre, synapse, syn_spec = pre_syn_spec)
-            nest_connect(synapse, post, syn_spec = syn_post_spec)
-            nest_connect(post, synapse, syn_spec = post_syn_spec)
+            connectionCount = len(post) if conn_spec == 'one_to_one' else len(post)**2
+            synapse = nest.Create("stdp_triplet_neuron", connectionCount, params = syn_spec)
+
+            nest_connect(pre, synapse, conn_spec, pre_syn_spec)
+            nest_connect(synapse, post, 'one_to_one', syn_post_spec)
+            nest_connect(post, synapse, 'one_to_one', post_syn_spec)
             return synapse
 
         else:
 
             return nest_connect(pre, post, conn_spec, syn_spec, model)
 
-    def _spikes(neuron, times):
-        """Trigger spike to given neuron at specified times."""
-        delay = 1.0
+    def _spikes(neurons, times):
+        """Trigger spike to given neurons at specified times."""
+        delay = nest.GetKernelStatus('resolution')
         gen = nest.Create("spike_generator", 1, { "spike_times": [t-delay for t in times] })
-        nest.Connect(gen, neuron, syn_spec = { "delay": delay })
+        nest.Connect(gen, neurons, syn_spec = { "delay": delay })
 
     nest.Connect = _connect
     nest.Spikes = _spikes

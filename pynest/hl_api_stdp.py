@@ -6,13 +6,6 @@
 Functions for spike-timing dependent plasticity.
 """
 
-"""
-@check_stack
-def Install(module_name):
-
-    return sr("(%s) Install" % module_name)
-"""
-
 import nest
 
 def helloSTDP():

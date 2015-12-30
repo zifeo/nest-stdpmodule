@@ -21,7 +21,7 @@
  Wmin               double: minimum allowed weight
 neareat_spike		bool: states saturate at 1 only taking into account
  neighboring spikes
- 
+
  tau_plus           double: time constant of short presynaptic trace (tau_plus
  of [1])
  tau_plus_triplet   double: time constant of long presynaptic trace (tau_x of
@@ -30,7 +30,7 @@ neareat_spike		bool: states saturate at 1 only taking into account
  of [1])
  tau_minus_triplet  double: time constant of long postsynaptic trace (tau_y of
  [1])
- 
+
  Aplus              double: weight of pair potentiation rule (A_plus_2 of [1])
  Aplus_triplet      double: weight of triplet potentiation rule (A_plus_3 of
  [1])
@@ -114,15 +114,15 @@ private:
   friend class UniversalDataLogger<STDPTripletNeuron>;
 
   struct Parameters_ {
-	  double_t Wmax_;
-	  double_t Wmin_;
-	  bool nearest_spike_;
-	  
+    double_t Wmax_;
+    double_t Wmin_;
+    bool nearest_spike_;
+
     double_t tau_plus_;
     double_t tau_plus_triplet_;
     double_t tau_minus_;
     double_t tau_minus_triplet_;
-	  
+
     double_t Aplus_;
     double_t Aminus_;
     double_t Aplus_triplet_;

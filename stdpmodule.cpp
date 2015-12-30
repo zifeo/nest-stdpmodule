@@ -104,6 +104,6 @@ void stdpmodule::STDPModule::init(SLIInterpreter *i) {
    */
 
   nest::register_connection_model<
-      STDPTripletConnection<nest::TargetIdentifierPtrRport> >(
+      STDPTripletConnection<nest::TargetIdentifierPtrRport>>(
       nest::NestModule::get_network(), "stdp_triplet_all_in_one_synapse");
 }

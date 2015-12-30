@@ -102,14 +102,14 @@ private:
   };
 
   // Access functions for UniversalDataLogger
-	double_t get_weight_() const { return S_.weight_; }
-	double_t get_weight_ref_() const { return S_.weight_ref_; }
-	double_t get_B_() const { return S_.B_; }
-	double_t get_C_() const { return S_.C_; }
-	double_t get_Zplus_() const { return S_.Zplus_; }
-	double_t get_Zslow_() const { return S_.Zslow_; }
-	double_t get_Zminus_() const { return S_.Zminus_; }
-	double_t get_Zht_() const { return S_.Zht_; }
+  double_t get_weight_() const { return S_.weight_; }
+  double_t get_weight_ref_() const { return S_.weight_ref_; }
+  double_t get_B_() const { return S_.B_; }
+  double_t get_C_() const { return S_.C_; }
+  double_t get_Zplus_() const { return S_.Zplus_; }
+  double_t get_Zslow_() const { return S_.Zslow_; }
+  double_t get_Zminus_() const { return S_.Zminus_; }
+  double_t get_Zht_() const { return S_.Zht_; }
 
   Parameters_ P_;
   State_ S_;

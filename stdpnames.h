@@ -12,9 +12,9 @@
 namespace stdpnames {
 
 const Name weight_ref("weight_ref");
-	const Name Wmax("Wmax");
-	const Name Wmin("Wmin");
-	
+const Name Wmax("Wmax");
+const Name Wmin("Wmin");
+
 const Name tau_plus("tau_plus");
 const Name tau_plus_triplet("tau_plus_triplet");
 const Name tau_minus("tau_minus");
@@ -50,7 +50,6 @@ const Name Kminus("Kminus");
 const Name Kminus_triplet("Kminus_triplet");
 
 const Name nearest_spike("nearest_spike");
-	
 }
 
 #endif /* stdpnames_h */

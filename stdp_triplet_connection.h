@@ -204,7 +204,7 @@ inline void stdpmodule::STDPTripletConnection<targetidentifierT>::send(
 
     // deal with dendritic delay
     double_t t_adjusted = start->t_ + dendritic_delay;
-    assert(t_adjusted > t_last_postspike);
+    assert(t_adjusted >= t_last_postspike);
 
     double_t delta = t_adjusted - t_last_postspike;
     assert(delta >= 0);

@@ -255,10 +255,21 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         nest.SetStatus(self.triplet_synapse, params = { "Wmax": limited_weight })
 
         self.generateSpikes(self.pre_neuron, [2.0])
-        self.generateSpikes(self.pre_neuron, [3.0])  # trigger computation
 
         nest.Simulate(3.0)
         self.assertAlmostEqualDetailed(limited_weight, self.status("weight"), "weight should have been limited")
+
+    def test_minWeightStaturatesWeight(self):
+        """Check that setting maximum weight property keep weight limited."""
+
+        limited_weight = self.status("weight")
+        nest.SetStatus(self.triplet_synapse, params = { "Wmin": limited_weight })
+
+        self.generateSpikes(self.pre_neuron, [2.0])
+
+        nest.Simulate(2.0)
+        self.assertAlmostEqualDetailed(limited_weight, self.status("weight"), "weight should have been limited")
+
 
 def suite():
     suite1 = unittest.TestLoader().loadTestsFromTestCase(STDPTripletNeuronTestCase)

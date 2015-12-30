@@ -20,6 +20,7 @@
  Parameters:
  weight				double: current synaptic weight
  Wmax               double: maximum allowed weight
+ Wmin               double: minimum allowed weight
  neareat_spike		bool: states saturate at 1 only taking into account
  
  neighboring spikes
@@ -139,6 +140,7 @@ public:
 private:
   double_t weight_;
 	double_t Wmax_;
+	double_t Wmin_;
 	bool nearest_spike_;
 
 	double_t tau_plus_;
@@ -166,7 +168,7 @@ stdpmodule::STDPTripletConnection<targetidentifierT>::STDPTripletConnection()
       tau_plus_triplet_(101), tau_minus_(33.7),
       tau_minus_triplet_(125), Aplus_(0.1), Aminus_(0.1), Aplus_triplet_(0.1),
       Aminus_triplet_(0.1), Kplus_(0.0), Kplus_triplet_(0.0), Kminus_(0.0),
-      Kminus_triplet_(0.0), Wmax_(100.0), nearest_spike_(false) {}
+      Kminus_triplet_(0.0), Wmax_(100.0), Wmin_(0.0), nearest_spike_(false) {}
 
 // Copy constructor.
 template <typename targetidentifierT>
@@ -178,7 +180,7 @@ stdpmodule::STDPTripletConnection<targetidentifierT>::STDPTripletConnection(
       Aminus_(rhs.Aminus_), Aplus_triplet_(rhs.Aplus_triplet_),
       Aminus_triplet_(rhs.Aminus_triplet_), Kplus_(rhs.Kplus_),
       Kplus_triplet_(rhs.Kplus_triplet_), Kminus_(rhs.Kminus_),
-      Kminus_triplet_(rhs.Kminus_triplet_), Wmax_(rhs.Wmax_),
+      Kminus_triplet_(rhs.Kminus_triplet_), Wmax_(rhs.Wmax_), Wmin_(rhs.Wmin_),
 nearest_spike_(rhs.nearest_spike_) {}
 
 // Send an event to the receiver of this connection.
@@ -222,7 +224,7 @@ inline void stdpmodule::STDPTripletConnection<targetidentifierT>::send(
 		
 		// potentiate: t = t^post
 		weight_ += Kplus_ * (Aplus_ + Aplus_triplet_ * Kminus_triplet_);
-		weight_ = std::min(std::max(weight_, 0.0), Wmax_);
+		weight_ = std::min(std::max(weight_, Wmin_), Wmax_);
 
     }
 	  
@@ -249,7 +251,7 @@ inline void stdpmodule::STDPTripletConnection<targetidentifierT>::send(
 
   // depress: t = t^pre
   weight_ -= Kminus_ * (Aminus_ + Aminus_triplet_ * Kplus_triplet_);
-	weight_ = std::min(std::max(weight_, 0.0), Wmax_);
+	weight_ = std::min(std::max(weight_, Wmin_), Wmax_);
 	
   Kplus_ += 1;
   Kplus_triplet_ += 1;
@@ -274,6 +276,7 @@ void stdpmodule::STDPTripletConnection<targetidentifierT>::get_status(
   ConnectionBase::get_status(d);
   def<double_t>(d, names::weight, weight_);
 	def<double_t>(d, stdpnames::Wmax, Wmax_);
+	def<bool>(d, stdpnames::Wmin, Wmin_);
 	def<bool>(d, stdpnames::nearest_spike, nearest_spike_);
 	
 	def<double_t>(d, stdpnames::tau_plus, tau_plus_);
@@ -301,6 +304,7 @@ void stdpmodule::STDPTripletConnection<targetidentifierT>::set_status(
   ConnectionBase::set_status(d, cm);
   updateValue<double_t>(d, names::weight, weight_);
 	updateValue<double_t>(d, stdpnames::Wmax, Wmax_);
+	updateValue<double_t>(d, stdpnames::Wmin, Wmin_);
 	updateValue<bool>(d, stdpnames::nearest_spike, nearest_spike_);
 
 	updateValue<double_t>(d, stdpnames::tau_plus, tau_plus_);
@@ -330,9 +334,13 @@ void stdpmodule::STDPTripletConnection<targetidentifierT>::set_status(
     throw BadProperty("State Kminus must be positive.");
   }
 
-  if (!(Kminus_triplet_ >= 0)) {
-    throw BadProperty("State Kminus_triplet must be positive.");
-  }
+	if (!(Kminus_triplet_ >= 0)) {
+		throw BadProperty("State Kminus_triplet must be positive.");
+	}
+	
+	if (!(Wmax_ >= Wmin_)) {
+		throw BadProperty("State Kminus_triplet must be positive.");
+	}
 }
 
 #endif /* stdp_triplet_connection_h */

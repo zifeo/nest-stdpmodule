@@ -18,7 +18,8 @@
 
  Parameters:
  Wmax               double: maximum allowed weight
- neareat_spike		bool: states saturate at 1 only taking into account
+ Wmin               double: minimum allowed weight
+neareat_spike		bool: states saturate at 1 only taking into account
  neighboring spikes
  
  tau_plus           double: time constant of short presynaptic trace (tau_plus
@@ -114,6 +115,7 @@ private:
 
   struct Parameters_ {
 	  double_t Wmax_;
+	  double_t Wmin_;
 	  bool nearest_spike_;
 	  
     double_t tau_plus_;

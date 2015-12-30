@@ -37,12 +37,13 @@ template <> void RecordablesMap<stdpmodule::STDPTripletNeuron>::create() {
 stdpmodule::STDPTripletNeuron::Parameters_::Parameters_()
     : tau_plus_(16.8), tau_plus_triplet_(101.0), tau_minus_(33.7),
       tau_minus_triplet_(125), Aplus_(0.1), Aminus_(7e-3),
-      Aplus_triplet_(6.2e-3), Aminus_triplet_(2.3e-4), Wmax_(100.0),
+      Aplus_triplet_(6.2e-3), Aminus_triplet_(2.3e-4), Wmax_(100.0), Wmin_(0.0),
 nearest_spike_(false) {}
 
 void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
 	def<double_t>(d, stdpnames::Wmax, Wmax_);
-	def<bool>(d, stdpnames::nearest_spike, nearest_spike_);
+	def<double_t>(d, stdpnames::Wmin, Wmin_);
+def<bool>(d, stdpnames::nearest_spike, nearest_spike_);
 	
 	def<double_t>(d, stdpnames::tau_plus, tau_plus_);
   def<double_t>(d, stdpnames::tau_plus_triplet, tau_plus_triplet_);
@@ -57,7 +58,8 @@ void stdpmodule::STDPTripletNeuron::Parameters_::get(DictionaryDatum &d) const {
 
 void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
 	updateValue<double_t>(d, stdpnames::Wmax, Wmax_);
-	updateValue<bool>(d, stdpnames::nearest_spike, nearest_spike_);
+	updateValue<double_t>(d, stdpnames::Wmin, Wmin_);
+updateValue<bool>(d, stdpnames::nearest_spike, nearest_spike_);
 	
   updateValue<double_t>(d, stdpnames::tau_plus, tau_plus_);
   updateValue<double_t>(d, stdpnames::tau_plus_triplet, tau_plus_triplet_);
@@ -68,6 +70,10 @@ void stdpmodule::STDPTripletNeuron::Parameters_::set(const DictionaryDatum &d) {
   updateValue<double_t>(d, stdpnames::Aminus, Aminus_);
   updateValue<double_t>(d, stdpnames::Aplus_triplet, Aplus_triplet_);
   updateValue<double_t>(d, stdpnames::Aminus_triplet, Aminus_triplet_);
+	
+	if (!(Wmax_ >= Wmin_)) {
+		throw BadProperty("State Kminus_triplet must be positive.");
+	}
 }
 
 /* ----------------------------------------------------------- states */
@@ -171,7 +177,7 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
       // depress: t = t^pre
       S_.weight_ -=
           S_.Kminus_ * (P_.Aminus_ + P_.Aminus_triplet_ * S_.Kplus_triplet_);
-	S_.weight_ = std::min(std::max(S_.weight_, 0.0), P_.Wmax_);
+	S_.weight_ = std::min(std::max(S_.weight_, P_.Wmin_), P_.Wmax_);
 		
       S_.Kplus_ += 1.0;
       S_.Kplus_triplet_ += 1.0;
@@ -192,7 +198,7 @@ void stdpmodule::STDPTripletNeuron::update(Time const &origin,
       // potentiate: t = t^post
       S_.weight_ +=
           S_.Kplus_ * (P_.Aplus_ + P_.Aplus_triplet_ * S_.Kminus_triplet_);
-		S_.weight_ = std::min(std::max(S_.weight_, 0.0), P_.Wmax_);
+		S_.weight_ = std::min(std::max(S_.weight_, P_.Wmin_), P_.Wmax_);
 
       S_.Kminus_ += 1.0;
       S_.Kminus_triplet_ += 1.0;

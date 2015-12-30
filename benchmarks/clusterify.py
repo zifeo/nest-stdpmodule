@@ -234,28 +234,29 @@ def delete_cluster():
     print 'Cluster deleted.'
 
 ##### EXECUTION #####
+if __name__ == '__main__':
 
-if len(argv) <= 1:
-    show_help()
+    if len(argv) <= 1:
+        show_help()
 
-elif argv[1] == 'key':
-    setup_key(argv[2] if len(argv) > 2 else '')
+    elif argv[1] == 'key':
+        setup_key(argv[2] if len(argv) > 2 else '')
 
-elif argv[1] == 'list':
-    list_droplets()
+    elif argv[1] == 'list':
+        list_droplets()
 
-elif argv[1] == 'create' and len(argv) == 4:
-    create_cluster(int(argv[2]), argv[3])
+    elif argv[1] == 'create' and len(argv) == 4:
+        create_cluster(int(argv[2]), argv[3])
 
-elif argv[1] == 'install' and len(argv) == 3:
-    install_cluster(argv[2])
+    elif argv[1] == 'install' and len(argv) == 3:
+        install_cluster(argv[2])
 
-elif argv[1] == 'run' and len(argv) == 4:
-    run_cluster(int(argv[2]), argv[3])
+    elif argv[1] == 'run' and len(argv) == 4:
+        run_cluster(int(argv[2]), argv[3])
 
-elif argv[1] == 'delete':
-    delete_cluster()
+    elif argv[1] == 'delete':
+        delete_cluster()
 
-else:
-    show_help()
+    else:
+        show_help()
 

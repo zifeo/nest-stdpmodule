@@ -12,7 +12,8 @@
 namespace stdpnames {
 
 const Name weight_ref("weight_ref");
-const Name Wmax("Wmax");
+	const Name Wmax("Wmax");
+	const Name Wmin("Wmin");
 	
 const Name tau_plus("tau_plus");
 const Name tau_plus_triplet("tau_plus_triplet");

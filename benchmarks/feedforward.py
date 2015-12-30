@@ -4,20 +4,19 @@ import numpy as np
 nest.Install("stdpmodule")
 nest.set_verbosity("M_WARNING")
 
-elements = 1000
-resolution = 0.1 # ms
-duration = 1000 # ms
-weight = 1.0
-delay = 2.0
-spikes = np.arange(delay, duration + delay, resolution)
+def bench(config, resolution):
 
-def generateSpikes(neurons, times):
-    """Trigger spike to given neuron at specified times."""
-    delay = resolution
-    gen = nest.Create("spike_generator", 1, { "spike_times": [t-delay for t in times] })
-    nest.Connect(gen, neurons, syn_spec = { "delay": delay })
+    elements = 10000
+    duration = 1000 # ms
+    weight = 1.0
+    delay = 2.0
+    spikes = np.arange(delay, duration + delay, resolution)
 
-def bench(config):
+    def generateSpikes(neurons, times):
+        """Trigger spike to given neuron at specified times."""
+        delay = resolution
+        gen = nest.Create("spike_generator", 1, { "spike_times": [t-delay for t in times] })
+        nest.Connect(gen, neurons, syn_spec = { "delay": delay })
 
     nest.ResetKernel()
     nest.SetKernelStatus({"resolution": resolution, "print_time": True})
@@ -100,21 +99,28 @@ def bench(config):
 
     nest.Simulate(duration + 2 * delay)
 
-    print nest.GetStatus(detector, "n_events")[0]
+    #print nest.GetStatus(detector, "n_events")[0]
 
 if __name__ == '__main__':
     import timeit
 
-    repetition = 1
+    repetition = 20
     configs = [1, 2, 3]
+
     results = []
+    resolutions = [1.0, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001]
+    resolutions.reverse()
 
-    for config in configs:
-        measure = timeit.timeit(
-                stmt = 'bench('+str(config)+')',
-                setup = "from __main__ import bench",
-                number = repetition
-        )
-        results.append(measure / repetition) # s
+    for resolution in resolutions:
+        temp = []
+        for config in configs:
+            measure = timeit.timeit(
+                    stmt = 'bench('+str(config)+','+str(resolution)+')',
+                    setup = "from __main__ import bench",
+                    number = repetition
+            )
+            temp.append(measure / repetition) # s
+        results.append(temp)
 
-    print results
+    print
+    print zip(resolutions, results)

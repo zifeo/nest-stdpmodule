@@ -5,39 +5,38 @@ import nest
 nest.Install("stdpmodule")
 nest.set_verbosity("M_WARNING")
 
-simtime = 1000
-dt = 1.0
-delay = 2.0 # synaptic delay in ms
+def bench(config, order):
 
-g = 5.0 # ratio inhibitory weight/excitatory weight
-eta = 2.0 # external rate relative to threshold rate
-epsilon = 0.1 # connection probability
-order = 250
-NE = 4*order # number of excitatory neurons
-NI = 1*order # number of inhibitory neurons
-Ntot = NE + NI
-N_rec = 50 # record from 50 neurons
-CE = int(epsilon*NE) # number of excitatory synapses per neuron
-CI = int(epsilon*NI) # number of inhibitory synapses per neuron
-tauMem = 20.0 # time constant of membrane potential in ms
-theta = 20.0 # membrane threshold potential in mV
-neuron_params = {
-    "C_m": 1.0,
-    "tau_m": tauMem,
-    "t_ref": 2.0,
-    "E_L": 0.0,
-    "V_reset": 0.0,
-    "V_m": 0.0,
-    "V_th": theta,
-}
-J = 0.1 # postsynaptic amplitude in mV
-J_ex = J # amplitude of excitatory postsynaptic potential
-J_in = -g*J_ex # amplitude of inhibitory postsynaptic potential
-nu_th = theta/(J*CE*tauMem)
-nu_ex = eta*nu_th
-p_rate = 1000.0*nu_ex*CE
+    simtime = 1000
+    dt = 1.0
+    delay = 2.0 # synaptic delay in ms
 
-def bench(config):
+    g = 5.0 # ratio inhibitory weight/excitatory weight
+    eta = 2.0 # external rate relative to threshold rate
+    epsilon = 0.1 # connection probability
+    NE = 4*order # number of excitatory neurons
+    NI = 1*order # number of inhibitory neurons
+    N_rec = 50 # record from 50 neurons
+    CE = int(epsilon*NE) # number of excitatory synapses per neuron
+    CI = int(epsilon*NI) # number of inhibitory synapses per neuron
+    tauMem = 20.0 # time constant of membrane potential in ms
+    theta = 20.0 # membrane threshold potential in mV
+    neuron_params = {
+        "C_m": 1.0,
+        "tau_m": tauMem,
+        "t_ref": 2.0,
+        "E_L": 0.0,
+        "V_reset": 0.0,
+        "V_m": 0.0,
+        "V_th": theta,
+    }
+    J = 0.1 # postsynaptic amplitude in mV
+    J_ex = J # amplitude of excitatory postsynaptic potential
+    J_in = -g*J_ex # amplitude of inhibitory postsynaptic potential
+    nu_th = theta/(J*CE*tauMem)
+    nu_ex = eta*nu_th
+    p_rate = 1000.0*nu_ex*CE
+
     nest.ResetKernel()
 
     nest.SetKernelStatus({"resolution": dt, "print_time": True})
@@ -169,22 +168,29 @@ def bench(config):
 
     nest.Simulate(simtime)
 
-    print nest.GetStatus(espikes, "n_events")[0]
-    print nest.GetStatus(ispikes, "n_events")[0]
+    #print nest.GetStatus(espikes, "n_events")[0]
+    #print nest.GetStatus(ispikes, "n_events")[0]
 
 if __name__ == '__main__':
     import timeit
 
-    repetition = 5
+    repetition = 20
     configs = [1, 2, 3]
+
     results = []
+    orders = [250, 500, 750, 1000, 1500, 2000, 2500]
+    orders.reverse()
 
-    for config in configs:
-        measure = timeit.timeit(
-                stmt = 'bench('+str(config)+')',
-                setup = "from __main__ import bench",
-                number = repetition
-        )
-        results.append(measure / repetition) # s
+    for order in orders:
+        temp = []
+        for config in configs:
+            measure = timeit.timeit(
+                    stmt = 'bench('+str(config)+','+str(order)+')',
+                    setup = "from __main__ import bench",
+                    number = repetition
+            )
+            temp.append(measure / repetition) # s
+        results.append(temp)
 
-    print results
+    print
+    print zip(orders, results)

@@ -2,6 +2,7 @@
 # requires python 2.7 at least
 
 import os
+import sys
 from sys import argv
 from time import sleep
 
@@ -22,7 +23,7 @@ def get_key():
 
     if not os.path.isfile(key_file_name):
         print 'Please set a key before.'
-        exit()
+        sys.exit(-1)
 
     key_file = open(key_file_name, 'r')
     key = key_file.read()
@@ -37,27 +38,27 @@ def get_droplets():
 
 def require_droplets():
     droplets = get_droplets()
-    if len(droplets) <= 0:
+    if not droplets:
         print 'No cluster yet'
-        exit()
+        sys.exit(-1)
     return droplets
 
 def require_master(droplets = None):
     if droplets is None:
         droplets = require_droplets()
     master = filter(lambda d: d.name.endswith('master'), droplets)
-    if len(master) <= 0:
+    if not master:
         print 'No master node found.'
-        exit()
+        sys.exit(-1)
     return master[0]
 
 def require_slaves(droplets = None):
     if droplets is None:
         droplets = require_droplets()
     slaves = filter(lambda d: not d.name.endswith('master'), droplets)
-    if len(slaves) <= 0:
+    if not slaves:
         print 'No slave node(s) found.'
-        exit()
+        sys.exit(-1)
     return slaves
 
 def distribute_file(file, droplets = None):
@@ -66,7 +67,7 @@ def distribute_file(file, droplets = None):
 
     if not os.path.isfile(file):
         print 'File does not exist yet.'
-        exit()
+        sys.exit(-1)
 
     file_name = os.path.basename(file)
 
@@ -86,7 +87,7 @@ def show_help():
     print '- install [script]: install program executing given bash script on each node.'
     print '- run [1..] [program]: run given python program on the cluster using mpi and n processes.'
     print '- delete: remove current cluster.'
-    exit()
+    sys.exit(-1)
 
 def setup_key(key):
     if key == '':
@@ -116,19 +117,19 @@ def create_cluster(number, type):
 
     if number <= 1:
         print 'Number must be greater than 1 (at least one master and one slave).'
-        exit()
+        sys.exit(-1)
 
-    if len(get_droplets()) > 0:
+    if get_droplets():
         print 'Please delete previous cluster before.'
-        exit()
+        sys.exit(-1)
 
     ssh_keys = get_manager().get_all_sshkeys()
-    if len(ssh_keys) <= 0:
+    if not ssh_keys:
         print 'At least one ssh key must be set (under settings/security).'
-        exit()
+        sys.exit(-1)
 
     queue = []
-    for i in range(0, number):
+    for i in range(number):
         drop = digitalocean.Droplet(token = get_key(),
                                     region = 'ams2',
                                     size_slug = type,
@@ -206,7 +207,7 @@ def run_cluster(pcount, program):
 
     if pcount < 1:
         print 'Number of process must be positive non-null.'
-        exit()
+        sys.exit(-1)
 
     program_name = os.path.basename(program)
     droplets = require_droplets()

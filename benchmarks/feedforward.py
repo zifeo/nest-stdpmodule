@@ -6,7 +6,7 @@ nest.set_verbosity("M_WARNING")
 
 def bench(config, resolution):
 
-    elements = 10000
+    elements = 1000
     duration = 1000 # ms
     weight = 1.0
     delay = 2.0
@@ -19,7 +19,7 @@ def bench(config, resolution):
         nest.Connect(gen, neurons, syn_spec = { "delay": delay })
 
     nest.ResetKernel()
-    nest.SetKernelStatus({"resolution": resolution, "print_time": True})
+    nest.SetKernelStatus({"resolution": resolution, "print_time": True })
 
     sources = nest.Create("parrot_neuron", elements)
     target = nest.Create("iaf_psc_delta")
@@ -104,11 +104,11 @@ def bench(config, resolution):
 if __name__ == '__main__':
     import timeit
 
-    repetition = 20
+    repetition = 5
     configs = [1, 2, 3]
 
     results = []
-    resolutions = [1.0, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001]
+    resolutions = [1.0, 0.5, 0.1]
     resolutions.reverse()
 
     for resolution in resolutions:

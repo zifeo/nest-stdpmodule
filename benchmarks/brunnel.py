@@ -39,7 +39,7 @@ def bench(config, order):
 
     nest.ResetKernel()
 
-    nest.SetKernelStatus({"resolution": dt, "print_time": True})
+    nest.SetKernelStatus({"resolution": dt, "print_time": True })
     nest.SetDefaults("iaf_psc_delta", neuron_params)
     nest.SetDefaults("poisson_generator",{"rate": p_rate})
 
@@ -174,11 +174,11 @@ def bench(config, order):
 if __name__ == '__main__':
     import timeit
 
-    repetition = 20
+    repetition = 5
     configs = [1, 2, 3]
 
     results = []
-    orders = [250, 500, 750, 1000, 1500, 2000, 2500]
+    orders = [250, 500, 1000]
     orders.reverse()
 
     for order in orders:

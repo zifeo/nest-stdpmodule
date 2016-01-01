@@ -83,8 +83,8 @@ def show_help():
     print 'Commands:'
     print '- key [token]: setup Digital Ocean token (empty for removing it).'
     print '- list: list current cluster.'
-    print '- create [2...] [1gb|2gb|4gb|8gb|16gb]: create n-cluster each having given size using all ssh-key.'
-    print '- install [script]: install program executing given bash script on each node.'
+    print '- create [2|3|...] [1gb|2gb|...]: create n-cluster of given size and setup ssh everywhere.'
+    print '- install [script]: execute given bash script on each node.'
     print '- run [1..] [program]: run given python program on the cluster using mpi and n processes.'
     print '- delete: remove current cluster.'
     sys.exit(-1)

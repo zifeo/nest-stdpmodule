@@ -92,7 +92,7 @@ AC_MSG_RESULT($NEST_CPPFLAGS)
 # here.
 # HEP 2004-12-21
 
-MYMODULE_SAVE_CXXFLAGS=$CXXFLAGS
+STDPModule_SAVE_CXXFLAGS=$CXXFLAGS
 
 # Must first check if we are on AIX
 AC_AIX
@@ -102,8 +102,8 @@ AC_AIX
 AC_PROG_CXX([ $NEST_COMPILER ])
 
 # the following is makeshift, should have the macro set proper
-# MYMODULE_SET_CXXFLAGS
-AM_CXXFLAGS=$MYMODULE_SAVE_CXXFLAGS
+# STDPModule_SET_CXXFLAGS
+AM_CXXFLAGS=$STDPModule_SAVE_CXXFLAGS
 CXXFLAGS=
 
 ## Configure C environment
@@ -183,7 +183,7 @@ AC_OUTPUT
 
 echo
 echo "-------------------------------------------------------"
-echo "MyModule Configuration Summary"
+echo "STDPModule Configuration Summary"
 echo "-------------------------------------------------------"
 echo
 echo "C++ compiler        : $CXX"
@@ -202,5 +202,5 @@ echo "You can build and install STDP module now, using"
 echo "  make"
 echo "  make install"
 echo
-echo "MyModule will be installed to: $LIBDIR_AS_CONFIGURED"
+echo "STDPModule will be installed to: $LIBDIR_AS_CONFIGURED"
 echo

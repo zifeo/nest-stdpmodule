@@ -6,7 +6,7 @@ import numpy as np
 Reproduce result of the pairing experiment from Pfister-Gerstner (2006) with the triplet model.
 """
 
-nest.helloSTDP()
+nest.HelloSTDP()
 nest.set_verbosity("M_WARNING")
 
 all_to_all_syn_spec = {

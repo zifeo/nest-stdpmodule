@@ -8,7 +8,7 @@ Functions for spike-timing dependent plasticity.
 
 import nest
 
-def helloSTDP():
+def HelloSTDP():
     """Enable all spiking-time dependent plasticity features."""
 
     nest.Install("stdpmodule")

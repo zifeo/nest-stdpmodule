@@ -19,7 +19,7 @@ def bench(config, resolution):
         nest.Connect(gen, neurons, syn_spec = { "delay": delay })
 
     nest.ResetKernel()
-    nest.SetKernelStatus({"resolution": resolution, "print_time": True })
+    nest.SetKernelStatus({"resolution": resolution, "print_time": True, "local_num_threads": 10 })
 
     sources = nest.Create("parrot_neuron", elements)
     target = nest.Create("iaf_psc_delta")

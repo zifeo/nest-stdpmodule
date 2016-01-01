@@ -122,9 +122,24 @@ All of those components can interact with each others and are including inside t
 Even though not everything above was implemented and tuned due to lack of time, Taranis can provide some insights for further work.
 Performance are quite good for a few neurons but does not scale well due in part to JVM garbage collector.
 
-### Results
+### Benchmarks results
 
-Coming soon.
+All the benchmarks were run **5** times on the same configuration (duration/precision compromise, some of them took hours to be completed).
+
+#### Brunnel balanced network
+
+Using delta neuron (`iaf_psc_deta`).
+
+![](./plots/brunnel-per-approach.png)
+![](./plots/brunnel-per-order.png)
+
+#### Feedforward
+
+**n** pre-synaptic neurons connected to **1** post-synpatic neuron.
+
+![](./plots/feedforward-per-approach-0.1ms.png)
+![](./plots/feedforward-per-approach-0.5ms.png)
+![](./plots/feedforward-per-approach-1ms.png)
 
 ### License
 

@@ -82,7 +82,7 @@ The DSL offers the following facilities:
 ### Cluster Beowulf
 
 Requires at least python 2.7 and DigitalOcean [python-bindings](https://github.com/koalalorenzo/python-digitalocean) (`pip install -U python-digitalocean`).
-The deloy system was tested up to **1/2** million neurons on **400**vcpus with **1.28**To RAM for ~19$ hourly.
+The deloy system was tested up to **1/2** million neurons (Brunnel balanced network) on **400**vcpus with **1.28**To RAM for ~19$ hourly.
 This script is provided as is and comes with no warranty nor liability.
 
 The command offers the following facilities:
@@ -108,6 +108,10 @@ Common scenario (global installation takes 15 minutes):
 ./clusterify.py run 4 brunnel.py
 ./clusterify.py delete`
 ```
+
+### Taranis
+
+
 
 ### Results
 

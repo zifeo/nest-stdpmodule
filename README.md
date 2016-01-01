@@ -111,7 +111,16 @@ Common scenario (global installation takes 15 minutes):
 
 ### Taranis
 
+Independly from this project, [Taranis](https://github.com/zifeo/Taranis) is a related short-project aiming to evaluate how can the [actor model](https://en.wikipedia.org/wiki/Actor_model) be implemented with STDP.
+Using abstract "dynamics" (calibrate/update/handle) as building block, a neuron is composed three parts:
 
+- post-connection dynamics: each incoming event will be arriving through there
+- neuron dynamics: care about post and pre calibrations and updates as well as its own dynamics
+- pre-connection dynamics: each outgoing event will be leaving through there
+
+All of those components can interact with each others and are including inside the same actor. 
+Even though not everything above was implemented and tuned due to lack of time, Taranis can provide some insights for further work.
+Performance are quite good for a few neurons but does not scale well due in part to JVM garbage collector.
 
 ### Results
 

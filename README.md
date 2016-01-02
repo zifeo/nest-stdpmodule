@@ -5,7 +5,7 @@ from [Swiss Institute of Technology in Lausanne](http://www.epfl.ch). It was sup
 [Alex Seeholzer](https://github.com/flinz) during fall semester 2015.
 
 Project's goal was to evaluate how can spike-timing dependent plasticity (STDP) mechanisms be implemented in the NEST 
-simulator, allowing complex protocols and neuro-modulation to be implemented.
+simulator, allowing complex protocols and neuro-modulation definitions.
 
 Standard approach, using NEST-native synapse system:
 
@@ -94,7 +94,7 @@ The command offers the following facilities:
 - `./clusterify.py run [1..] [program]`: run given python program on the cluster using mpi and n processes
 - `./clusterify.py delete`: delete: remove current cluster
 
-Common scenario (global installation takes 15 minutes):
+Common scenario (global installation takes 15 minutes on average):
 
 ```bash
 ./clusterify.py key digitalOceanToken
@@ -111,16 +111,17 @@ Common scenario (global installation takes 15 minutes):
 
 ### Taranis
 
-Independly from this project, [Taranis](https://github.com/zifeo/Taranis) is a related short-project aiming to evaluate how can the [actor model](https://en.wikipedia.org/wiki/Actor_model) be implemented with STDP.
+Independly from this project, [Taranis](https://github.com/zifeo/Taranis) is a related short proof of concept aiming to evaluate how can the [actor model](https://en.wikipedia.org/wiki/Actor_model) be implemented with STDP.
 Using abstract "dynamics" (calibrate/update/handle) as building block, a neuron is composed three parts:
 
-- post-connection dynamics: each incoming event will be arriving through there
+- post-connection dynamics: each incoming event will be arriving to the neuron through there
 - neuron dynamics: care about post and pre calibrations and updates as well as its own dynamics
-- pre-connection dynamics: each outgoing event will be leaving through there
+- pre-connection dynamics: each outgoing event will be leaving the neuron through there
 
 All of those components can interact with each others and are including inside the same actor. 
+Each event sent will be broadcasted to the neuron's successors as well as neuron's priors. 
 Even though not everything above was implemented and tuned due to lack of time, Taranis can provide some insights for further work.
-Performance are quite good for a few neurons but does not scale well due in part to JVM garbage collector.
+Performance are quite good for a few neurons but does not scale well due in part to JVM garbage collection.
 
 ### Benchmarks results
 

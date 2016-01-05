@@ -1,53 +1,58 @@
 ## A generalizable model of spike-timing dependent plasticity for the the Neural Simulation Tool ([NEST](https://github.com/nest/nest-simulator))
 
-This is a bachelor graduation project carried out at the [Laboratory of Computational Neuroscience](http://lcn1.epfl.ch) 
+This is a bachelor semester project carried out at the [Laboratory of Computational Neuroscience](http://lcn1.epfl.ch) 
 from [Swiss Institute of Technology in Lausanne](http://www.epfl.ch). It was supervised by 
 [Alex Seeholzer](https://github.com/flinz) during fall semester 2015.
 
-Project's goal was to evaluate how can spike-timing dependent plasticity (STDP) mechanisms be implemented in the NEST 
-simulator, allowing complex protocols and neuro-modulation definitions.
+The project's goal was to evaluate how alternative spike-timing dependent plasticity (STDP) mechanisms can be implemented in the NEST simulator, facilitating the subsequent implementation of complex STDP rule and neuro-modulation.
 
-Standard approach, using NEST-native synapse system:
+### Introduction
 
-- synapse updates happen only on pre-synaptic spikes
-- delays are complex to manage correctly
-- limited access on post-synaptic variables
-- no neuro-modulation
+The NEST Simulator has...
+
+### Overview
+
+#### Standard approach, using NEST-native event driven synapses:
+
+- synapse updates happen only on pre-synaptic spikes (event driven updates)
+- dendritic delays have to be explicitly implemented in each STDP model
+- limited access to post-synaptic variables
+- limited neuro-modulation (see https://github.com/nest/nest-simulator/blob/master/models/volume_transmitter.h)
 - directly available out of the box
-- minimum delay is resolution
+- minimum delay is simulation resolution
 - theoretically complete graph scales at **O(n^2)** connections for **n** neurons
 
-Neuron entity approach, using a fake neuron as a synapse:
+#### STDPNode approach, using an [ArchivingNode](https://github.com/nest/nest-simulator/blob/master/nestkernel/archiving_node.h) and two static connections, which comprise a STDPNode:
 
-- synapses has its own dynamics (calibrate/update/handle)
-- delays are manage by the simulation
-- all variables are located in the synapse
-- neuro-modulation through custom event
-- require a DSL (pynest) or must follow a well defined *contract* (pre-neuron -> synapse, synapse -> post-neuron, post-neuron -> synapse on port **1** for feedback)
-- minimum delay is twice the resolution
+- STDPNodes are updated in continuous time (via calibrate/update/handle)
+- delays are externalized to connections into and out of the STDPNode
+- all variables (e.g. synaptic traces) are located in the synapse
+- allows flexible neuro-modulation through, e.g., custom events or additional spike receptors
+- requires a DSL (pynest) or must follow a well defined *contract* (pre-neuron -> synapse, synapse -> post-neuron, post-neuron -> synapse on port **1** for feedback, see **Figure 1**)
+- minimum delay is twice the simulation resolution
 - theoretically complete graph scales at **O(4n^2)** connections for **n** neurons
 
 ### In this repository
 
 - standard approach (root): 
     - triplet model (Pfister 2006), `stdp_triplet_all_in_one_synapse` is defined inside `stdp_triplet_connection.h` (difference with NEST 2.10 `stdp_synapse` is variables centralization)
-- neuron entity approach (root):
+- STDPNode approach (root):
     - triplet model (Pfister 2006), `stdp_triplet_neuron` is defined inside `stdp_triplet_neuron.{h,cpp}`
-    - long-stability model (Zenke 2015), `stdp_long_neuron` is defined inside `stdp_long_neuron.{h,cpp}` (no tests)
+    - first version of long-term stable STDP model (Zenke 2015), `stdp_long_neuron` is defined inside `stdp_long_neuron.{h,cpp}` (no tests)
 - tests:
-    - triplet model (Pfister 2006) both approach (classical tests as well as visual decays tests)
+    - triplet model (Pfister 2006), for both approaches (classical tests as well as visual decays tests)
 - slides: [reveal.js](https://github.com/hakimel/reveal.js/) midterm and final presentations
 - pynest:
-    - neuron entity approach DSL example (do not handle all connections types, i.e. no indegree)
+    - STDPNode approach DSL example (do not handle all connections types, i.e. no indegree)
 - examples:
     - standard approach for triplet model (Pfister 2006) pairing experiment
-    - neuron entity approach with contract for triplet model (Pfister 2006) pairing experiment
-    - neuron entity approach with dsl for triplet model (Pfister 2006) pairing experiment
-    - Zenke entity approach with contract for long-stability model (Zenke 2015) pairing experiment (but different parameters)
+    - STDPNode approach with contract for triplet model (Pfister 2006) pairing experiment
+    - STDPNode approach with DSL for triplet model (Pfister 2006) pairing experiment
+    - STDPNode approach with contract for long-term stable STDP model (Zenke 2015) pairing experiment (parameters differ slightly from those in Zenke 2015)
 - benchmarks:
-    - a Brunnel balanced network with delta neuron (`iaf_psc_deta`): static connections vs standard approach vs neuron entity approach (through different network orders and cores)
-    - a feedforward (**n** pre-synaptic neurons connected to **1** post-synpatic neuron): static connections vs standard approach vs neuron entity approach (through different **n**, cores and resolutions)
-    - some installations scripts for NEST and this module
+    - a Brunnel balanced network with delta neuron (`iaf_psc_deta`): static connections vs standard approach vs STDPNode approach (through different network orders and cores)
+    - a feedforward (**n** pre-synaptic neurons connected to **1** post-synpatic neuron): static connections vs standard approach vs STDPNode approach (through different **n**, cores and resolutions)
+    - installations scripts for NEST and this module
     - a command `./clusterify.py` for building easily NEST clusters (simulation via MPI) on [DigitalOcean](https://www.digitalocean.com)
     - plotting scripts of benchmark results
 - plots: all plotted results

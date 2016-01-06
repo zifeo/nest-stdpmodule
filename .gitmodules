@@ -1,0 +1,3 @@
+[submodule "cluster"]
+	path = cluster
+	url = https://github.com/zifeo/nest-simulator-cluster.git

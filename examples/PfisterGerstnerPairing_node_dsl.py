@@ -6,20 +6,10 @@ import numpy as np
 Reproduce result of the pairing experiment from Pfister-Gerstner (2006) with the triplet model.
 """
 
-nest.Install("stdpmodule")
+nest.HelloSTDP()
 nest.set_verbosity("M_WARNING")
 
-def generateSpikes(neuron, times):
-    """Trigger spike to given neuron at specified times."""
-    delay = 1.0
-    gen = nest.Create("spike_generator", 1, { "spike_times": [t - delay for t in times] })
-    nest.Connect(gen, neuron, syn_spec = { "delay": delay })
-
-def create(model, number):
-    """Allow multiple model instance to be unpack as they are created."""
-    return map(lambda x: (x,), nest.Create(model, number))
-
-syn_spec = {
+all_to_all_syn_spec = {
     "weight": 1.0,
     "tau_plus": 16.8,
     "tau_plus_triplet": 101.0,
@@ -33,6 +23,27 @@ syn_spec = {
     "Kplus_triplet": 0.0,
     "Kminus": 0.0,
     "Kminus_triplet": 0.0,
+    "axonal_delay": 0.1,
+    "dendritic_delay": 0.9,
+    "nearest_spike": False,
+}
+
+nearest_syn_spec = {
+    "weight": 1.0,
+    "tau_plus": 16.8,
+    "tau_plus_triplet": 714.0,
+    "tau_minus": 33.7,
+    "tau_minus_triplet": 40.0,
+    "Aplus": 8.8e-11,
+    "Aminus": 6.6e-3,
+    "Aplus_triplet": 5.3e-2,
+    "Aminus_triplet": 3.1e-3,
+    "Kplus": 0.0,
+    "Kplus_triplet": 0.0,
+    "Kminus": 0.0,
+    "Kminus_triplet": 0.0,
+    "axonal_delay": 0.1,
+    "dendritic_delay": 0.9,
     "nearest_spike": True,
 }
 
@@ -45,10 +56,9 @@ weights_minus = []
 weights_plus_nearest = []
 weights_minus_nearest = []
 
-def evaluate(rho, dt, nearest):
+def evaluate(rho, dt, syn_spec):
     """Evaluate connection change of weight and returns it."""
     nest.ResetKernel()
-    nest.SetKernelStatus({"local_num_threads" : 1, "resolution" : 0.1, "print_time": False})
 
     step = 1000.0 / rho
     simulation_duration = np.ceil(n * step)
@@ -56,32 +66,28 @@ def evaluate(rho, dt, nearest):
     times_post = [t + dt for t in times_pre]
 
     # Entities
-    local_spec = syn_spec.copy()
-    local_spec.update({ "nearest_spike": nearest })
     neuron_pre = nest.Create("parrot_neuron")
     neuron_post = nest.Create("parrot_neuron")
-    triplet_synapse = nest.Create("stdp_triplet_node", params = local_spec)
 
     # Connections
-    generateSpikes(neuron_pre, times_pre)
-    generateSpikes(neuron_post, times_post)
-    nest.Connect(neuron_pre, triplet_synapse)
-    nest.Connect(triplet_synapse, neuron_post, syn_spec = { "receptor_type": 1 }) # do not repeat spike
-    nest.Connect(neuron_post, triplet_synapse, syn_spec = { "receptor_type": 1 }) # differentiate post-synaptic feedback
+    nest.Spikes(neuron_pre, times_pre)
+    nest.Spikes(neuron_post, times_post)
+    triplet_synapse = nest.Connect(neuron_pre, neuron_post, model = "stdp_triplet_node", syn_spec = syn_spec,
+                                   syn_post_spec = { "receptor_type": 1 }) # avoid repeating spike on post parrot neuron
 
     # Simulation
-    current_weight = nest.GetStatus(triplet_synapse, keys = "weight")[0]
+    before_weight = nest.GetStatus(triplet_synapse, keys = "weight")[0]
     nest.Simulate(start_spikes + simulation_duration)
 
     # Results
     end_weight = nest.GetStatus(triplet_synapse, keys = "weight")[0]
-    return end_weight - current_weight
+    return end_weight - before_weight
 
 for rho in rhos:
-    weights_plus.append(evaluate(rho, dt, False))
-    weights_minus.append(evaluate(rho, -dt, False))
-    weights_plus_nearest.append(evaluate(rho, dt, True))
-    weights_minus_nearest.append(evaluate(rho, -dt, True))
+    weights_plus.append(evaluate(rho, dt, all_to_all_syn_spec))
+    weights_minus.append(evaluate(rho, -dt, all_to_all_syn_spec))
+    weights_plus_nearest.append(evaluate(rho, dt, nearest_syn_spec))
+    weights_minus_nearest.append(evaluate(rho, -dt, nearest_syn_spec))
 
 plt.figure()
 plt.title('Pairing experiment (Pfister-Gerstner 2006)')

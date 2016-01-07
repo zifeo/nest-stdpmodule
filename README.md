@@ -52,7 +52,7 @@ This is why you will find in this module an alternative approach of synapses usi
 - standard approach (root): 
     - triplet model (Pfister 2006), `stdp_triplet_all_in_one_synapse` is defined inside `stdp_triplet_connection.h` (difference with NEST 2.10 `stdp_synapse` is variables centralization)
 - STDPNode approach (root):
-    - triplet model (Pfister 2006), `stdp_triplet_neuron` is defined inside `stdp_triplet_neuron.{h,cpp}`
+    - triplet model (Pfister 2006), `stdp_triplet_node` is defined inside `stdp_triplet_node.{h,cpp}`
     - first version of long-term stable STDP model (Zenke 2015), `stdp_longterm_node` is defined inside `stdp_longterm_node.{h,cpp}` (no tests)
 - tests:
     - triplet model (Pfister 2006), for both approaches (classical tests as well as visual decays tests)
@@ -94,7 +94,7 @@ However depending on your installation it must sometimes be manually done (check
 The DSL offers the following facilities:
 
 - `nest.helloSTDP()`: start this module and patch pynest accordingly
-- `triplet_synapse = nest.Connect(pre, post, conn_spec = None, syn_spec = None, model = "stdp_triplet_neuron", pre_syn_spec = None, syn_post_spec = None)`: connect `pre` and `post` neurons through triplet model (Pfister 2006) and return associated neuron entity synapses 
+- `triplet_synapse = nest.Connect(pre, post, conn_spec = None, syn_spec = None, model = "stdp_triplet_node", pre_syn_spec = None, syn_post_spec = None)`: connect `pre` and `post` neurons through triplet model (Pfister 2006) and return associated neuron entity synapses 
 - `nest.Spikes(neurons, times)`: send on-demand spikes to `neurons` at given range `times`
 
 ### Taranis

@@ -38,7 +38,7 @@
 // include headers with your own stuff
 #include "stdpmodule.h"
 #include "stdp_triplet_connection.h"
-#include "stdp_triplet_neuron.h"
+#include "stdp_triplet_node.h"
 #include "stdp_longterm_node.h"
 
 // -- Interface to dynamic module loader ---------------------------------------
@@ -86,7 +86,7 @@ void stdpmodule::STDPModule::init(SLIInterpreter *i) {
    */
 
   nest::register_model<STDPTripletNeuron>(nest::NestModule::get_network(),
-                                          "stdp_triplet_neuron");
+                                          "stdp_triplet_node");
   nest::register_model<STDPLongNeuron>(nest::NestModule::get_network(),
                                        "stdp_longterm_node");
 

@@ -89,7 +89,7 @@ def bench(config, resolution):
             "receptor_type": 1 # differentiate post-synaptic feedback
         }
 
-        synapses = nest.Create("stdp_triplet_neuron", len(sources), params = stdp_neuron)
+        synapses = nest.Create("stdp_triplet_node", len(sources), params = stdp_neuron)
         nest.Connect(sources, synapses, 'one_to_one', pre_syn_spec)
         nest.Connect(synapses, target, 'all_to_all', syn_post_spec)
         nest.Connect(target, synapses, 'all_to_all', post_syn_spec)

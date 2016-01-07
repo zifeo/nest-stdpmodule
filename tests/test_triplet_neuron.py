@@ -4,7 +4,7 @@ from math import exp
 
 @nest.check_stack
 class STDPTripletNeuronTestCase(unittest.TestCase):
-    """Check stdp_triplet_neuron model properties."""
+    """Check stdp_triplet_node model properties."""
 
     @classmethod
     def setUpClass(self):
@@ -38,7 +38,7 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         # setup basic circuit
         self.pre_neuron = nest.Create("parrot_neuron")
         self.post_neuron = nest.Create("parrot_neuron")
-        self.triplet_synapse = nest.Create("stdp_triplet_neuron", params = self.syn_spec)
+        self.triplet_synapse = nest.Create("stdp_triplet_node", params = self.syn_spec)
 
         nest.Connect(self.pre_neuron, self.triplet_synapse)
         nest.Connect(self.triplet_synapse, self.post_neuron, syn_spec = {
@@ -86,7 +86,7 @@ class STDPTripletNeuronTestCase(unittest.TestCase):
         def setupProperty(property):
             bad_syn_spec = self.syn_spec.copy()
             bad_syn_spec.update(property)
-            self.triplet_synapse = nest.Create("stdp_triplet_neuron", params = bad_syn_spec)
+            self.triplet_synapse = nest.Create("stdp_triplet_node", params = bad_syn_spec)
 
         def badPropertyWith(content, parameters):
             self.assertRaisesRegexp(nest.NESTError, "BadProperty(.+)" + content, setupProperty, parameters)

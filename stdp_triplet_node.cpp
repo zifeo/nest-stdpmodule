@@ -1,10 +1,10 @@
 //
-//  stdp_triplet_neuron.cpp
+//  stdp_triplet_node.cpp
 //  NEST
 //
 //
 
-#include "stdp_triplet_neuron.h"
+#include "stdp_triplet_node.h"
 
 #include "stdpnames.h"
 #include "network.h"

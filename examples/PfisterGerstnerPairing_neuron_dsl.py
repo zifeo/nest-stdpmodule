@@ -72,7 +72,7 @@ def evaluate(rho, dt, syn_spec):
     # Connections
     nest.Spikes(neuron_pre, times_pre)
     nest.Spikes(neuron_post, times_post)
-    triplet_synapse = nest.Connect(neuron_pre, neuron_post, model = "stdp_triplet_neuron", syn_spec = syn_spec,
+    triplet_synapse = nest.Connect(neuron_pre, neuron_post, model = "stdp_triplet_node", syn_spec = syn_spec,
                                    syn_post_spec = { "receptor_type": 1 }) # avoid repeating spike on post parrot neuron
 
     # Simulation

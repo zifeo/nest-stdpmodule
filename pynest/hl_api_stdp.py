@@ -19,7 +19,7 @@ def HelloSTDP():
     def _connect(pre, post, conn_spec = None, syn_spec = None, model = None, pre_syn_spec = None, syn_post_spec = None):
         """Wrap nest connect and allow to create fake neuron-synapse."""
 
-        if (model == "stdp_triplet_neuron"):
+        if (model == "stdp_triplet_node"):
 
             if conn_spec != None and conn_spec != 'all_to_all' and conn_spec != 'one_to_one':
                 raise nest.NESTError('Unsupported conn_spec for stdp dsl: %s' % conn_spec)
@@ -40,7 +40,7 @@ def HelloSTDP():
             }
 
             connectionCount = len(post) if conn_spec == 'one_to_one' else len(post)**2
-            synapse = nest.Create("stdp_triplet_neuron", connectionCount, params = syn_spec)
+            synapse = nest.Create("stdp_triplet_node", connectionCount, params = syn_spec)
 
             nest_connect(pre, synapse, conn_spec, pre_syn_spec)
             nest_connect(synapse, post, 'one_to_one', syn_post_spec)

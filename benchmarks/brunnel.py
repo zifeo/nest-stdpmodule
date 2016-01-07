@@ -147,7 +147,7 @@ def bench(config, order):
                 "delay": delay - min_delay
             }
             selected_ex = random.sample(filter(lambda n: n != post, nodes_ex), CE)
-            synapses_ex = nest.Create("stdp_triplet_neuron", CE, params = stdp_excitatory)
+            synapses_ex = nest.Create("stdp_triplet_node", CE, params = stdp_excitatory)
             nest.Connect(selected_ex, synapses_ex, 'one_to_one', pre_syn_spec)
             nest.Connect(synapses_ex, (post,), 'all_to_all', syn_post_spec)
             nest.Connect((post,), synapses_ex, 'all_to_all', post_syn_spec)
@@ -158,7 +158,7 @@ def bench(config, order):
                 "delay": delay - min_delay
             }
             selected_in = random.sample(filter(lambda n: n != post, nodes_in), CI)
-            synapses_in = nest.Create("stdp_triplet_neuron", CI, params = stdp_inhibitory)
+            synapses_in = nest.Create("stdp_triplet_node", CI, params = stdp_inhibitory)
             nest.Connect(selected_in, synapses_in, 'one_to_one', pre_syn_spec)
             nest.Connect(synapses_in, (post,), 'all_to_all', syn_post_spec)
             nest.Connect((post,), synapses_in, 'all_to_all', post_syn_spec)

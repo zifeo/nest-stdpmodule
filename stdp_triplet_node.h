@@ -1,11 +1,11 @@
 //
-//  stdp_triplet_neuron.h
+//  stdp_triplet_node.h
 //  NEST
 //
 //
 
 /* BeginDocumentation
- Name: stdp_triplet_neuron - Neuron that acts like a stdp_triplet_connection.
+ Name: stdp_triplet_node - Neuron that acts like a stdp_triplet_connection.
 
  Description:
  stdp_triplet_synapse is a modeled connection with spike time dependent

@@ -207,7 +207,7 @@
 							```python
 							neuron_pre = nest.Create("parrot_neuron")
 							neuron_post = nest.Create("parrot_neuron")
-							triplet_neuron = nest.Create("stdp_triplet_neuron")
+							triplet_neuron = nest.Create("stdp_triplet_node")
 
 							nest.Connect(neuron_pre, triplet_neuron)
 							nest.Connect(neuron_post, neuronPost)

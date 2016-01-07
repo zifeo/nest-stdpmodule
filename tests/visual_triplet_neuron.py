@@ -36,7 +36,7 @@ times_post = [400.0, 600.0]
 # setup circuit
 neuron_pre = nest.Create("parrot_neuron")
 neuron_post = nest.Create("parrot_neuron")
-triplet_synapse = nest.Create("stdp_triplet_neuron", params = syn_spec)
+triplet_synapse = nest.Create("stdp_triplet_node", params = syn_spec)
 multi = nest.Create("multimeter")
 nest.SetStatus(multi, params = {
     "withtime": True,

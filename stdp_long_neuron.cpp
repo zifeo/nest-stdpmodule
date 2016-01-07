@@ -167,13 +167,13 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
         P_.tau_const_ * delta; // (16)
     S_.C_ +=
         (-S_.C_ / P_.tau_hom_ + S_.Zht_ * S_.Zht_ / 1000.0) * delta; // (18)
-    // S_.B_ = P_.A_ * std::min(S_.C_, 1.0);                            // (17)
+    S_.B_ = P_.A_ * std::min(S_.C_, 1.0);                            // (17)
 
     if (current_pre_spikes_n > 0) {
 
       // depress: t = t^pre
-      S_.weight_ -= S_.B_ * S_.Zminus_; // doublet LTD (12)
-      // S_.weight_ += P_.delta_;          // transmitter - induced (14)
+      S_.weight_ -= S_.B_ * S_.Zminus_ // doublet LTD (12)
+                    += P_.delta_;          // transmitter - induced (14)
 
       S_.Zplus_ += 1.0;
 

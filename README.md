@@ -117,14 +117,14 @@ All the benchmarks were run **5** times on the same configuration (duration/prec
 
 #### Brunnel balanced network
 
-Using delta neuron (`iaf_psc_deta`).
+Using delta neuron (`iaf_psc_deta`) and triplet model (Pfister 2006).
 
 ![](./figures/brunnel-per-approach.png)
 ![](./figures/brunnel-per-order.png)
 
 #### Feedforward
 
-**n** pre-synaptic neurons connected to **1** post-synpatic neuron.
+**n** pre-synaptic neurons connected to **1** post-synpatic neuron using triplet model (Pfister 2006).
 
 ![](./figures/feedforward-per-approach-0.1ms.png)
 ![](./figures/feedforward-per-approach-0.5ms.png)

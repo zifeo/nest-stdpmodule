@@ -53,9 +53,8 @@ The NEST Simulator has...
     - a Brunnel balanced network with delta neuron (`iaf_psc_deta`): static connections vs standard approach vs STDPNode approach (through different network orders and cores)
     - a feedforward (**n** pre-synaptic neurons connected to **1** post-synpatic neuron): static connections vs standard approach vs STDPNode approach (through different **n**, cores and resolutions)
     - installations scripts for NEST and this module
-    - a command `./clusterify.py` for building easily NEST clusters (simulation via MPI) on [DigitalOcean](https://www.digitalocean.com)
     - plotting scripts of benchmark results
-- plots: all plotted results
+- cluster: command for deploying NEST and this module over large Beowulf MPI-clusters on DigitalOcean
     
 ### How to install this module
 
@@ -84,36 +83,6 @@ The DSL offers the following facilities:
 - `triplet_synapse = nest.Connect(pre, post, conn_spec = None, syn_spec = None, model = "stdp_triplet_neuron", pre_syn_spec = None, syn_post_spec = None)`: connect `pre` and `post` neurons through triplet model (Pfister 2006) and return associated neuron entity synapses 
 - `nest.Spikes(neurons, times)`: send on-demand spikes to `neurons` at given range `times`
 
-### Cluster Beowulf
-
-Requires at least python 2.7 and DigitalOcean [python-bindings](https://github.com/koalalorenzo/python-digitalocean) (`pip install -U python-digitalocean`).
-The deloy system was tested up to **1/2** million neurons (Brunnel balanced network) on **400**vcpus with **1.28**To RAM for ~19$ hourly.
-This script is provided as is and comes with no warranty nor liability.
-
-The command offers the following facilities:
-
-- `./clusterify.py key [token]`: setup Digital Ocean token (empty for removing it)
-- `./clusterify.py list`: list current cluster
-- `./clusterify.py create [2|3|...] [1gb|2gb|...]`: create n-cluster of given size and setup ssh everywhere
-- `./clusterify.py install [script]`: execute given bash script on each node
-- `./clusterify.py run [1..] [program]`: run given python program on the cluster using mpi and n processes
-- `./clusterify.py delete`: delete: remove current cluster
-
-Common scenario (global installation takes 15 minutes on average):
-
-```bash
-./clusterify.py key digitalOceanToken
-./clusterify.py create 4 8gb
-./clusterify.py list
-./clusterify.py install install_env.bash
-./clusterify.py install install_nest.bash
-./clusterify.py install install_stdpmodule.bash
-./clusterify.py run 16 brunnel.py
-./clusterify.py run 8 brunnel.py
-./clusterify.py run 4 brunnel.py
-./clusterify.py delete`
-```
-
 ### Taranis
 
 Independly from this project, [Taranis](https://github.com/zifeo/Taranis) is a related short proof of concept aiming to evaluate how can the [actor model](https://en.wikipedia.org/wiki/Actor_model) be implemented with STDP.
@@ -124,9 +93,9 @@ Using abstract "dynamics" (calibrate/update/handle) as building block, a neuron 
 - pre-connection dynamics: each outgoing event will be leaving the neuron through there
 
 All of those components can interact with each others and are including inside the same actor. 
-Each event sent will be broadcasted to the neuron's successors as well as neuron's priors. 
+Each event sent will be broadcasted to the neuron's successors as well as neuron's priors nodes.
 Even though not everything above was implemented and tuned due to lack of time, Taranis can provide some insights for further work.
-Performance are quite good for a few neurons but does not scale well due in part to JVM garbage collection.
+Performance are quite good for a few neurons but does not scale well due in part to JVM garbage collection and provided dispatcher.
 
 ### Benchmarks results
 

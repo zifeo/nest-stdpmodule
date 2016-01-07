@@ -1,5 +1,5 @@
 //
-//  stdp_long_neuron.h
+//  stdp_longterm_node.h
 //  NEST
 //
 //

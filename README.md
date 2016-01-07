@@ -53,7 +53,7 @@ This is why you will find in this module an alternative approach of synapses usi
     - triplet model (Pfister 2006), `stdp_triplet_all_in_one_synapse` is defined inside `stdp_triplet_connection.h` (difference with NEST 2.10 `stdp_synapse` is variables centralization)
 - STDPNode approach (root):
     - triplet model (Pfister 2006), `stdp_triplet_neuron` is defined inside `stdp_triplet_neuron.{h,cpp}`
-    - first version of long-term stable STDP model (Zenke 2015), `stdp_long_neuron` is defined inside `stdp_long_neuron.{h,cpp}` (no tests)
+    - first version of long-term stable STDP model (Zenke 2015), `stdp_longterm_node` is defined inside `stdp_longterm_node.{h,cpp}` (no tests)
 - tests:
     - triplet model (Pfister 2006), for both approaches (classical tests as well as visual decays tests)
 - slides: [reveal.js](https://github.com/hakimel/reveal.js/) midterm and final presentations

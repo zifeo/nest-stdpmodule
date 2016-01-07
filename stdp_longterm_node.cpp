@@ -1,10 +1,10 @@
 //
-//  stdp_long_neuron.cpp
+//  stdp_longterm_node.cpp
 //  NEST
 //
 //
 
-#include "stdp_long_neuron.h"
+#include "stdp_longterm_node.h"
 
 #include "stdpnames.h"
 #include "network.h"

@@ -47,7 +47,7 @@ def evaluate(rho, dt, nearest):
     local_spec.update({ "nearest_spike": nearest })
     neuron_pre = nest.Create("parrot_neuron")
     neuron_post = nest.Create("parrot_neuron")
-    triplet_synapse = nest.Create("stdp_long_neuron", params = local_spec)
+    triplet_synapse = nest.Create("stdp_longterm_node", params = local_spec)
 
     multi = nest.Create("multimeter")
     nest.SetStatus(multi, params = {

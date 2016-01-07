@@ -25,19 +25,19 @@ This is why you will find in this module an alternative approach of synapses usi
 
 #### Standard approach, using NEST-native event driven synapses
 
-![](./figures/standard-approach.svg)
+![](./figures/standard-approach.png)
 
 - synapse updates happen only on pre-synaptic spikes (event driven updates)
 - dendritic delays have to be explicitly implemented in each STDP model
 - limited access to post-synaptic variables
-- limited neuro-modulation (see https://github.com/nest/nest-simulator/blob/master/models/volume_transmitter.h)
+- limited neuro-modulation (see [Volume transmitter](https://github.com/nest/nest-simulator/blob/master/models/volume_transmitter.h))
 - directly available out of the box
 - minimum delay is simulation resolution
 - theoretically complete graph scales at **O(n^2)** connections for **n** neurons
 
 #### STDPNode approach, using an [ArchivingNode](https://github.com/nest/nest-simulator/blob/master/nestkernel/archiving_node.h) and two static connections
 
-![](./figures/STDPNode-approach.svg)
+![](./figures/STDPNode-approach.png)
 
 - STDPNodes are updated in continuous time (via calibrate/update/handle)
 - delays are externalized to connections into and out of the STDPNode

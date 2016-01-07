@@ -173,7 +173,7 @@ void stdpmodule::STDPLongNeuron::update(Time const &origin, const long_t from,
 
       // depress: t = t^pre
       S_.weight_ -= S_.B_ * S_.Zminus_ // doublet LTD (12)
-                    += P_.delta_;          // transmitter - induced (14)
+                    + P_.delta_;       // transmitter - induced (14)
 
       S_.Zplus_ += 1.0;
 

@@ -51,8 +51,7 @@ The NEST Simulator has...
     - STDPNode approach with contract for long-term stable STDP model (Zenke 2015) pairing experiment (parameters differ slightly from those in Zenke 2015)
 - benchmarks:
     - a Brunnel balanced network with delta neuron (`iaf_psc_deta`): static connections vs standard approach vs STDPNode approach (through different network orders and cores)
-    - a feedforward (**n** pre-synaptic neurons connected to **1** post-synpatic neuron): static connections vs standard approach vs STDPNode approach (through different **n**, cores and resolutions)
-    - installations scripts for NEST and this module
+    - a feedforward network (**n** pre-synaptic neurons connected to **1** post-synpatic neuron): static connections vs standard approach vs STDPNode approach (through different **n**, cores and resolutions)
     - plotting scripts of benchmark results
 - cluster: command for deploying NEST and this module over large Beowulf MPI-clusters on DigitalOcean
     
@@ -62,7 +61,7 @@ NEST simulator >= 2.8.0 is required (not tested below) before proceeding to furt
 Otherwise please check out the official installation [steps](http://www.nest-simulator.org/installation/).
 
 ```bash
-git clone https://github.com/zifeo/nest-stdpmodule.git stdpmodule
+git clone --recursive https://github.com/zifeo/nest-stdpmodule.git stdpmodule
 cd stdpmodule
 ./bootstrap.sh
 ./configure
@@ -105,21 +104,20 @@ All the benchmarks were run **5** times on the same configuration (duration/prec
 
 Using delta neuron (`iaf_psc_deta`).
 
-![](./plots/brunnel-per-approach.png)
-![](./plots/brunnel-per-order.png)
+![](./benchmarks/brunnel-per-approach.png)
+![](./benchmarks/brunnel-per-order.png)
 
 #### Feedforward
 
 **n** pre-synaptic neurons connected to **1** post-synpatic neuron.
 
-![](./plots/feedforward-per-approach-0.1ms.png)
-![](./plots/feedforward-per-approach-0.5ms.png)
-![](./plots/feedforward-per-approach-1ms.png)
+![](./benchmarks/feedforward-per-approach-0.1ms.png)
+![](./benchmarks/feedforward-per-approach-0.5ms.png)
+![](./benchmarks/feedforward-per-approach-1ms.png)
 
 ### License
 
-All the work is provided under NEST [GNU General Public License 2 or later](http://www.nest-simulator.org/license/) and respectively DigitalOcean agreements.
-See `LICENSE` for further details.
+All the work is provided under NEST [GNU General Public License 2 or later](http://www.nest-simulator.org/license/). See `LICENSE` for further details.
 
 ### References
 

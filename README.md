@@ -8,11 +8,24 @@ The project's goal was to evaluate how alternative spike-timing dependent plasti
 
 ### Introduction
 
-The NEST Simulator has...
+The NEST Simulator is using `Node` as a base class for most of the components in a network.
+One example is neurons extending `ArchivingNode` which is itself extending `Node`.
+One opposite example is synapses only extending `Connection`.
+
+As a result synapses do not benefit of the same dynamics as general nodes. 
+On the one hand, their updates can only happen in an event-driven manner: changing theirs states can only be triggered by received events (one way only, from pre-synaptic to post-synaptic neuron).
+On the other hand, neurons are receiving ticks at a rate of 1/resolution: states changes can happen as often as the resolution allows.
+
+Some models of spike-timing dependent plasticity require complex dynamics and pre-to-post and post-to-pre triggers dependencies (e.g. Pfister 2006 or Zenke 2015).
+In NEST this is currently doable, whenever an event is received in the synapse, by rebuilding and going through the history of the post-synaptic neuron.
+However this process can be hard to achieve right and is longer to implement for the user.
+This is why you will find in this module an alternative approach of synapses using an archiving node and two static connections as a base.
 
 ### Overview
 
 #### Standard approach, using NEST-native event driven synapses
+
+![]()
 
 - synapse updates happen only on pre-synaptic spikes (event driven updates)
 - dendritic delays have to be explicitly implemented in each STDP model
@@ -23,6 +36,8 @@ The NEST Simulator has...
 - theoretically complete graph scales at **O(n^2)** connections for **n** neurons
 
 #### STDPNode approach, using an [ArchivingNode](https://github.com/nest/nest-simulator/blob/master/nestkernel/archiving_node.h) and two static connections
+
+![]()
 
 - STDPNodes are updated in continuous time (via calibrate/update/handle)
 - delays are externalized to connections into and out of the STDPNode

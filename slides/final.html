@@ -40,87 +40,11 @@
 						**Teo Stocco** / supervisor **Alex Seeholzer**
 					</script>
 				</section>
-
-				<section>
-					<section data-markdown>
-						<script type="text/template">
-							## Behind [NEST](http://www.nest-simulator.org)
-														
-							- started in 1993
-							- switched to General Public License in 2012
-							- mostly written in C++
-							- python and custom language (SLI) interface
-							- massively multi-threaded (OpenMP)
-							- 50+ neuron & 10+ synapse models
-						
-							![](img/nest.svg)
-						</script>
-					</section>
-					<section data-markdown>
-						<script type="text/template">
-							## Project goal
-							
-							Currently, connections (synapses) depend on pre-synaptic neurons for updates. This discard some synaptic processes:
-							
-							- neuromodulation
-							- some STDP protocols 
-							- others external influx
-							
-							**Let's build a workaround!**
-						</script>
-					</section>
-				</section>
 				
 				<section>
 					<section data-markdown>
 						<script type="text/template">
-							## Pfister-Gerstner Model · 2006
-
-							- triplet rule STDP protocol
-							- fits experimental datas (e.g. visual cortical slices)
-							- 2 pre-synaptic variables (e.g. # of active NMDA receptors)
-							- 2 post-synaptic variables (e.g. influx of calcium concentration)
-						</script>
-					</section>
-					<section data-markdown>
-						<script type="text/template">
-							## Pre-synaptically
-							
-							$$\displaystyle\frac{dr_1(t)}{dt}=-\frac{r_1(t)}{\tau_+}\quad\text{if}~t=t_{pre}~~r_1\to r_1+1$$
-							
-							$$\displaystyle\frac{dr_2(t)}{dt}=-\frac{r_2(t)}{\tau_x}\quad\text{if}~t=t_{pre}~~r_2\to r_2+1$$
-							
-							where $\tau_+,\tau_x$ are decay time-constants
-						</script>
-					</section>
-					<section data-markdown>
-						<script type="text/template">
-							## Post-synaptically
-							
-							$$\displaystyle\frac{do_1(t)}{dt}=-\frac{o_1(t)}{\tau_-}\quad\text{if}~t=t_{post}~~o_1\to o_1+1$$
-							
-							$$\displaystyle\frac{do_2(t)}{dt}=-\frac{o_2(t)}{\tau_y}\quad\text{if}~t=t_{post}~~o_2\to o_2+1$$
-							
-							where $\tau_-,\tau_y$ are decay time-constants
-						</script>
-					</section>
-					<section data-markdown>
-						<script type="text/template">
-							## Weight updates
-							
-							$$\displaystyle w(t)\to w(t)-o_1(t)[A_2^-+A_3^-r_2(t-\epsilon)]\quad\text{if}~t=t_{pre}$$
-							
-							$$\displaystyle w(t)\to w(t)+r_1(t)[A_2^++A_3^+o_2(t-\epsilon)]\quad\text{if}~t=t_{post}$$
-							
-							where $A_2^+,A_2^-,A_3^+,A_3^-$ are amplitudes of weight change respective to spike pairs and spike triplets
-						</script>
-					</section>
-				</section>
-				
-				<section>
-					<section data-markdown>
-						<script type="text/template">
-							## Connection implementation 
+							## Standard approach 
 
 							<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 270 70" width="60%" style="enable-background:new 0 0 270 70;" xml:space="preserve">
 							<style type="text/css">
@@ -222,7 +146,7 @@
 				<section>
 					<section data-markdown>
 						<script type="text/template">
-							## Neuron implementation
+							## STDPNode approach
 
 							<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="60%" viewBox="0 0 270 70" style="enable-background:new 0 0 270 70;" xml:space="preserve">
 							<style type="text/css">
@@ -293,7 +217,57 @@
 				<section>
 					<section data-markdown>
 						<script type="text/template">
-							## What's next?
+							## Contract & DSL
+
+							- reproducing some other results
+							- allow neuromodulation
+							- reducing solution verbosity
+							- increasing the flexibility and generality
+						</script>
+					</section>
+				</section>
+				
+				<section>
+					<section data-markdown>
+						<script type="text/template">
+							## Benchmarks
+
+							- reproducing some other results
+							- allow neuromodulation
+							- reducing solution verbosity
+							- increasing the flexibility and generality
+						</script>
+					</section>
+					
+					<section data-markdown>
+						<script type="text/template">
+							## Cluster
+
+							- reproducing some other results
+							- allow neuromodulation
+							- reducing solution verbosity
+							- increasing the flexibility and generality
+						</script>
+					</section>
+				</section>
+				
+				<section>
+					<section data-markdown>
+						<script type="text/template">
+							## Taranis
+
+							- reproducing some other results
+							- allow neuromodulation
+							- reducing solution verbosity
+							- increasing the flexibility and generality
+						</script>
+					</section>
+				</section>
+				
+				<section>
+					<section data-markdown>
+						<script type="text/template">
+							## Conclusion
 
 							- reproducing some other results
 							- allow neuromodulation
@@ -308,8 +282,11 @@
 						<script type="text/template">
 							## Thanks!
 
-							Work is on Github under [zifeo/nest-stdpmodule](https://github.com/zifeo/nest-stdpmodule) or on the official NEST repository.
+							Work is available on Github:
 							
+							[zifeo/nest-stdpmodule](https://github.com/zifeo/nest-stdpmodule)
+							
+							[zifeo/nest-simulator-cluster](https://github.com/zifeo/nest-simulator-cluster)							
 							![](img/github.png)
 						</script>
 					</section>

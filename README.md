@@ -12,7 +12,7 @@ The NEST Simulator has...
 
 ### Overview
 
-#### Standard approach, using NEST-native event driven synapses:
+#### Standard approach, using NEST-native event driven synapses
 
 - synapse updates happen only on pre-synaptic spikes (event driven updates)
 - dendritic delays have to be explicitly implemented in each STDP model
@@ -22,7 +22,7 @@ The NEST Simulator has...
 - minimum delay is simulation resolution
 - theoretically complete graph scales at **O(n^2)** connections for **n** neurons
 
-#### STDPNode approach, using an [ArchivingNode](https://github.com/nest/nest-simulator/blob/master/nestkernel/archiving_node.h) and two static connections, which comprise a STDPNode:
+#### STDPNode approach, using an [ArchivingNode](https://github.com/nest/nest-simulator/blob/master/nestkernel/archiving_node.h) and two static connections
 
 - STDPNodes are updated in continuous time (via calibrate/update/handle)
 - delays are externalized to connections into and out of the STDPNode
@@ -53,7 +53,7 @@ The NEST Simulator has...
     - a Brunnel balanced network with delta neuron (`iaf_psc_deta`): static connections vs standard approach vs STDPNode approach (through different network orders and cores)
     - a feedforward network (**n** pre-synaptic neurons connected to **1** post-synpatic neuron): static connections vs standard approach vs STDPNode approach (through different **n**, cores and resolutions)
     - plotting scripts of benchmark results
-- cluster: command for deploying NEST and this module over large Beowulf MPI-clusters on DigitalOcean
+- cluster: command for deploying [NEST and this module over large Beowulf MPI-clusters on DigitalOcean](https://github.com/zifeo/nest-simulator-cluster)
     
 ### How to install this module
 

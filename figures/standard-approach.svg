@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 270 70" style="enable-background:new 0 0 270 70;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;stroke:#000000;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#000000;stroke-miterlimit:10;}
+	.st2{fill:none;}
+	.st3{font-family:'CambriaMath';}
+	.st4{font-size:14px;}
+</style>
+<circle id="XMLID_1_" class="st0" cx="35" cy="35" r="25"/>
+<circle id="XMLID_3_" class="st0" cx="235" cy="35" r="25"/>
+<g id="XMLID_2_">
+	<g id="XMLID_16_">
+		<line id="XMLID_19_" class="st1" x1="60" y1="35" x2="203.9" y2="35"/>
+		<g id="XMLID_17_">
+			<path id="XMLID_18_" d="M210,35c-2.8,1.1-6.4,2.9-8.5,4.8l1.7-4.8l-1.7-4.8C203.6,32.1,207.1,33.9,210,35z"/>
+		</g>
+	</g>
+</g>
+<rect id="XMLID_4_" x="60" y="10" class="st2" width="150" height="25"/>
+<text id="XMLID_5_" transform="matrix(1 0 0 1 107.1089 19.739)" class="st3 st4">w(event)</text>
+</svg>

@@ -25,7 +25,7 @@ This is why you will find in this module an alternative approach of synapses usi
 
 #### Standard approach, using NEST-native event driven synapses
 
-![]()
+![](./figures/standard-approach.svg)
 
 - synapse updates happen only on pre-synaptic spikes (event driven updates)
 - dendritic delays have to be explicitly implemented in each STDP model
@@ -37,7 +37,7 @@ This is why you will find in this module an alternative approach of synapses usi
 
 #### STDPNode approach, using an [ArchivingNode](https://github.com/nest/nest-simulator/blob/master/nestkernel/archiving_node.h) and two static connections
 
-![]()
+![](./figures/STDPNode-approach.svg)
 
 - STDPNodes are updated in continuous time (via calibrate/update/handle)
 - delays are externalized to connections into and out of the STDPNode
@@ -67,7 +67,7 @@ This is why you will find in this module an alternative approach of synapses usi
 - benchmarks:
     - a Brunnel balanced network with delta neuron (`iaf_psc_deta`): static connections vs standard approach vs STDPNode approach (through different network orders and cores)
     - a feedforward network (**n** pre-synaptic neurons connected to **1** post-synpatic neuron): static connections vs standard approach vs STDPNode approach (through different **n**, cores and resolutions)
-    - plotting scripts of benchmark results
+- figures: benchmark results plots and illustrations
 - cluster: command for deploying [NEST and this module over large Beowulf MPI-clusters on DigitalOcean](https://github.com/zifeo/nest-simulator-cluster)
     
 ### How to install this module
@@ -119,16 +119,16 @@ All the benchmarks were run **5** times on the same configuration (duration/prec
 
 Using delta neuron (`iaf_psc_deta`).
 
-![](./benchmarks/brunnel-per-approach.png)
-![](./benchmarks/brunnel-per-order.png)
+![](./figures/brunnel-per-approach.png)
+![](./figures/brunnel-per-order.png)
 
 #### Feedforward
 
 **n** pre-synaptic neurons connected to **1** post-synpatic neuron.
 
-![](./benchmarks/feedforward-per-approach-0.1ms.png)
-![](./benchmarks/feedforward-per-approach-0.5ms.png)
-![](./benchmarks/feedforward-per-approach-1ms.png)
+![](./figures/feedforward-per-approach-0.1ms.png)
+![](./figures/feedforward-per-approach-0.5ms.png)
+![](./figures/feedforward-per-approach-1ms.png)
 
 ### License
 

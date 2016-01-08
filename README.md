@@ -43,7 +43,7 @@ This is why you will find in this module an alternative approach of synapses usi
 - delays are externalized to connections into and out of the STDPNode
 - all variables (e.g. synaptic traces) are located in the synapse
 - allows flexible neuro-modulation through, e.g., custom events or additional spike receptors
-- requires a DSL (pynest) or must follow a well defined *contract* (pre-neuron -> synapse, synapse -> post-neuron, post-neuron -> synapse on port **1** for feedback, see **Figure 1**)
+- requires a DSL (pynest) or must follow a well defined *contract* (pre-neuron -> synapse, synapse -> post-neuron, post-neuron -> synapse on port **1** for feedback, see figure above)
 - minimum delay is twice the simulation resolution
 - theoretically complete graph scales at **O(4n^2)** connections for **n** neurons
 
@@ -126,9 +126,7 @@ Using delta neuron (`iaf_psc_deta`) and triplet model (Pfister 2006).
 
 **n** pre-synaptic neurons connected to **1** post-synpatic neuron using triplet model (Pfister 2006).
 
-![](./figures/feedforward-per-approach-0.1ms.png)
 ![](./figures/feedforward-per-approach-0.5ms.png)
-![](./figures/feedforward-per-approach-1ms.png)
 
 ### License
 

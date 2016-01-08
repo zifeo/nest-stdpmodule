@@ -59,6 +59,7 @@ weights_minus_nearest = []
 def evaluate(rho, dt, syn_spec):
     """Evaluate connection change of weight and returns it."""
     nest.ResetKernel()
+    nest.SetKernelStatus({"local_num_threads" : 1, "resolution" : 0.1, "print_time": False})
 
     step = 1000.0 / rho
     simulation_duration = np.ceil(n * step)
@@ -76,12 +77,12 @@ def evaluate(rho, dt, syn_spec):
                                    syn_post_spec = { "receptor_type": 1 }) # avoid repeating spike on post parrot neuron
 
     # Simulation
-    before_weight = nest.GetStatus(triplet_synapse, keys = "weight")[0]
+    current_weight = nest.GetStatus(triplet_synapse, keys = "weight")[0]
     nest.Simulate(start_spikes + simulation_duration)
 
     # Results
     end_weight = nest.GetStatus(triplet_synapse, keys = "weight")[0]
-    return end_weight - before_weight
+    return end_weight - current_weight
 
 for rho in rhos:
     weights_plus.append(evaluate(rho, dt, all_to_all_syn_spec))

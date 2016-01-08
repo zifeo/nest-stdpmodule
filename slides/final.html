@@ -46,13 +46,13 @@
 						<script type="text/template">
 							## Standard approach 
 
-							<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 270 70" width="60%" style="enable-background:new 0 0 270 70;" xml:space="preserve">
+							<svg version="1.1" id="f1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 270 70" width="60%" style="enable-background:new 0 0 270 70;" xml:space="preserve">
 							<style type="text/css">
-								.st0{fill:#FFFFFF;stroke:#000000;stroke-miterlimit:10;}
-								.st1{fill:none;stroke:#000000;stroke-miterlimit:10;}
-								.st2{fill:none;}
-								.st3{font-family:'CambriaMath';}
-								.st4{font-size:14px;}
+								#f1 .st0{fill:#FFFFFF;stroke:#000000;stroke-miterlimit:10;}
+								#f1 .st1{fill:none;stroke:#000000;stroke-miterlimit:10;}
+								#f1 .st2{fill:none;}
+								#f1 .st3{font-family:'CambriaMath';}
+								#f1 .st4{font-size:14px;}
 							</style>
 							<circle id="XMLID_1_" class="st0" cx="35" cy="35" r="25"/>
 							<circle id="XMLID_3_" class="st0" cx="235" cy="35" r="25"/>
@@ -100,13 +100,13 @@
 						<script type="text/template">
 							## STDPNode approach
 
-							<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="60%" viewBox="0 0 270 70" style="enable-background:new 0 0 270 70;" xml:space="preserve">
+							<svg version="1.1" id="f2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="60%" viewBox="0 0 270 70" style="enable-background:new 0 0 270 70;" xml:space="preserve">
 							<style type="text/css">
-								.st0{fill:#FFFFFF;stroke:#000000;stroke-miterlimit:10;}
-								.st1{fill:none;stroke:#000000;stroke-miterlimit:10;}
-								.st2{fill:none;}
-								.st3{font-family:'CambriaMath';}
-								.st4{font-size:14px;}
+								#f2 .st0{fill:#FFFFFF;stroke:#000000;stroke-miterlimit:10;}
+								#f2 .st1{fill:none;stroke:#000000;stroke-miterlimit:10;}
+								#f2 .st2{fill:none;}
+								#f2 .st3{font-family:'CambriaMath';}
+								#f2 .st4{font-size:14px;}
 							</style>
 							<circle id="XMLID_1_" class="st0" cx="35" cy="35" r="25"/>
 							<circle id="XMLID_51_" class="st0" cx="135" cy="35" r="25"/>
@@ -164,14 +164,14 @@
 						<script type="text/template">
 							## STDPNode: visualizing decay
 
-							![](img/decay_sim.png)
+							![](img/decay_sim_node.png)
 						</script>
 					</section>
 					<section data-markdown>
 						<script type="text/template">
 							## Pairing protocol
 
-							![](img/pairing_paper.png) ![](img/pairing_nest.png)
+							![](img/pairing_paper.png) ![](img/pairing_nest_node.png)
 						</script>
 					</section>
 				</section>
@@ -184,6 +184,7 @@
 							- pre-neuron -> synapse
 							- synapse -> post-neuron
 							- post-neuron -> synapse on port **1**
+							- dendritic and axonal delays
 							
 							In practice: boilerplate and error-prone
 						</script>
@@ -268,15 +269,15 @@
 						<script type="text/template">
 							## Benchmarks: Brunnel (1)
 
-							![](img/decay_sim.png)
+							![](img/benchmark_brunnel_per_connection.png)
 						</script>
 					</section>
 					
 					<section data-markdown>
 						<script type="text/template">
-							## Benchmarks: Brunnel (1)
+							## Benchmarks: Brunnel (2)
 
-							![](img/decay_sim.png)
+							![](img/benchmark_brunnel_per_size.png)
 						</script>
 					</section>
 					
@@ -284,7 +285,7 @@
 						<script type="text/template">
 							## Benchmarks: Feedforward n:1
 
-							![](img/decay_sim.png)
+							![](img/benchmark_feedforward.png)
 						</script>
 					</section>
 				</section>
@@ -294,15 +295,15 @@
 						<script type="text/template">
 							## Taranis
 
-							<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+							<svg version="1.1" id="f3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 								 viewBox="0 0 500 198.2" style="enable-background:new 0 0 500 198.2;" xml:space="preserve">
 							<style type="text/css">
-								.st0{fill:#FFFFFF;stroke:#000000;stroke-miterlimit:10;}
-								.st1{fill:none;stroke:#E30613;stroke-miterlimit:10;}
-								.st2{fill:#E30613;}
-								.st3{fill:none;}
-								.st4{font-family:'CambriaMath';}
-								.st5{font-size:12px;}
+								#f3 .st0{fill:#FFFFFF;stroke:#000000;stroke-miterlimit:10;}
+								#f3 .st1{fill:none;stroke:#E30613;stroke-miterlimit:10;}
+								#f3 .st2{fill:#E30613;}
+								#f3 .st3{fill:none;}
+								#f3 .st4{font-family:'CambriaMath';}
+								#f3 .st5{font-size:12px;}
 							</style>
 							<ellipse id="XMLID_1_" class="st0" cx="250.1" cy="99.5" rx="115.1" ry="92.3"/>
 							<circle id="XMLID_2_" class="st0" cx="184.2" cy="79.3" r="37.5"/>
@@ -355,7 +356,7 @@
 
 							- actor model (high parallelizable)
 							- **dynamics** (calibrate/update/handle) as building block
-							- interaction free inside the actor
+							- free interaction inside the actor
 							- events broadcasted to neighbors
 						</script>
 					</section>
@@ -363,21 +364,21 @@
 						<script type="text/template">
 							## NEST: Brunnel
 
-							![](img/decay_sim.png)
+							![](img/nest-brunnel.png)
 						</script>
 					</section>
 					<section data-markdown>
 						<script type="text/template">
 							## Taranis: Brunnel
 
-							![](img/decay_sim.png)
+							![](img/taranis-brunnel.png)
 						</script>
 					</section>
 					<section data-markdown>
 						<script type="text/template">
 							## Performance
 
-							![](img/decay_sim.png)
+							![](img/nest-taranis.png)
 						
 							Due to garbage collection and use of default dispatchers
 						</script>
@@ -388,8 +389,8 @@
 
 							- fast model design and tests
 							- very high flexibility (dynamics, events, modulation)
-							- easily distributed and monitor
-							- typesafe and code-hints simulation
+							- easily distributed and monitored
+							- typesafe and code-hints
 							- scala/java/javascript/more?
 						</script>
 					</section>
@@ -402,7 +403,7 @@
 							val stim = 1000.0
 							
 							val neuron1 = create(IafNeuron.withParams(Ie = stim))
-							val neuron2 = create(IafNeuron.default)
+							val neuron2 = create(IafNeuron.default) // IafNeuron.PaperName2010
 							val multimeter = create(Multimeter.withRecorders[IafNeuron](
 							"Vm" -> (_.Vm)
 							))
@@ -416,11 +417,28 @@
 					</section>
 					<section data-markdown>
 						<script type="text/template">
-							## Model
+							## Stackable trait
 
-							![](img/decay_sim.png)
-							![](img/decay_sim.png)
-							![](img/decay_sim.png)
+							```scala
+							class IafNeuron extends Entity with EventsHub with Records
+							```
+
+							```scala						
+							trait EventsHub extends Entity {
+								abstract override def receive: Receive = {
+								    val manageEventsAndPriors = { 
+								    	case event: Event =>
+											eventsBuffer += event
+											if (priors.contains(sender))
+												eventsBuffer += priors(sender).handle(event)
+								    
+										case BindPriors(newPriors) =>
+								        	priors ++= newPriors
+								    }
+								    manageEventsAndPriors.orElse(super.receive)
+								}
+							}
+							```
 						</script>
 					</section>
 				</section>
@@ -428,9 +446,17 @@
 				<section>
 					<section data-markdown>
 						<script type="text/template">
-							## Conclusion
+							## STDPNode conclusion
 
-							- 
+							- continuous time
+							- all variables (traces) located in the synapse
+							- flexible neuro-modulation (receptors, events)
+							- require additional contract (DSL)
+							- delays are externalized to connections
+							- minimum delay is twice the resolution
+							- can connect with Multimeter and record variables
+							- ArchivingNode overhead but scales better than $O(n^2)$
+							- can perform better on heavily connected network
 						</script>
 					</section>
 				</section>

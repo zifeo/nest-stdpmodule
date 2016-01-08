@@ -33,6 +33,7 @@ This is why you will find in this module an alternative approach of synapses usi
 - limited neuro-modulation (see [Volume transmitter](https://github.com/nest/nest-simulator/blob/master/models/volume_transmitter.h))
 - directly available out of the box
 - minimum delay is simulation resolution
+- no devices connection (e.g. Multimeter)
 - theoretically complete graph scales at **O(n^2)** connections for **n** neurons
 
 #### STDPNode approach, using an [ArchivingNode](https://github.com/nest/nest-simulator/blob/master/nestkernel/archiving_node.h) and two static connections
@@ -45,6 +46,7 @@ This is why you will find in this module an alternative approach of synapses usi
 - allows flexible neuro-modulation through, e.g., custom events or additional spike receptors
 - requires a DSL (pynest) or must follow a well defined *contract* (pre-neuron -> synapse, synapse -> post-neuron, post-neuron -> synapse on port **1** for feedback, see figure above)
 - minimum delay is twice the simulation resolution
+- can connect with Multimeter and record variables
 - theoretically complete graph scales at **O(4n^2)** connections for **n** neurons
 
 ### In this repository

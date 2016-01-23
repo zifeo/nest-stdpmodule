@@ -17,9 +17,9 @@ On the one hand, their updates can only happen in an event-driven manner: changi
 On the other hand, neurons are receiving ticks at a rate of 1/resolution: states changes can happen as often as the resolution allows.
 
 Some models of spike-timing dependent plasticity require complex dynamics and pre-to-post and post-to-pre triggers dependencies (e.g. Pfister 2006 or Zenke 2015).
-In NEST this is currently doable, whenever an event is received in the synapse, by rebuilding and going through the history of the post-synaptic neuron.
+This is currently doable whenever an event is received in the synapse by rebuilding and going through the whole history of the post-synaptic neuron.
 However this process can be hard to achieve right and is longer to implement for the user.
-This is why you will find in this module an alternative approach of synapses using an archiving node and two static connections as a base.
+This is why we suggest in this module an alternative approach of synapses using an archiving node and two static connections as a base.
 
 ### Overview
 

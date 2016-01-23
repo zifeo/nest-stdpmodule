@@ -36,7 +36,7 @@ This is why you will find in this module an alternative approach of synapses usi
 - no devices connection (e.g. Multimeter)
 - theoretically complete graph scales at **O(n^2)** connections for **n** neurons
 
-#### STDPNode approach, using an [ArchivingNode](https://github.com/nest/nest-simulator/blob/master/nestkernel/archiving_node.h) and two static connections
+#### STDPNode approach, using an [ArchivingNode](https://github.com/nest/nest-simulator/blob/master/nestkernel/archiving_node.h) and three static connections
 
 ![](./figures/STDPNode-approach.png)
 

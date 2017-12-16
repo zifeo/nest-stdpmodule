@@ -58,7 +58,6 @@ This is why we suggest in this module an alternative approach of synapses using 
     - first version of long-term stable STDP model (Zenke 2015), `stdp_longterm_node` is defined inside `stdp_longterm_node.{h,cpp}` (no tests)
 - tests:
     - triplet model (Pfister 2006), for both approaches (classical tests as well as visual decays tests)
-- slides: [reveal.js](https://github.com/hakimel/reveal.js/) midterm and final presentations
 - pynest:
     - STDPNode approach DSL example (do not handle all connections types, i.e. no indegree)
 - examples:
